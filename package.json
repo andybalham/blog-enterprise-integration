@@ -1,34 +1,37 @@
 {
-  "name": "blog-task-tokens-part-2",
+  "name": "blog-enterprise-integration",
   "version": "1.0.0",
-  "description": "Source code for blog post on handling task tokens failures.",
+  "description": "Source code for blog post on enterprise integration.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint-and-fix": "eslint ./src --ext .ts --fix",
     "build": "npm run lint && tsc",
-    "cdk-synth": "cdk synth TaskTokenTestStack > .cdk-synth.yml",
-    "cdk-deploy": "cdk deploy TaskTokenTestStack --hotswap",
+    "test-request-api-synth": "cdk synth RequestApiTestStack --app \"npx ts-node tests/test-cdk-app.ts\" > .cdk-synth.yml",
+    "test-request-api-deploy": "cdk deploy RequestApiTestStack --app \"npx ts-node tests/test-cdk-app.ts\"",
+    "test-request-api-hotswap": "cdk deploy RequestApiTestStack --hotswap --app \"npx ts-node tests/test-cdk-app.ts\"",
+    "test-request-api-destroy": "cdk destroy RequestApiTestStack --app \"npx ts-node tests/test-cdk-app.ts\"",
+    "test-destroy-all": "cdk destroy --all --app \"npx ts-node tests/test-cdk-app.ts\"",
+    "cdk-deploy": "cdk deploy",
     "cdk-destroy": "cdk destroy --all"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andybalham/blog-task-tokens-part-2.git"
+    "url": "git+https://github.com/andybalham/blog-enterprise-integration.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/andybalham/blog-task-tokens-part-2/issues"
+    "url": "https://github.com/andybalham/blog-enterprise-integration/issues"
   },
-  "homepage": "https://github.com/andybalham/blog-task-tokens-part-2#readme",
+  "homepage": "https://github.com/andybalham/blog-enterprise-integration#readme",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.81",
     "@types/jest": "^27.4.1",
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
-    "aws-sdk": "^2.958.0",
     "esbuild": "^0.12.17",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
@@ -46,13 +49,12 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@andybalham/cdk-cloud-test-kit": "^1.0.4",
-    "@andybalham/state-machine-builder-v2": "^2.0.1",
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.31.1-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.31.1-alpha.0",
-    "aws-cdk-lib": "^2.31.1",
+    "@andybalham/cdk-cloud-test-kit": "^1.0.5",
+    "aws-cdk-lib": "^2.42.0",
+    "aws-sdk": "^2.1218.0",
     "axios": "^0.27.2",
-    "constructs": "^10.1.44",
-    "nanoid": "^3.3.4"
+    "constructs": "^10.1.106",
+    "nanoid": "^3.3.4",
+    "node-fetch": "^2.6.7"
   }
 }

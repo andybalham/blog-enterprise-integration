@@ -9,6 +9,7 @@
     "apigatewayv",
     "Chainable",
     "esbuild",
+    "eventbridge",
     "exts",
     "hotswap",
     "istanbuljs",
@@ -22,16 +23,24 @@
     "TRes",
     "vars"
   ],
+  "workbench.colorCustomizations": {
+    "[Default Dark+]": {
+      "titleBar.activeBackground": "#008585",
+      "sideBar.background": "#004747",
+      "activityBar.background": "#008585",
+      "activityBar.activeBackground": "#00d4d4"
+    }
+  },
   "serverlessConsole.services": [
     {
       "type": "cloudformation",
-      "title": "Task Token",
+      "title": "Request API Test",
       "timeOffsetInMs": 0,
       "awsProfile": "default",
       "stacks": [
         {
           "region": "eu-west-2",
-          "stackName": "TaskTokenTestStack",
+          "stackName": "RequestApiTestStack",
           "stage": "dev"
         }
       ]
