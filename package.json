@@ -13,7 +13,8 @@
     "test-request-api-hotswap": "cdk deploy RequestApiTestStack --hotswap --app \"npx ts-node tests/test-cdk-app.ts\"",
     "test-request-api-destroy": "cdk destroy RequestApiTestStack --app \"npx ts-node tests/test-cdk-app.ts\"",
     "test-destroy-all": "cdk destroy --all --app \"npx ts-node tests/test-cdk-app.ts\"",
-    "cdk-deploy": "cdk deploy",
+    "cdk-synth": "cdk synth ApplicationStack > .cdk-synth.yml",
+    "cdk-deploy": "cdk deploy ApplicationStack",
     "cdk-destroy": "cdk destroy --all"
   },
   "repository": {

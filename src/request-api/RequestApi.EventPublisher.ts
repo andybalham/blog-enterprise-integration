@@ -16,14 +16,14 @@ import {
   EventService,
 } from '../domain/domain-events';
 
-export const BUCKET_NAME = 'BUCKET_NAME';
-export const EVENT_BUS_NAME = 'EVENT_BUS_NAME';
+export const DATA_BUCKET_NAME = 'DATA_BUCKET_NAME';
+export const APPLICATION_EVENT_BUS_NAME = 'APPLICATION_EVENT_BUS_NAME';
 
 const s3 = new S3();
-const bucketName = process.env[BUCKET_NAME];
+const bucketName = process.env[DATA_BUCKET_NAME];
 
 const eventBridge = new EventBridge();
-const eventBusName = process.env[EVENT_BUS_NAME];
+const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 

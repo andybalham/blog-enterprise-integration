@@ -50,8 +50,8 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     // SUT
 
     const sut = new RequestApi(this, 'SUT', {
-      eventBus,
-      bucket,
+      applicationEventBus: eventBus,
+      dataBucket: bucket,
     });
 
     this.addTestResourceTag(sut.api, RequestApiTestStack.RequestApiId);
