@@ -2,14 +2,11 @@
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { APIGatewayEvent } from 'aws-lambda';
-import EventBridge, {
-  PutEventsRequest,
-  PutEventsRequestEntry,
-} from 'aws-sdk/clients/eventbridge';
 import { randomUUID } from 'crypto';
 import {
   generateQuoteReference,
   putDataInS3Async as getDataUrlAsync,
+  putDomainEventsAsync as putDomainEventAsync,
 } from '../lib/utils';
 import {
   EventDomain,
@@ -22,8 +19,6 @@ export const DATA_BUCKET_NAME = 'DATA_BUCKET_NAME';
 export const APPLICATION_EVENT_BUS_NAME = 'APPLICATION_EVENT_BUS_NAME';
 
 const bucketName = process.env[DATA_BUCKET_NAME];
-
-const eventBridge = new EventBridge();
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
 
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
@@ -35,11 +30,9 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     };
   }
 
-  // Generate the reference
+  // Generate the reference, store the request, and get a pre-signed URL
 
   const quoteReference = generateQuoteReference();
-
-  // Store the body and get a pre-signed URL
 
   const quoteRequestDataUrl = await getDataUrlAsync({
     bucketName,
@@ -63,20 +56,11 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     },
   };
 
-  const requestEntry: PutEventsRequestEntry = {
-    Source: `${quoteSubmitted.metadata.domain}.${quoteSubmitted.metadata.service}`,
-    DetailType: EventDetailType.QuoteSubmitted,
-    Detail: JSON.stringify(quoteSubmitted),
-    EventBusName: eventBusName,
-  };
-
-  const request: PutEventsRequest = {
-    Entries: [requestEntry],
-  };
-
-  const response = await eventBridge.putEvents(request).promise();
-
-  console.log(JSON.stringify({ response }, null, 2));
+  await putDomainEventAsync({
+    eventBusName,
+    detailType: EventDetailType.QuoteSubmitted,
+    event: quoteSubmitted,
+  });
 
   // Return the reference
 

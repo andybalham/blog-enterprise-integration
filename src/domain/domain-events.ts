@@ -14,7 +14,7 @@ export class EventDetailType {
 
 // TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
 
-export interface EventBridgePayload<TData> {
+export interface DomainEvent<TData> {
   metadata: {
     correlationId: string;
     requestId: string;
@@ -24,7 +24,7 @@ export interface EventBridgePayload<TData> {
   data: TData;
 }
 
-export type QuoteSubmitted = EventBridgePayload<{
+export type QuoteSubmitted = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;
 }>;

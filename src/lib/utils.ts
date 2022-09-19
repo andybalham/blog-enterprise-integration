@@ -2,9 +2,15 @@ import fetch from 'node-fetch';
 import { customAlphabet } from 'nanoid';
 import { S3 } from 'aws-sdk';
 import { PutObjectRequest } from 'aws-sdk/clients/s3';
+import EventBridge, {
+  PutEventsRequest,
+  PutEventsRequestEntry,
+} from 'aws-sdk/clients/eventbridge';
+import { DomainEvent } from 'src/domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3();
+const eventBridge = new EventBridge();
 
 export const fetchFromUrlAsync = async <T>(url: string): Promise<T> => {
   const fetchResponse = await fetch(url);
@@ -52,4 +58,33 @@ export const putDataInS3Async = async ({
   });
 
   return dataUrl;
+};
+
+export const putDomainEventsAsync = async <T>({
+  eventBusName,
+  detailType,
+  event: domainEvent,
+}: {
+  eventBusName?: string;
+  detailType: string;
+  event: DomainEvent<T>;
+}): Promise<void> => {
+  //
+  if (eventBusName === undefined) throw new Error('eventBusName === undefined');
+
+  const requestEntry: PutEventsRequestEntry = {
+    Source: `${domainEvent.metadata.domain}.${domainEvent.metadata.service}`,
+    DetailType: detailType,
+    Detail: JSON.stringify(domainEvent),
+    EventBusName: eventBusName,
+  };
+
+  const request: PutEventsRequest = {
+    Entries: [requestEntry],
+  };
+
+  const putEventsResponse = await eventBridge.putEvents(request).promise();
+
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify({ putEventsResponse }, null, 2));
 };
