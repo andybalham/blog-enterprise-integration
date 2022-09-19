@@ -7,6 +7,7 @@ import EventBridge, {
   PutEventsRequestEntry,
 } from 'aws-sdk/clients/eventbridge';
 import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
+import { randomUUID } from 'crypto';
 import { customAlphabet } from 'nanoid';
 import {
   EventDomain,
@@ -37,14 +38,14 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   // Generate the id and reference
 
-  const correlationId = event.headers['x-correlation-id'] ?? nanoid();
+  const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
   const loanApplicationReference = getLoanApplicationReference();
 
   // Store the body and get a pre-signed URL
 
   const s3Params = {
     Bucket: bucketName,
-    Key: `${loanApplicationReference}/loan-application.json`,
+    Key: `${loanApplicationReference}/${loanApplicationReference}-quote-request.json`,
   };
 
   await s3

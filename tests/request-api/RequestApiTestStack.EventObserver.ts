@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda/trigger/eventbridge';
-import fetch from 'node-fetch';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { recordObservationDataAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLib';
+import { fetchFromUrlAsync } from '../../src/lib/utils';
 import { LoanApplicationDetails } from '../../src/domain/domain-models';
 import { LoanApplicationSubmitted } from '../../src/domain/domain-events';
 
@@ -14,12 +14,10 @@ export const handler = async (
 ): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  const fetchResponse = await fetch(
-    event.detail.data.loanApplicationDetailsUrl
-  );
-
-  const loanApplicationDetails: LoanApplicationDetails =
-    await fetchResponse.json();
+  const loanApplicationDetails =
+    await fetchFromUrlAsync<LoanApplicationDetails>(
+      event.detail.data.loanApplicationDetailsUrl
+    );
 
   console.log(JSON.stringify({ loanApplicationDetails }, null, 2));
 

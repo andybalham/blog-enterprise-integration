@@ -1,7 +1,9 @@
-Questions:
+# Questions
 
 - Should we have a separate CDK test app for each component?
   - Would this speed up test deployments?
+
+# Runtime.ImportModuleError
 
 Why are we getting the following? Is this the same issue? https://github.com/aws/aws-cdk/issues/14290
 
@@ -31,6 +33,10 @@ Why are we getting the following? Is this the same issue? https://github.com/aws
 
 We solved the above by exposing the underlying functions, rather that the class.
 
-Headers: https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+# HTTP Headers
 
-https://docs.aws.amazon.com/cdk/v2/guide/cli.html
+https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+
+# CDK CLI
+
+See 'Specifying the app command': https://docs.aws.amazon.com/cdk/v2/guide/cli.html

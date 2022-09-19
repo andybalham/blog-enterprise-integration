@@ -79,6 +79,7 @@ describe('RequestApi Tests', () => {
     expect(actualEventDetail.metadata.domain).toBe(EventDomain.LoanBroker);
     expect(actualEventDetail.metadata.service).toBe(EventService.RequestApi);
     expect(actualEventDetail.metadata.correlationId).toBe(correlationId);
+    expect(actualEventDetail.metadata.requestId).toBeDefined();
 
     expect(actualEventDetail.data.loanApplicationReference).toBe(
       applicationReference

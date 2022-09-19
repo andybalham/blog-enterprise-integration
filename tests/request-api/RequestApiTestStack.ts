@@ -1,5 +1,5 @@
 import { IntegrationTestStack } from '@andybalham/cdk-cloud-test-kit';
-import { RemovalPolicy } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { EventBus } from 'aws-cdk-lib/aws-events';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -25,6 +25,11 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     const bucket = new Bucket(this, 'Bucket', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      lifecycleRules: [
+        {
+          expiration: Duration.days(1),
+        },
+      ],
     });
 
     const eventBus = new EventBus(this, 'EventBus');
