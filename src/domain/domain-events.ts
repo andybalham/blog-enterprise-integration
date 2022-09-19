@@ -17,6 +17,7 @@ export class EventDetailType {
 export interface EventBridgePayload<TData> {
   metadata: {
     correlationId: string;
+    requestId: string;
     service: string;
     domain: string;
   };

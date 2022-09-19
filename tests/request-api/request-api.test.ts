@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import { IntegrationTestClient } from '@andybalham/cdk-cloud-test-kit';
 import axios from 'axios';
+import { EventDomain, EventService } from '../../src/domain/domain-events';
 import { LoanApplicationDetails } from '../../src/domain/domain-models';
 import RequestApiTestStack from './RequestApiTestStack';
 
@@ -48,9 +49,13 @@ describe('RequestApi Tests', () => {
       },
     };
 
+    const correlationId = 'request-event-published-as-expected';
+
     // Act
 
-    const response = await axios.post(requestApiUrl, loanApplicationDetails);
+    const response = await axios.post(requestApiUrl, loanApplicationDetails, {
+      headers: { 'x-correlation-id': correlationId },
+    });
 
     expect(response.status).toBe(201);
 
@@ -70,6 +75,10 @@ describe('RequestApi Tests', () => {
 
     const { actualEventDetail, actualLoanApplicationDetails } =
       observations[0].data;
+
+    expect(actualEventDetail.metadata.domain).toBe(EventDomain.LoanBroker);
+    expect(actualEventDetail.metadata.service).toBe(EventService.RequestApi);
+    expect(actualEventDetail.metadata.correlationId).toBe(correlationId);
 
     expect(actualEventDetail.data.loanApplicationReference).toBe(
       applicationReference

@@ -2,11 +2,12 @@
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda/trigger/eventbridge';
 import fetch from 'node-fetch';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { recordObservationDataAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLib';
 import { LoanApplicationDetails } from '../../src/domain/domain-models';
 import { LoanApplicationSubmitted } from '../../src/domain/domain-events';
-import TestFunctionClient from '../andybalham/cdk-cloud-test-kit/TestFunctionClient';
 
-const testFunctionClient = new TestFunctionClient();
+const documentClient = new DocumentClient();
 
 export const handler = async (
   event: EventBridgeEvent<'LoanApplicationSubmitted', LoanApplicationSubmitted>
@@ -22,7 +23,7 @@ export const handler = async (
 
   console.log(JSON.stringify({ loanApplicationDetails }, null, 2));
 
-  await testFunctionClient.recordObservationDataAsync({
+  await recordObservationDataAsync(documentClient, {
     actualEventDetail: event.detail,
     actualLoanApplicationDetails: loanApplicationDetails,
   });

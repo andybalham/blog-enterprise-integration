@@ -2,7 +2,10 @@
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { APIGatewayEvent } from 'aws-lambda';
-import EventBridge, { PutEventsRequest, PutEventsRequestEntry } from 'aws-sdk/clients/eventbridge';
+import EventBridge, {
+  PutEventsRequest,
+  PutEventsRequestEntry,
+} from 'aws-sdk/clients/eventbridge';
 import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
 import { customAlphabet } from 'nanoid';
 import {
@@ -34,7 +37,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   // Generate the id and reference
 
-  const correlationId = nanoid();
+  const correlationId = event.headers['x-correlation-id'] ?? nanoid();
   const loanApplicationReference = getLoanApplicationReference();
 
   // Store the body and get a pre-signed URL
@@ -64,6 +67,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   const loanApplicationSubmitted: LoanApplicationSubmitted = {
     metadata: {
       correlationId,
+      requestId: event.requestContext.requestId,
       domain: EventDomain.LoanBroker,
       service: EventService.RequestApi,
     },
