@@ -9,7 +9,7 @@ export class EventService {
 }
 
 export class EventDetailType {
-  static readonly LoanApplicationSubmitted = 'LoanApplicationSubmitted';
+  static readonly QuoteSubmitted = 'QuoteSubmitted';
 }
 
 // TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
@@ -24,7 +24,7 @@ export interface EventBridgePayload<TData> {
   data: TData;
 }
 
-export type LoanApplicationSubmitted = EventBridgePayload<{
-  loanApplicationReference: string;
-  loanApplicationDetailsUrl: string;
+export type QuoteSubmitted = EventBridgePayload<{
+  quoteReference: string;
+  quoteRequestDataUrl: string;
 }>;

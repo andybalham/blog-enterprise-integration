@@ -4,25 +4,29 @@ import { EventBridgeEvent } from 'aws-lambda/trigger/eventbridge';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { recordObservationDataAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLib';
 import { fetchFromUrlAsync } from '../../src/lib/utils';
-import { LoanApplicationDetails } from '../../src/domain/domain-models';
-import { LoanApplicationSubmitted } from '../../src/domain/domain-events';
+import { QuoteRequest } from '../../src/domain/domain-models';
+import { QuoteSubmitted } from '../../src/domain/domain-events';
 
 const documentClient = new DocumentClient();
 
+export interface QuoteSubmittedObservation {
+  actualEvent: QuoteSubmitted;
+  actualQuoteRequest: QuoteRequest;
+}
+
 export const handler = async (
-  event: EventBridgeEvent<'LoanApplicationSubmitted', LoanApplicationSubmitted>
+  event: EventBridgeEvent<'QuoteSubmitted', QuoteSubmitted>
 ): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  const loanApplicationDetails =
-    await fetchFromUrlAsync<LoanApplicationDetails>(
-      event.detail.data.loanApplicationDetailsUrl
-    );
+  const actualQuoteRequest = await fetchFromUrlAsync<QuoteRequest>(
+    event.detail.data.quoteRequestDataUrl
+  );
 
-  console.log(JSON.stringify({ loanApplicationDetails }, null, 2));
+  const observation: QuoteSubmittedObservation = {
+    actualEvent: event.detail,
+    actualQuoteRequest,
+  };
 
-  await recordObservationDataAsync(documentClient, {
-    actualEventDetail: event.detail,
-    actualLoanApplicationDetails: loanApplicationDetails,
-  });
+  await recordObservationDataAsync(documentClient, observation);
 };

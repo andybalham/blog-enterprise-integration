@@ -8,6 +8,12 @@
 https://docs.aws.amazon.com/cdk/v2/guide/stacks.html
 https://bobbyhadz.com/blog/aws-cdk-nested-stack
 
+# Power tools for Lambda
+
+https://github.com/awslabs/aws-lambda-powertools-typescript
+
+https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#usage
+
 # Runtime.ImportModuleError
 
 Why are we getting the following? Is this the same issue? https://github.com/aws/aws-cdk/issues/14290

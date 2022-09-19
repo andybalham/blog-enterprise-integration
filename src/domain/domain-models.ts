@@ -1,4 +1,4 @@
-export interface LoanApplicationDetails {
+export interface QuoteRequest {
   personalDetails: PersonalDetails;
   loanDetails: LoanDetails;
 }

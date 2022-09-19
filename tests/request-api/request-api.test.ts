@@ -3,8 +3,9 @@
 import { IntegrationTestClient } from '@andybalham/cdk-cloud-test-kit';
 import axios from 'axios';
 import { EventDomain, EventService } from '../../src/domain/domain-events';
-import { LoanApplicationDetails } from '../../src/domain/domain-models';
+import { QuoteRequest } from '../../src/domain/domain-models';
 import RequestApiTestStack from './RequestApiTestStack';
+import { QuoteSubmittedObservation } from './RequestApiTestStack.EventObserver';
 
 jest.setTimeout(2 * 60 * 1000);
 
@@ -33,7 +34,7 @@ describe('RequestApi Tests', () => {
 
     const requestApiUrl = `${requestApiBaseUrl}/prod/requests`;
 
-    const loanApplicationDetails: LoanApplicationDetails = {
+    const quoteRequest: QuoteRequest = {
       personalDetails: {
         firstName: 'Alex',
         lastName: 'Pritchard',
@@ -53,15 +54,15 @@ describe('RequestApi Tests', () => {
 
     // Act
 
-    const response = await axios.post(requestApiUrl, loanApplicationDetails, {
+    const response = await axios.post(requestApiUrl, quoteRequest, {
       headers: { 'x-correlation-id': correlationId },
     });
 
     expect(response.status).toBe(201);
 
-    const { applicationReference } = response.data;
+    const { quoteReference } = response.data;
 
-    expect(applicationReference).toBeDefined();
+    expect(quoteReference).toBeDefined();
 
     // Await
 
@@ -73,18 +74,16 @@ describe('RequestApi Tests', () => {
 
     expect(timedOut).toBeFalsy();
 
-    const { actualEventDetail, actualLoanApplicationDetails } =
-      observations[0].data;
+    const { actualEvent, actualQuoteRequest } = observations[0]
+      .data as QuoteSubmittedObservation;
 
-    expect(actualEventDetail.metadata.domain).toBe(EventDomain.LoanBroker);
-    expect(actualEventDetail.metadata.service).toBe(EventService.RequestApi);
-    expect(actualEventDetail.metadata.correlationId).toBe(correlationId);
-    expect(actualEventDetail.metadata.requestId).toBeDefined();
+    expect(actualEvent.metadata.domain).toBe(EventDomain.LoanBroker);
+    expect(actualEvent.metadata.service).toBe(EventService.RequestApi);
+    expect(actualEvent.metadata.correlationId).toBe(correlationId);
+    expect(actualEvent.metadata.requestId).toBeDefined();
 
-    expect(actualEventDetail.data.loanApplicationReference).toBe(
-      applicationReference
-    );
+    expect(actualEvent.data.quoteReference).toBe(quoteReference);
 
-    expect(actualLoanApplicationDetails).toMatchObject(loanApplicationDetails);
+    expect(actualQuoteRequest).toMatchObject(quoteRequest);
   });
 });

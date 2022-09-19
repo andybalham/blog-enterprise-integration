@@ -42,7 +42,7 @@ export default class RequestApiTestStack extends IntegrationTestStack {
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule('Rule', eventBus, {
-        detailType: [EventDetailType.LoanApplicationSubmitted],
+        detailType: [EventDetailType.QuoteSubmitted],
       }),
       RequestApiTestStack.EventObserverId
     );

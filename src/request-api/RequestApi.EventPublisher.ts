@@ -8,11 +8,11 @@ import EventBridge, {
 } from 'aws-sdk/clients/eventbridge';
 import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
 import { randomUUID } from 'crypto';
-import { customAlphabet } from 'nanoid';
+import { generateQuoteReference } from '../lib/utils';
 import {
   EventDomain,
   EventDetailType,
-  LoanApplicationSubmitted,
+  QuoteSubmitted,
   EventService,
 } from '../domain/domain-events';
 
@@ -24,8 +24,6 @@ const bucketName = process.env[DATA_BUCKET_NAME];
 
 const eventBridge = new EventBridge();
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-
-const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
@@ -39,13 +37,13 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   // Generate the id and reference
 
   const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
-  const loanApplicationReference = getLoanApplicationReference();
+  const quoteReference = generateQuoteReference();
 
   // Store the body and get a pre-signed URL
 
   const s3Params = {
     Bucket: bucketName,
-    Key: `${loanApplicationReference}/${loanApplicationReference}-quote-request.json`,
+    Key: `${quoteReference}/${quoteReference}-quote-request.json`,
   };
 
   await s3
@@ -58,14 +56,14 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html
 
-  const loanApplicationDetailsUrl = await s3.getSignedUrlPromise('getObject', {
+  const quoteRequestDataUrl = await s3.getSignedUrlPromise('getObject', {
     ...s3Params,
     Expires: 5 * 60, // 5 minutes
   });
 
-  // Publish the event to process the application
+  // Publish the event to process the quote
 
-  const loanApplicationSubmitted: LoanApplicationSubmitted = {
+  const quoteSubmitted: QuoteSubmitted = {
     metadata: {
       correlationId,
       requestId: event.requestContext.requestId,
@@ -73,15 +71,15 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
       service: EventService.RequestApi,
     },
     data: {
-      loanApplicationReference,
-      loanApplicationDetailsUrl,
+      quoteReference,
+      quoteRequestDataUrl,
     },
   };
 
   const requestEntry: PutEventsRequestEntry = {
-    Source: `${loanApplicationSubmitted.metadata.domain}.${loanApplicationSubmitted.metadata.service}`,
-    DetailType: EventDetailType.LoanApplicationSubmitted,
-    Detail: JSON.stringify(loanApplicationSubmitted),
+    Source: `${quoteSubmitted.metadata.domain}.${quoteSubmitted.metadata.service}`,
+    DetailType: EventDetailType.QuoteSubmitted,
+    Detail: JSON.stringify(quoteSubmitted),
     EventBusName: eventBusName,
   };
 
@@ -97,12 +95,6 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   return {
     statusCode: 201,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ applicationReference: loanApplicationReference }),
+    body: JSON.stringify({ quoteReference }),
   };
 };
-
-function getLoanApplicationReference(): string {
-  const todayDateString = new Date().toISOString().slice(0, 10);
-  const reference = `${todayDateString}-${nanoid().slice(0, 9)}`;
-  return reference;
-}
