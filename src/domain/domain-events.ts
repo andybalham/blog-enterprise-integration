@@ -28,3 +28,8 @@ export type QuoteSubmitted = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;
 }>;
+
+export type QuoteProcessed = DomainEvent<{
+  quoteReference: string;
+  quoteResponseDataUrl: string;
+}>;
