@@ -5,8 +5,8 @@ import { APIGatewayEvent } from 'aws-lambda';
 import { randomUUID } from 'crypto';
 import {
   generateQuoteReference,
-  putDataInS3Async as getDataUrlAsync,
-  putDomainEventsAsync as putDomainEventAsync,
+  getDataUrlAsync,
+  putDomainEventAsync,
 } from '../lib/utils';
 import {
   EventDomain,

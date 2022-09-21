@@ -1,5 +1,7 @@
 /* eslint-disable max-classes-per-file */
 
+import { QuoteResponse } from './domain-models';
+
 export class EventDomain {
   static readonly LoanBroker = 'LoanBroker';
 }
@@ -10,6 +12,8 @@ export class EventService {
 
 export class EventDetailType {
   static readonly QuoteSubmitted = 'QuoteSubmitted';
+
+  static readonly QuoteProcessed = 'QuoteProcessed';
 }
 
 // TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
@@ -31,5 +35,5 @@ export type QuoteSubmitted = DomainEvent<{
 
 export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
-  quoteResponseDataUrl: string;
+  quoteResponse: QuoteResponse;
 }>;

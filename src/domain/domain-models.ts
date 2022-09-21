@@ -3,6 +3,11 @@ export interface QuoteRequest {
   loanDetails: LoanDetails;
 }
 
+export interface QuoteResponse {
+  bestRate: number;
+  lenderName: string;
+}
+
 export interface LoanDetails {
   amount: number;
   termMonths: number;

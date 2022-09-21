@@ -23,7 +23,7 @@ export const generateQuoteReference = (): string => {
   return reference;
 };
 
-export const putDataInS3Async = async ({
+export const getDataUrlAsync = async ({
   bucketName,
   key,
   data,
@@ -60,7 +60,7 @@ export const putDataInS3Async = async ({
   return dataUrl;
 };
 
-export const putDomainEventsAsync = async <T>({
+export const putDomainEventAsync = async <T>({
   eventBusName,
   detailType,
   event: domainEvent,
