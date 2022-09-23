@@ -5,6 +5,7 @@ import { PutObjectRequest } from 'aws-sdk/clients/s3';
 import EventBridge, {
   PutEventsRequest,
   PutEventsRequestEntry,
+  PutEventsResponse,
 } from 'aws-sdk/clients/eventbridge';
 import { DomainEvent } from 'src/domain/domain-events';
 
@@ -68,7 +69,7 @@ export const putDomainEventAsync = async <T>({
   eventBusName?: string;
   detailType: string;
   event: DomainEvent<T>;
-}): Promise<void> => {
+}): Promise<PutEventsResponse> => {
   //
   if (eventBusName === undefined) throw new Error('eventBusName === undefined');
 
@@ -83,8 +84,5 @@ export const putDomainEventAsync = async <T>({
     Entries: [requestEntry],
   };
 
-  const putEventsResponse = await eventBridge.putEvents(request).promise();
-
-  // eslint-disable-next-line no-console
-  console.log(JSON.stringify({ putEventsResponse }, null, 2));
+  return eventBridge.putEvents(request).promise();
 };

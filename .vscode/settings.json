@@ -44,6 +44,19 @@
           "stage": "dev"
         }
       ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Queue Processor Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "QuoteProcessorTestStack",
+          "stage": "dev"
+        }
+      ]
     }
   ]
 }

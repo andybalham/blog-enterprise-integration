@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { QuoteResponse } from './domain-models';
+import { LoanDetails, QuoteResponse } from './domain-models';
 
 export class EventDomain {
   static readonly LoanBroker = 'LoanBroker';
@@ -36,4 +36,5 @@ export type QuoteSubmitted = DomainEvent<{
 export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
   quoteResponse: QuoteResponse;
+  loanDetails: LoanDetails;
 }>;

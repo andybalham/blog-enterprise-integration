@@ -6,7 +6,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { EventDetailType } from '../domain/domain-events';
-import { APPLICATION_EVENT_BUS_NAME } from './constants';
+import { APPLICATION_EVENT_BUS_NAME, STATE_MACHINE_ARN } from './constants';
 
 export interface QuoteProcessorProps {
   applicationEventBus: EventBus;
@@ -16,23 +16,6 @@ export default class QuoteProcessor extends Construct {
   //
   constructor(scope: Construct, id: string, props: QuoteProcessorProps) {
     super(scope, id);
-
-    const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
-      environment: {
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusArn,
-      },
-    });
-
-    const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
-      eventBus: props.applicationEventBus,
-      eventPattern: {
-        detailType: [EventDetailType.QuoteSubmitted],
-      },
-    });
-
-    quoteSubmittedRule.addTarget(
-      new LambdaFunctionTarget(requestHandlerFunction)
-    );
 
     // TODO 20Sep22: Have the Request Handler kick off the step function with a single lambda to send a response
     //               We can then write a unit test to raise an event and listen, then fetch the result
@@ -58,6 +41,24 @@ export default class QuoteProcessor extends Construct {
           },
         }),
     });
+
+    const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
+      environment: {
+        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusArn,
+        [STATE_MACHINE_ARN]: stateMachine.stateMachineArn,
+      },
+    });
+
+    const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
+      eventBus: props.applicationEventBus,
+      eventPattern: {
+        detailType: [EventDetailType.QuoteSubmitted],
+      },
+    });
+
+    quoteSubmittedRule.addTarget(
+      new LambdaFunctionTarget(requestHandlerFunction)
+    );
 
     stateMachine.grantStartExecution(requestHandlerFunction);
   }

@@ -33,7 +33,10 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       ],
     });
 
-    const eventBus = new EventBus(this, 'EventBus');
+    const eventBus = new EventBus(
+      this,
+      QuoteProcessorTestStack.ApplicationEventBusId
+    );
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule('Rule', eventBus, {
