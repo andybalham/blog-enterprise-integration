@@ -24,3 +24,10 @@ export interface Address {
   lines: string[];
   postcode: string;
 }
+
+export interface CreditReport {
+  reportReference: string;
+  onElectoralRoll: boolean;
+  hasBankruptcies: boolean;
+  creditScore: number;
+}

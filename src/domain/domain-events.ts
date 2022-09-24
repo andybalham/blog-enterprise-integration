@@ -8,22 +8,27 @@ export enum EventDomain {
 
 export enum EventService {
   RequestApi = 'RequestApi',
+  CreditBureau = 'CreditBureau',
 }
 
 export enum EventDetailType {
   QuoteSubmitted = 'QuoteSubmitted',
   QuoteProcessed = 'QuoteProcessed',
+  CreditReportRequested = 'CreditReportRequested',
+  CreditReportReceived = 'CreditReportReceived',
 }
 
 // TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
 
+export interface DomainEventMetadata {
+  domain: EventDomain;
+  service: EventService;
+  correlationId: string;
+  requestId: string;
+}
+
 export interface DomainEvent<TData> {
-  metadata: {
-    correlationId: string;
-    requestId: string;
-    service: EventService;
-    domain: EventDomain;
-  };
+  metadata: DomainEventMetadata;
   data: TData;
 }
 
@@ -36,4 +41,14 @@ export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
   quoteResponse: QuoteResponse;
   loanDetails: LoanDetails;
+}>;
+
+export type CreditReportRequested = DomainEvent<{
+  quoteReference: string;
+  quoteRequestDataUrl: string;
+}>;
+
+export type CreditReportReceived = DomainEvent<{
+  creditReportDataUrl?: string;
+  isFailure: boolean;
 }>;
