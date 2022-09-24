@@ -7,7 +7,7 @@ import EventBridge, {
   PutEventsRequestEntry,
   PutEventsResponse,
 } from 'aws-sdk/clients/eventbridge';
-import { DomainEvent } from 'src/domain/domain-events';
+import { DomainEvent, EventDetailType } from 'src/domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3();
@@ -67,7 +67,7 @@ export const putDomainEventAsync = async <T>({
   event: domainEvent,
 }: {
   eventBusName?: string;
-  detailType: string;
+  detailType: EventDetailType;
   event: DomainEvent<T>;
 }): Promise<PutEventsResponse> => {
   //

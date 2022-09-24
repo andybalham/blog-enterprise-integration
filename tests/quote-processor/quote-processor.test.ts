@@ -9,6 +9,8 @@ import { QuoteRequest } from 'src/domain/domain-models';
 import {
   QuoteSubmitted,
   EventDetailType,
+  EventDomain,
+  EventService,
 } from '../../src/domain/domain-events';
 import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
 import QuoteProcessorTestStack from './QuoteProcessorTestStack';
@@ -72,8 +74,8 @@ describe('QuoteProcessor Tests', () => {
       metadata: {
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
-        domain: 'test-domain',
-        service: 'test-service',
+        domain: EventDomain.LoanBroker,
+        service: EventService.RequestApi,
       },
       data: {
         quoteReference: 'test-quoteReference',
