@@ -5,14 +5,15 @@ import {
   IntegrationTestClient,
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
-import { QuoteRequest } from 'src/domain/domain-models';
 import {
   QuoteSubmitted,
   EventDetailType,
   EventDomain,
   EventService,
 } from '../../src/domain/domain-events';
+import { QuoteRequest } from '../../src/domain/domain-models';
 import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
+import { emptyQuoteRequest } from '../lib/model-examples';
 import QuoteProcessorTestStack from './QuoteProcessorTestStack';
 
 jest.setTimeout(2 * 60 * 1000);
@@ -48,24 +49,16 @@ describe('QuoteProcessor Tests', () => {
     // Arrange
 
     const quoteRequest: QuoteRequest = {
+      ...emptyQuoteRequest,
       loanDetails: {
         amount: 1000,
         termMonths: 12,
-      },
-      personalDetails: {
-        firstName: '',
-        lastName: '',
-        niNumber: '',
-        address: {
-          lines: [],
-          postcode: '',
-        },
       },
     };
 
     const quoteRequestDataUrl = await getDataUrlAsync({
       bucketName: dataBucket.bucketName,
-      key: 'test-key',
+      key: 'test-quote-request',
       data: JSON.stringify(quoteRequest),
       expirySeconds: 5 * 60,
     });

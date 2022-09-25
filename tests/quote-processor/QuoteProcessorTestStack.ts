@@ -5,7 +5,7 @@ import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
-import { EventDetailType } from '../../src/domain/domain-events';
+import { QUOTE_PROCESSED_PATTERN } from '../../src/domain/domain-event-patterns';
 
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
@@ -39,9 +39,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
     );
 
     this.addEventBridgeRuleTargetFunction(
-      this.addEventBridgePatternRule('Rule', eventBus, {
-        detailType: [EventDetailType.QuoteProcessed],
-      }),
+      this.addEventBridgePatternRule('Rule', eventBus, QUOTE_PROCESSED_PATTERN),
       QuoteProcessorTestStack.EventObserverId
     );
 

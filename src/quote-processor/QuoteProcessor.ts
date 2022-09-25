@@ -5,7 +5,7 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { EventDetailType } from '../domain/domain-events';
+import { QUOTE_SUBMITTED_PATTERN } from '../domain/domain-event-patterns';
 import { APPLICATION_EVENT_BUS_NAME, STATE_MACHINE_ARN } from './constants';
 
 export interface QuoteProcessorProps {
@@ -51,9 +51,7 @@ export default class QuoteProcessor extends Construct {
 
     const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
       eventBus: props.applicationEventBus,
-      eventPattern: {
-        detailType: [EventDetailType.QuoteSubmitted],
-      },
+      eventPattern: QUOTE_SUBMITTED_PATTERN,
     });
 
     quoteSubmittedRule.addTarget(

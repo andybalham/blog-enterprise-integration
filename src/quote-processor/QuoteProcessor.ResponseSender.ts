@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 
-import { EventDetailType, QuoteProcessed } from 'src/domain/domain-events';
-import { QuoteRequest } from 'src/domain/domain-models';
-import { fetchFromUrlAsync, putDomainEventAsync } from 'src/lib/utils';
+import { EventDetailType, QuoteProcessed } from '../domain/domain-events';
+import { QuoteRequest } from '../domain/domain-models';
+import { fetchFromUrlAsync, putDomainEventAsync } from '../lib/utils';
 import { APPLICATION_EVENT_BUS_NAME } from './constants';
 import { QuoteProcessorState } from './QuoteProcessorState';
 

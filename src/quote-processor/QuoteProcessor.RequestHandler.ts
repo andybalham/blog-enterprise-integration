@@ -4,7 +4,7 @@ import { EventBridgeEvent } from 'aws-lambda';
 import StepFunctions, {
   StartExecutionInput,
 } from 'aws-sdk/clients/stepfunctions';
-import { QuoteSubmitted } from 'src/domain/domain-events';
+import { QuoteSubmitted } from '../domain/domain-events';
 import { STATE_MACHINE_ARN } from './constants';
 import { QuoteProcessorState } from './QuoteProcessorState';
 

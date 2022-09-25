@@ -43,9 +43,13 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   // Publish the event to process the quote
 
+  // TODO 25Sep22: Validate the header value is a UUID
+  const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
+
   const quoteSubmitted: QuoteSubmitted = {
     metadata: {
-      correlationId: event.headers['x-correlation-id'] ?? randomUUID(),
+      
+      correlationId,
       requestId: event.requestContext.requestId,
       domain: EventDomain.LoanBroker,
       service: EventService.RequestApi,

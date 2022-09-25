@@ -8,6 +8,7 @@ export enum EventDomain {
 
 export enum EventService {
   RequestApi = 'RequestApi',
+  QuoteProcessor = 'QuoteProcessor',
   CreditBureau = 'CreditBureau',
 }
 
@@ -27,7 +28,13 @@ export interface DomainEventMetadata {
   requestId: string;
 }
 
-export interface DomainEvent<TData> {
+export interface DomainEventBase {
+  metadata: DomainEventMetadata;
+  data: Record<string, any>;
+}
+
+export interface DomainEvent<TData extends Record<string, any>>
+  extends DomainEventBase {
   metadata: DomainEventMetadata;
   data: TData;
 }
@@ -49,6 +56,6 @@ export type CreditReportRequested = DomainEvent<{
 }>;
 
 export type CreditReportReceived = DomainEvent<{
+  resultType: 'SUCCEEDED' | 'FAILED';
   creditReportDataUrl?: string;
-  isFailure: boolean;
 }>;
