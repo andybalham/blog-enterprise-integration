@@ -6,8 +6,15 @@ import {
 } from '@andybalham/cdk-cloud-test-kit';
 import { EventBridgeEvent } from 'aws-lambda';
 import {
-  FIRST_NAME_TEST,
-  HIGH_CREDIT_SCORE,
+  TEST_FIRST_NAME,
+  TEST_HIGH_CREDIT_SCORE,
+  TEST_LAST_NAME_FAILED,
+  TEST_LAST_NAME_LOW_CREDIT_SCORE,
+  TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
+  TEST_LOW_CREDIT_SCORE,
+  TEST_MEDIUM_CREDIT_SCORE,
+  TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+  TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
 } from '../../src/credit-bureau/constants';
 import {
   CreditReportReceived,
@@ -31,7 +38,55 @@ const defaultTestQuoteRequest: QuoteRequest = {
   ...emptyQuoteRequest,
   personalDetails: {
     ...emptyQuoteRequest.personalDetails,
-    firstName: FIRST_NAME_TEST,
+    firstName: TEST_FIRST_NAME,
+  },
+};
+
+const notOnElectoralRollQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    address: {
+      ...emptyQuoteRequest.personalDetails.address,
+      postcode: TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+    },
+  },
+};
+
+const hasBankruptciesQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    niNumber: TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+  },
+};
+
+const lowCreditScoreQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_LOW_CREDIT_SCORE,
+  },
+};
+
+const mediumCreditScoreQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
+  },
+};
+
+const failedQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_FAILED,
   },
 };
 
@@ -65,7 +120,39 @@ describe('CreditBureau tests', () => {
       expectedResultType: 'SUCCEEDED',
       expectedOnElectoralRoll: true,
       expectedHasBankruptcies: false,
-      expectedCreditScore: HIGH_CREDIT_SCORE,
+      expectedCreditScore: TEST_HIGH_CREDIT_SCORE,
+    },
+    {
+      quoteRequest: notOnElectoralRollQuoteRequest,
+      expectedResultType: 'SUCCEEDED',
+      expectedOnElectoralRoll: false,
+      expectedHasBankruptcies: false,
+      expectedCreditScore: TEST_HIGH_CREDIT_SCORE,
+    },
+    {
+      quoteRequest: hasBankruptciesQuoteRequest,
+      expectedResultType: 'SUCCEEDED',
+      expectedOnElectoralRoll: true,
+      expectedHasBankruptcies: true,
+      expectedCreditScore: TEST_HIGH_CREDIT_SCORE,
+    },
+    {
+      quoteRequest: lowCreditScoreQuoteRequest,
+      expectedResultType: 'SUCCEEDED',
+      expectedOnElectoralRoll: true,
+      expectedHasBankruptcies: false,
+      expectedCreditScore: TEST_LOW_CREDIT_SCORE,
+    },
+    {
+      quoteRequest: mediumCreditScoreQuoteRequest,
+      expectedResultType: 'SUCCEEDED',
+      expectedOnElectoralRoll: true,
+      expectedHasBankruptcies: false,
+      expectedCreditScore: TEST_MEDIUM_CREDIT_SCORE,
+    },
+    {
+      quoteRequest: failedQuoteRequest,
+      expectedResultType: 'FAILED',
     },
   ].forEach((theory) => {
     test(`${JSON.stringify(theory)}`, async () => {
@@ -114,8 +201,6 @@ describe('CreditBureau tests', () => {
         CreditReportReceived
       >;
 
-      console.log(JSON.stringify({ firstEvent }, null, 2));
-
       expect(firstEvent['detail-type']).toBe(
         EventDetailType.CreditReportReceived
       );
@@ -148,6 +233,7 @@ describe('CreditBureau tests', () => {
         expect(actualCreditReport.creditScore).toBe(theory.expectedCreditScore);
         //
       } else {
+        expect(firstEvent.detail.data.resultType).toBe(theory.expectedResultType);
         expect(firstEvent.detail.data.creditReportDataUrl).toBeUndefined();
       }
     });

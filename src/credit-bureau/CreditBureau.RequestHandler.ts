@@ -19,7 +19,15 @@ import {
 import {
   APPLICATION_EVENT_BUS_NAME,
   DATA_BUCKET_NAME,
-  HIGH_CREDIT_SCORE,
+  TEST_FIRST_NAME,
+  TEST_HIGH_CREDIT_SCORE,
+  TEST_LAST_NAME_FAILED,
+  TEST_LAST_NAME_LOW_CREDIT_SCORE,
+  TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
+  TEST_LOW_CREDIT_SCORE,
+  TEST_MEDIUM_CREDIT_SCORE,
+  TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+  TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
 } from './constants';
 
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
@@ -34,37 +42,84 @@ export const handler = async (
     event.detail.data.quoteRequestDataUrl
   );
 
-  console.log(JSON.stringify({ quoteRequest }, null, 2));
+  const isTestRequest =
+    quoteRequest.personalDetails.firstName === TEST_FIRST_NAME;
 
-  const creditReport: CreditReport = {
-    reportReference: randomUUID(),
-    creditScore: HIGH_CREDIT_SCORE,
-    hasBankruptcies: false,
-    onElectoralRoll: true,
-  };
+  if (isTestRequest) {
+    console.log(JSON.stringify({ quoteRequest }, null, 2));
 
-  const creditReportDataUrl = await getDataUrlAsync({
-    bucketName: dataBucketName,
-    key: `${event.detail.data.quoteReference}/${event.detail.data.quoteReference}-credit-report.json`,
-    data: JSON.stringify(creditReport),
-  });
+    const isFailedRequest =
+      quoteRequest.personalDetails.lastName === TEST_LAST_NAME_FAILED;
 
-  const creditReportReceived: CreditReportReceived = {
-    metadata: {
-      domain: EventDomain.LoanBroker,
-      service: EventService.CreditBureau,
-      correlationId: event.detail.metadata.correlationId,
-      requestId: randomUUID(),
-    },
-    data: {
-      resultType: 'SUCCEEDED',
-      creditReportDataUrl,
-    },
-  };
+    let creditReportReceived: CreditReportReceived;
 
-  await putDomainEventAsync({
-    eventBusName,
-    detailType: EventDetailType.CreditReportReceived,
-    event: creditReportReceived,
-  });
+    if (isFailedRequest) {
+      creditReportReceived = {
+        metadata: {
+          domain: EventDomain.LoanBroker,
+          service: EventService.CreditBureau,
+          correlationId: event.detail.metadata.correlationId,
+          requestId: event.detail.metadata.requestId,
+        },
+        data: {
+          resultType: 'FAILED',
+        },
+      };
+    } else {
+      //
+      let creditScore = TEST_HIGH_CREDIT_SCORE;
+      if (
+        quoteRequest.personalDetails.lastName ===
+        TEST_LAST_NAME_LOW_CREDIT_SCORE
+      )
+        creditScore = TEST_LOW_CREDIT_SCORE;
+      if (
+        quoteRequest.personalDetails.lastName ===
+        TEST_LAST_NAME_MEDIUM_CREDIT_SCORE
+      )
+        creditScore = TEST_MEDIUM_CREDIT_SCORE;
+
+      if (
+        quoteRequest.personalDetails.lastName ===
+        TEST_LAST_NAME_LOW_CREDIT_SCORE
+      )
+        creditScore = TEST_LOW_CREDIT_SCORE;
+
+      const creditReport: CreditReport = {
+        reportReference: randomUUID(),
+        creditScore,
+        hasBankruptcies:
+          quoteRequest.personalDetails.niNumber ===
+          TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+        onElectoralRoll:
+          quoteRequest.personalDetails.address.postcode !==
+          TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+      };
+
+      const creditReportDataUrl = await getDataUrlAsync({
+        bucketName: dataBucketName,
+        key: `${event.detail.data.quoteReference}/${event.detail.data.quoteReference}-credit-report.json`,
+        data: JSON.stringify(creditReport),
+      });
+
+      creditReportReceived = {
+        metadata: {
+          domain: EventDomain.LoanBroker,
+          service: EventService.CreditBureau,
+          correlationId: event.detail.metadata.correlationId,
+          requestId: event.detail.metadata.requestId,
+        },
+        data: {
+          resultType: 'SUCCEEDED',
+          creditReportDataUrl,
+        },
+      };
+    }
+
+    await putDomainEventAsync({
+      eventBusName,
+      detailType: EventDetailType.CreditReportReceived,
+      event: creditReportReceived,
+    });
+  }
 };
