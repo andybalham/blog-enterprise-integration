@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-console */
 import {
@@ -5,15 +6,11 @@ import {
   IntegrationTestClient,
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
-import {
-  QuoteSubmitted,
-  EventDetailType,
-  EventDomain,
-  EventService,
-} from '../../src/domain/domain-events';
+import { EventDetailType } from '../../src/domain/domain-events';
 import { QuoteRequest } from '../../src/domain/domain-models';
-import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
-import { emptyQuoteRequest } from '../lib/model-examples';
+import { putDomainEventAsync } from '../../src/lib/utils';
+import { defaultTestQuoteRequest } from '../lib/model-examples';
+import { getQuoteSubmittedEvent } from '../lib/utils';
 import QuoteProcessorTestStack from './QuoteProcessorTestStack';
 
 jest.setTimeout(2 * 60 * 1000);
@@ -49,32 +46,17 @@ describe('QuoteProcessor Tests', () => {
     // Arrange
 
     const quoteRequest: QuoteRequest = {
-      ...emptyQuoteRequest,
+      ...defaultTestQuoteRequest,
       loanDetails: {
         amount: 1000,
         termMonths: 12,
       },
     };
 
-    const quoteRequestDataUrl = await getDataUrlAsync({
-      bucketName: dataBucket.bucketName,
-      key: 'test-quote-request',
-      data: JSON.stringify(quoteRequest),
-      expirySeconds: 5 * 60,
-    });
-
-    const quoteSubmitted: QuoteSubmitted = {
-      metadata: {
-        correlationId: 'test-correlationId',
-        requestId: 'test-requestId',
-        domain: EventDomain.LoanBroker,
-        service: EventService.RequestApi,
-      },
-      data: {
-        quoteReference: 'test-quoteReference',
-        quoteRequestDataUrl,
-      },
-    };
+    const quoteSubmitted = await getQuoteSubmittedEvent(
+      dataBucket,
+      quoteRequest
+    );
 
     // Act
 
@@ -102,6 +84,10 @@ describe('QuoteProcessor Tests', () => {
       quoteSubmitted.metadata.correlationId
     );
 
+    expect(observations[0].data.detail.metadata.requestId).toBe(
+      quoteSubmitted.metadata.requestId
+    );
+
     expect(observations[0].data.detail.data.quoteReference).toBe(
       quoteSubmitted.data.quoteReference
     );
@@ -110,4 +96,6 @@ describe('QuoteProcessor Tests', () => {
       quoteRequest.loanDetails
     );
   });
+
+  test(`TODO`, async () => {});
 });

@@ -17,9 +17,6 @@ export default class QuoteProcessor extends Construct {
   constructor(scope: Construct, id: string, props: QuoteProcessorProps) {
     super(scope, id);
 
-    // TODO 20Sep22: Have the Request Handler kick off the step function with a single lambda to send a response
-    //               We can then write a unit test to raise an event and listen, then fetch the result
-
     const responseSenderFunction = new NodejsFunction(this, 'ResponseSender', {
       environment: {
         [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,

@@ -1,4 +1,11 @@
-/* eslint-disable import/prefer-default-export */
+import {
+  TEST_FIRST_NAME,
+  TEST_LAST_NAME_FAILED,
+  TEST_LAST_NAME_LOW_CREDIT_SCORE,
+  TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
+  TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+  TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+} from '../../src/credit-bureau/constants';
 import { QuoteRequest } from '../../src/domain/domain-models';
 
 export const emptyQuoteRequest: QuoteRequest = {
@@ -14,5 +21,61 @@ export const emptyQuoteRequest: QuoteRequest = {
       lines: [],
       postcode: '',
     },
+  },
+};
+
+export const defaultTestQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+  },
+};
+
+export const notOnElectoralRollQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    address: {
+      ...emptyQuoteRequest.personalDetails.address,
+      postcode: TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+    },
+  },
+};
+
+export const hasBankruptciesQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    niNumber: TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+  },
+};
+
+export const lowCreditScoreQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_LOW_CREDIT_SCORE,
+  },
+};
+
+export const mediumCreditScoreQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
+  },
+};
+
+export const failedQuoteRequest: QuoteRequest = {
+  ...emptyQuoteRequest,
+  personalDetails: {
+    ...emptyQuoteRequest.personalDetails,
+    firstName: TEST_FIRST_NAME,
+    lastName: TEST_LAST_NAME_FAILED,
   },
 };
