@@ -16,7 +16,11 @@ import {
   getDataUrlAsync,
   putDomainEventAsync,
 } from '../lib/utils';
-import { APPLICATION_EVENT_BUS_NAME, DATA_BUCKET_NAME } from './constants';
+import {
+  APPLICATION_EVENT_BUS_NAME,
+  DATA_BUCKET_NAME,
+  HIGH_CREDIT_SCORE,
+} from './constants';
 
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
 const dataBucketName = process.env[DATA_BUCKET_NAME];
@@ -34,9 +38,9 @@ export const handler = async (
 
   const creditReport: CreditReport = {
     reportReference: randomUUID(),
-    creditScore: 999,
+    creditScore: HIGH_CREDIT_SCORE,
     hasBankruptcies: false,
-    onElectoralRoll: false,
+    onElectoralRoll: true,
   };
 
   const creditReportDataUrl = await getDataUrlAsync({
