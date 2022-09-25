@@ -5,7 +5,10 @@ import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
-import { QUOTE_PROCESSED_PATTERN } from '../../src/domain/domain-event-patterns';
+import {
+  CREDIT_REPORT_REQUESTED_PATTERN,
+  QUOTE_PROCESSED_PATTERN,
+} from '../../src/domain/domain-event-patterns';
 
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
@@ -15,12 +18,18 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
   static readonly ApplicationEventBusId = 'ApplicationEventBusId';
 
-  static readonly EventObserverId = 'EventObserver';
+  static readonly QuoteProcessedObserverId = 'QuoteProcessedObserverId';
+
+  static readonly CreditReportRequestedObserverId =
+    'CreditReportRequestedObserverId';
 
   constructor(scope: Construct, id: string) {
     super(scope, id, {
       testStackId: QuoteProcessorTestStack.Id,
-      testFunctionIds: [QuoteProcessorTestStack.EventObserverId],
+      testFunctionIds: [
+        QuoteProcessorTestStack.QuoteProcessedObserverId,
+        QuoteProcessorTestStack.CreditReportRequestedObserverId,
+      ],
     });
 
     const bucket = new Bucket(this, 'Bucket', {
@@ -39,8 +48,21 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
     );
 
     this.addEventBridgeRuleTargetFunction(
-      this.addEventBridgePatternRule('Rule', eventBus, QUOTE_PROCESSED_PATTERN),
-      QuoteProcessorTestStack.EventObserverId
+      this.addEventBridgePatternRule(
+        'QuoteProcessedRule',
+        eventBus,
+        QUOTE_PROCESSED_PATTERN
+      ),
+      QuoteProcessorTestStack.QuoteProcessedObserverId
+    );
+
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
+        'CreditReportRequestedRule',
+        eventBus,
+        CREDIT_REPORT_REQUESTED_PATTERN
+      ),
+      QuoteProcessorTestStack.CreditReportRequestedObserverId
     );
 
     // SUT

@@ -42,7 +42,7 @@ describe('QuoteProcessor Tests', () => {
     await dataBucket.clearAllObjectsAsync();
   });
 
-  test(`Submitted event results in processed event`, async () => {
+  test(`Quote submitted event results in quote processed event`, async () => {
     // Arrange
 
     const quoteRequest: QuoteRequest = {
@@ -68,34 +68,71 @@ describe('QuoteProcessor Tests', () => {
 
     // Await
 
-    const { observations, timedOut } = await testClient.pollTestAsync({
-      until: async (o) => o.length > 0,
-    });
+    const { observations: quoteProcessedObservations, timedOut } =
+      await testClient.pollTestAsync({
+        filterById: QuoteProcessorTestStack.QuoteProcessedObserverId,
+        until: async (o) => o.length > 0,
+      });
 
     // Assert
 
     expect(timedOut).toBeFalsy();
 
-    expect(observations[0].data['detail-type']).toBe(
-      EventDetailType.QuoteProcessed
-    );
+    const observationData = quoteProcessedObservations[0].data;
 
-    expect(observations[0].data.detail.metadata.correlationId).toBe(
+    expect(observationData['detail-type']).toBe(EventDetailType.QuoteProcessed);
+
+    expect(observationData.detail.metadata.correlationId).toBe(
       quoteSubmitted.metadata.correlationId
     );
 
-    expect(observations[0].data.detail.metadata.requestId).toBe(
+    expect(observationData.detail.metadata.requestId).toBe(
       quoteSubmitted.metadata.requestId
     );
 
-    expect(observations[0].data.detail.data.quoteReference).toBe(
+    expect(observationData.detail.data.quoteReference).toBe(
       quoteSubmitted.data.quoteReference
     );
 
-    expect(observations[0].data.detail.data.loanDetails).toEqual(
+    expect(observationData.detail.data.loanDetails).toEqual(
       quoteRequest.loanDetails
     );
   });
 
-  test(`TODO`, async () => {});
+  test(`Quote submitted event results in credit report requested event`, async () => {
+    // Arrange
+
+    const quoteSubmitted = await getQuoteSubmittedEvent(
+      dataBucket,
+      defaultTestQuoteRequest
+    );
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: applicationEventBus.eventBusArn,
+      detailType: EventDetailType.QuoteSubmitted,
+      event: quoteSubmitted,
+    });
+
+    // Await
+
+    const { observations: creditReportRequestedObservations, timedOut } =
+      await testClient.pollTestAsync({
+        filterById: QuoteProcessorTestStack.CreditReportRequestedObserverId,
+        until: async (o) => o.length > 0,
+      });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+
+    const observationData = creditReportRequestedObservations[0].data;
+
+    expect(observationData['detail-type']).toBe(
+      EventDetailType.CreditReportRequested
+    );
+
+    // TODO 25Sep22: Assert
+  });
 });
