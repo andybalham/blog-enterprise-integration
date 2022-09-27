@@ -53,9 +53,11 @@ export type QuoteProcessed = DomainEvent<{
 export type CreditReportRequested = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;
+  taskToken: string;
 }>;
 
 export type CreditReportReceived = DomainEvent<{
   resultType: 'SUCCEEDED' | 'FAILED';
+  taskToken: string;
   creditReportDataUrl?: string;
 }>;

@@ -63,6 +63,7 @@ export const handler = async (
         },
         data: {
           resultType: 'FAILED',
+          taskToken: event.detail.data.taskToken,
         },
       };
     } else {
@@ -111,6 +112,7 @@ export const handler = async (
         },
         data: {
           resultType: 'SUCCEEDED',
+          taskToken: event.detail.data.taskToken,
           creditReportDataUrl,
         },
       };

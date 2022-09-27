@@ -66,6 +66,8 @@ describe('QuoteProcessor Tests', () => {
       event: quoteSubmitted,
     });
 
+    // TODO 27Sep22: We need to respond to the credit report request
+
     // Await
 
     const { observations: quoteProcessedObservations, timedOut } =

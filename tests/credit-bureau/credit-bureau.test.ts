@@ -120,6 +120,7 @@ describe('CreditBureau tests', () => {
         data: {
           quoteReference: 'test-quote-reference',
           quoteRequestDataUrl,
+          taskToken: 'test-task-token',
         },
       };
 
@@ -156,6 +157,10 @@ describe('CreditBureau tests', () => {
 
       expect(firstEvent.detail.metadata.requestId).toBe(
         creditReportRequested.metadata.requestId
+      );
+
+      expect(firstEvent.detail.data.taskToken).toBe(
+        creditReportRequested.data.taskToken
       );
 
       expect(firstEvent.detail.data.resultType).toBe(theory.expectedResultType);

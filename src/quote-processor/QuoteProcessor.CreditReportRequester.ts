@@ -16,13 +16,12 @@ export const handler = async (event: Record<string, any>): Promise<void> => {
 
   const state = event.state as QuoteProcessorState;
 
-  // TODO 25Sep22: We need to pass the task token to and from the credit bureau
-
   const creditReportRequested: CreditReportRequested = {
     metadata: state.quoteSubmitted.metadata,
     data: {
       quoteReference: state.quoteSubmitted.data.quoteReference,
       quoteRequestDataUrl: state.quoteSubmitted.data.quoteRequestDataUrl,
+      taskToken: event.taskToken,
     },
   };
 
