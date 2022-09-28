@@ -41,7 +41,6 @@ export interface DomainEvent<TData extends Record<string, any>>
 
 export type QuoteSubmitted = DomainEvent<{
   quoteReference: string;
-  quoteRequestDataUrl: string;
 }>;
 
 export type QuoteProcessed = DomainEvent<{

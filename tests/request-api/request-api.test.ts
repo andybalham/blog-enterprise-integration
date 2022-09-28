@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-console */
-import { IntegrationTestClient } from '@andybalham/cdk-cloud-test-kit';
+import {
+  IntegrationTestClient,
+  S3TestClient,
+} from '@andybalham/cdk-cloud-test-kit';
 import axios from 'axios';
-import { EventDomain, EventService } from '../../src/domain/domain-events';
+import {
+  EventDomain,
+  EventService,
+  QuoteSubmitted,
+} from '../../src/domain/domain-events';
 import { QuoteRequest } from '../../src/domain/domain-models';
+import LoanBrokerFileStore from '../../src/lib/LoanBrokerFileStore';
 import RequestApiTestStack from './RequestApiTestStack';
-import { QuoteSubmittedObservation } from './RequestApiTestStack.EventObserver';
 
 jest.setTimeout(2 * 60 * 1000);
 
@@ -16,6 +23,8 @@ describe('RequestApi Tests', () => {
   });
 
   let requestApiBaseUrl: string | undefined;
+  let quoteBucket: S3TestClient;
+  let loanBrokerFileStore: LoanBrokerFileStore;
 
   beforeAll(async () => {
     await testClient.initialiseClientAsync();
@@ -23,10 +32,14 @@ describe('RequestApi Tests', () => {
     requestApiBaseUrl = testClient.getApiGatewayBaseUrlByStackId(
       RequestApiTestStack.RequestApiId
     );
+
+    quoteBucket = testClient.getS3TestClient(RequestApiTestStack.QuoteBucketId);
+    loanBrokerFileStore = new LoanBrokerFileStore(quoteBucket.bucketName);
   });
 
   beforeEach(async () => {
     await testClient.initialiseTestAsync();
+    await quoteBucket.clearAllObjectsAsync();
   });
 
   test(`request event published as expected`, async () => {
@@ -67,6 +80,7 @@ describe('RequestApi Tests', () => {
     // Await
 
     const { observations, timedOut } = await testClient.pollTestAsync({
+      filterById: RequestApiTestStack.QuoteSubmittedObserverId,
       until: async (o) => o.length > 0,
     });
 
@@ -74,8 +88,7 @@ describe('RequestApi Tests', () => {
 
     expect(timedOut).toBeFalsy();
 
-    const { actualEvent, actualQuoteRequest } = observations[0]
-      .data as QuoteSubmittedObservation;
+    const actualEvent = observations[0].data.detail as QuoteSubmitted;
 
     expect(actualEvent.metadata.domain).toBe(EventDomain.LoanBroker);
     expect(actualEvent.metadata.service).toBe(EventService.RequestApi);
@@ -83,6 +96,10 @@ describe('RequestApi Tests', () => {
     expect(actualEvent.metadata.requestId).toBeDefined();
 
     expect(actualEvent.data.quoteReference).toBe(quoteReference);
+
+    const actualQuoteRequest = await loanBrokerFileStore.getQuoteRequestAsync(
+      actualEvent.data.quoteReference
+    );
 
     expect(actualQuoteRequest).toMatchObject(quoteRequest);
   });
