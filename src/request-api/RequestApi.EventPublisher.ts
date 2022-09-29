@@ -3,23 +3,23 @@
 /* eslint-disable import/prefer-default-export */
 import { APIGatewayEvent } from 'aws-lambda';
 import { randomUUID } from 'crypto';
-import { generateQuoteReference, putDomainEventAsync } from '../lib/utils';
+import {
+  generateQuoteReference,
+  getDataUrlAsync,
+  putDomainEventAsync,
+} from '../lib/utils';
 import {
   EventDomain,
   EventDetailType,
   QuoteSubmitted,
   EventService,
 } from '../domain/domain-events';
-import LoanBrokerFileStore from '../lib/LoanBrokerFileStore';
-import { QuoteRequest } from '../domain/domain-models';
 
 export const DATA_BUCKET_NAME = 'DATA_BUCKET_NAME';
 export const APPLICATION_EVENT_BUS_NAME = 'APPLICATION_EVENT_BUS_NAME';
 
 const bucketName = process.env[DATA_BUCKET_NAME];
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-
-const loanBrokerFileStore = new LoanBrokerFileStore(bucketName);
 
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
@@ -30,15 +30,25 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     };
   }
 
-  // In production we would validate both the header and the body
-  const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
-  const quoteRequest: QuoteRequest = JSON.parse(event.body);
+  // Generate the reference, store the request, and get a pre-signed URL
 
   const quoteReference = generateQuoteReference();
-  await loanBrokerFileStore.putQuoteRequestAsync(quoteReference, quoteRequest);
+
+  const quoteRequestDataUrl = await getDataUrlAsync({
+    bucketName,
+    key: `${quoteReference}/${quoteReference}-quote-request.json`,
+    data: event.body,
+    expirySeconds: 5 * 60, // 5 minutes
+  });
+
+  // Publish the event to process the quote
+
+  // TODO 25Sep22: Validate the header value is a UUID
+  const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
 
   const quoteSubmitted: QuoteSubmitted = {
     metadata: {
+      
       correlationId,
       requestId: event.requestContext.requestId,
       domain: EventDomain.LoanBroker,
@@ -46,6 +56,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     },
     data: {
       quoteReference,
+      quoteRequestDataUrl,
     },
   };
 

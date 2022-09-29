@@ -1,6 +1,8 @@
 import { IntegrationTestStack } from '@andybalham/cdk-cloud-test-kit';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { EventBus } from 'aws-cdk-lib/aws-events';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import RequestApi from '../../src/request-api/RequestApi';
@@ -12,14 +14,12 @@ export default class RequestApiTestStack extends IntegrationTestStack {
 
   static readonly RequestApiId = 'RequestApi';
 
-  static readonly QuoteBucketId = 'QuoteBucket';
-
-  static readonly QuoteSubmittedObserverId = 'QuoteSubmittedObserver';
+  static readonly EventObserverId = 'EventObserver';
 
   constructor(scope: Construct, id: string) {
     super(scope, id, {
       testStackId: RequestApiTestStack.Id,
-      testFunctionIds: [RequestApiTestStack.QuoteSubmittedObserverId],
+      integrationTestTable: true,
     });
 
     const bucket = new Bucket(this, 'Bucket', {
@@ -34,17 +34,17 @@ export default class RequestApiTestStack extends IntegrationTestStack {
 
     const eventBus = new EventBus(this, 'EventBus');
 
-    // this.addTestFunction(
-    //   new NodejsFunction(this, RequestApiTestStack.EventObserverId, {
-    //     logRetention: RetentionDays.ONE_DAY,
-    //   })
-    // );
+    this.addTestFunction(
+      new NodejsFunction(this, RequestApiTestStack.EventObserverId, {
+        logRetention: RetentionDays.ONE_DAY,
+      })
+    );
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule('Rule', eventBus, {
         detailType: [EventDetailType.QuoteSubmitted],
       }),
-      RequestApiTestStack.QuoteSubmittedObserverId
+      RequestApiTestStack.EventObserverId
     );
 
     // SUT
@@ -55,6 +55,5 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     });
 
     this.addTestResourceTag(sut.api, RequestApiTestStack.RequestApiId);
-    this.addTestResourceTag(bucket, RequestApiTestStack.QuoteBucketId);
   }
 }
