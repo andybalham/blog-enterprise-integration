@@ -69,6 +69,9 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     this.addTestFunction(mockCreditBureauFunction);
 
+    bucket.grantReadWrite(mockCreditBureauFunction);
+    eventBus.grantPutEventsTo(mockCreditBureauFunction);
+
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule(
         'QuoteProcessedRule',

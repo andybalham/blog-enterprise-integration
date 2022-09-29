@@ -7,7 +7,7 @@ import {
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
 import { EventDetailType } from '../../src/domain/domain-events';
-import { QuoteRequest } from '../../src/domain/domain-models';
+import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
 import { getQuoteSubmittedEvent } from '../lib/utils';
@@ -37,8 +37,6 @@ describe('QuoteProcessor Tests', () => {
   });
 
   beforeEach(async () => {
-    await testClient.initialiseTestAsync();
-
     await dataBucket.clearAllObjectsAsync();
   });
 
@@ -58,6 +56,21 @@ describe('QuoteProcessor Tests', () => {
       quoteRequest
     );
 
+    const creditReport: CreditReport = {
+      reportReference: 'test-report-reference',
+      creditScore: 999,
+      hasBankruptcies: false,
+      onElectoralRoll: true,
+    };
+
+    await testClient.initialiseTestAsync({
+      testId: 'quote-processed-event-published',
+      inputs: {
+        creditReportResultType: 'SUCCEEDED',
+        creditReport,
+      },
+    });
+
     // Act
 
     await putDomainEventAsync({
@@ -65,8 +78,6 @@ describe('QuoteProcessor Tests', () => {
       detailType: EventDetailType.QuoteSubmitted,
       event: quoteSubmitted,
     });
-
-    // TODO 27Sep22: We need to respond to the credit report request
 
     // Await
 
@@ -102,6 +113,8 @@ describe('QuoteProcessor Tests', () => {
   });
 
   test(`Quote submitted event results in credit report requested event`, async () => {
+    await testClient.initialiseTestAsync();
+
     // Arrange
 
     const quoteSubmitted = await getQuoteSubmittedEvent(
