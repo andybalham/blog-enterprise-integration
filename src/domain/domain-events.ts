@@ -39,6 +39,12 @@ export interface DomainEvent<TData extends Record<string, any>>
   data: TData;
 }
 
+export interface CallbackData extends Record<string, any> {
+  taskToken: string;
+}
+
+export type CallbackDomainEvent = DomainEvent<CallbackData>;
+
 export type QuoteSubmitted = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;

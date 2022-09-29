@@ -86,5 +86,20 @@ export default class QuoteProcessor extends Construct {
     );
 
     stateMachine.grantStartExecution(requestHandlerFunction);
+
+    const callbackHandlerFunction = new NodejsFunction(
+      this,
+      'CallbackHandler',
+      {
+        environment: {
+          [STATE_MACHINE_ARN]: stateMachine.stateMachineArn,
+        },
+        logRetention: RetentionDays.ONE_DAY,
+      }
+    );
+
+    // TODO 29Sep22: Need to subscribe to the return event
+
+    stateMachine.grantTaskResponse(callbackHandlerFunction);
   }
 }
