@@ -12,7 +12,10 @@ import {
   TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { QUOTE_SUBMITTED_PATTERN } from '../domain/domain-event-patterns';
+import {
+  QUOTE_PROCESSOR_CALLBACK_PATTERN,
+  QUOTE_SUBMITTED_PATTERN,
+} from '../domain/domain-event-patterns';
 import { APPLICATION_EVENT_BUS_NAME, STATE_MACHINE_ARN } from './constants';
 
 export interface QuoteProcessorProps {
@@ -59,6 +62,7 @@ export default class QuoteProcessor extends Construct {
             taskToken: JsonPath.taskToken,
             'state.$': '$',
           }),
+          resultPath: '$.creditReportReceived',
           timeout: Duration.seconds(30), // Don't wait forever for a reply
         })
         .lambdaInvoke('SendResponse', {
@@ -67,6 +71,8 @@ export default class QuoteProcessor extends Construct {
         })
         .build(this),
     });
+
+    // Request handler function
 
     const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
       environment: {
@@ -87,6 +93,8 @@ export default class QuoteProcessor extends Construct {
 
     stateMachine.grantStartExecution(requestHandlerFunction);
 
+    // Callback handler function
+
     const callbackHandlerFunction = new NodejsFunction(
       this,
       'CallbackHandler',
@@ -96,6 +104,15 @@ export default class QuoteProcessor extends Construct {
         },
         logRetention: RetentionDays.ONE_DAY,
       }
+    );
+
+    const quoteProcessorCallbackRule = new Rule(this, id, {
+      eventBus: props.applicationEventBus,
+      eventPattern: QUOTE_PROCESSOR_CALLBACK_PATTERN,
+    });
+
+    quoteProcessorCallbackRule.addTarget(
+      new LambdaFunctionTarget(callbackHandlerFunction)
     );
 
     // TODO 29Sep22: Need to subscribe to the return event

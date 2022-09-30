@@ -15,3 +15,7 @@ export const CREDIT_REPORT_REQUESTED_PATTERN = {
 export const CREDIT_REPORT_RECEIVED_PATTERN = {
   detailType: [EventDetailType.CreditReportReceived],
 };
+
+export const QUOTE_PROCESSOR_CALLBACK_PATTERN = {
+  detailType: [EventDetailType.CreditReportReceived],
+};
