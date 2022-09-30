@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 import { getTestPropsAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLib';
+import { EventBridgeEvent } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import {
   APPLICATION_EVENT_BUS_NAME,
@@ -8,20 +9,31 @@ import {
 } from '../../src/credit-bureau/constants';
 import {
   CreditReportReceived,
+  CreditReportRequested,
   EventDetailType,
   EventDomain,
   EventService,
 } from '../../src/domain/domain-events';
-import { CreditReport } from '../../src/domain/domain-models';
-import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
+import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
+import {
+  fetchFromUrlAsync,
+  getDataUrlAsync,
+  putDomainEventAsync,
+} from '../../src/lib/utils';
 
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
 const dataBucketName = process.env[DATA_BUCKET_NAME];
 
 const documentClient = new DocumentClient();
 
-export const handler = async (event: Record<string, any>): Promise<any> => {
+export const handler = async (
+  event: EventBridgeEvent<'CreditReportRequested', CreditReportRequested>
+): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
+
+  const quoteRequest = await fetchFromUrlAsync<QuoteRequest>(event.detail.data.quoteRequestDataUrl);
+
+  console.log(JSON.stringify({ quoteRequest }, null, 2));
 
   const testProps = await getTestPropsAsync(documentClient);
 

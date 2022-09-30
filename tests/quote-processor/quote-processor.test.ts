@@ -111,43 +111,4 @@ describe('QuoteProcessor Tests', () => {
       quoteRequest.loanDetails
     );
   });
-
-  test(`Quote submitted event results in credit report requested event`, async () => {
-    await testClient.initialiseTestAsync();
-
-    // Arrange
-
-    const quoteSubmitted = await getQuoteSubmittedEvent(
-      dataBucket,
-      defaultTestQuoteRequest
-    );
-
-    // Act
-
-    await putDomainEventAsync({
-      eventBusName: applicationEventBus.eventBusArn,
-      detailType: EventDetailType.QuoteSubmitted,
-      event: quoteSubmitted,
-    });
-
-    // Await
-
-    const { observations: creditReportRequestedObservations, timedOut } =
-      await testClient.pollTestAsync({
-        filterById: QuoteProcessorTestStack.CreditReportRequestedObserverId,
-        until: async (o) => o.length > 0,
-      });
-
-    // Assert
-
-    expect(timedOut).toBeFalsy();
-
-    const observationData = creditReportRequestedObservations[0].data;
-
-    expect(observationData['detail-type']).toBe(
-      EventDetailType.CreditReportRequested
-    );
-
-    // TODO 25Sep22: Assert
-  });
 });
