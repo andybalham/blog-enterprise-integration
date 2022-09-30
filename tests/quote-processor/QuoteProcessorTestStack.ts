@@ -28,17 +28,13 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
   static readonly MockCreditBureauId = 'MockCreditBureau';
 
-  static readonly CreditReportRequestedObserverId =
-    'CreditReportRequestedObserver';
-
   constructor(scope: Construct, id: string) {
     super(scope, id, {
       testStackId: QuoteProcessorTestStack.Id,
-      testFunctionIds: [
-        QuoteProcessorTestStack.QuoteProcessedObserverId,
-        QuoteProcessorTestStack.CreditReportRequestedObserverId,
-      ],
+      testFunctionIds: [QuoteProcessorTestStack.QuoteProcessedObserverId],
     });
+
+    // Data bucket
 
     const bucket = new Bucket(this, 'Bucket', {
       removalPolicy: RemovalPolicy.DESTROY,
@@ -50,10 +46,14 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       ],
     });
 
+    // Application event bus
+
     const eventBus = new EventBus(
       this,
       QuoteProcessorTestStack.ApplicationEventBusId
     );
+
+    // Mock credit bureau
 
     const mockCreditBureauFunction = new NodejsFunction(
       this,
@@ -74,6 +74,17 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule(
+        'CreditReportRequestedMockRule',
+        eventBus,
+        CREDIT_REPORT_REQUESTED_PATTERN
+      ),
+      QuoteProcessorTestStack.MockCreditBureauId
+    );
+
+    // Hook up event to observe
+
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
         'QuoteProcessedRule',
         eventBus,
         QUOTE_PROCESSED_PATTERN
@@ -81,23 +92,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.QuoteProcessedObserverId
     );
 
-    this.addEventBridgeRuleTargetFunction(
-      this.addEventBridgePatternRule(
-        'CreditReportRequestedObserverRule',
-        eventBus,
-        CREDIT_REPORT_REQUESTED_PATTERN
-      ),
-      QuoteProcessorTestStack.CreditReportRequestedObserverId
-    );
-
-    this.addEventBridgeRuleTargetFunction(
-      this.addEventBridgePatternRule(
-        'CreditReportRequestedMockRule',
-        eventBus,
-        CREDIT_REPORT_REQUESTED_PATTERN
-      ),
-      QuoteProcessorTestStack.MockCreditBureauId
-    );
+    // TODO 30Sep22: Add an SSM parameter for our test lenders
 
     // SUT
 

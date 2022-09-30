@@ -33,6 +33,7 @@ export default class QuoteProcessor extends Construct {
       environment: {
         [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
       },
+      logRetention: RetentionDays.ONE_DAY,
     });
 
     props.applicationEventBus.grantPutEventsTo(responseSenderFunction);
@@ -46,10 +47,18 @@ export default class QuoteProcessor extends Construct {
         environment: {
           [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
         },
+        logRetention: RetentionDays.ONE_DAY,
       }
     );
 
     props.applicationEventBus.grantPutEventsTo(creditReportRequesterFunction);
+
+    // Lender reader
+
+    const lenderLookupFunction = new NodejsFunction(this, 'LenderLookup', {
+      environment: {},
+      logRetention: RetentionDays.ONE_DAY,
+    });
 
     // State machine
 
@@ -64,6 +73,10 @@ export default class QuoteProcessor extends Construct {
           }),
           resultPath: '$.creditReportReceived',
           timeout: Duration.seconds(30), // Don't wait forever for a reply
+        })
+        .lambdaInvoke('LookupLenders', {
+          lambdaFunction: lenderLookupFunction,
+          payloadResponseOnly: true,
         })
         .lambdaInvoke('SendResponse', {
           lambdaFunction: responseSenderFunction,
@@ -114,8 +127,6 @@ export default class QuoteProcessor extends Construct {
     quoteProcessorCallbackRule.addTarget(
       new LambdaFunctionTarget(callbackHandlerFunction)
     );
-
-    // TODO 29Sep22: Need to subscribe to the return event
 
     stateMachine.grantTaskResponse(callbackHandlerFunction);
   }
