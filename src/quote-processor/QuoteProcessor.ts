@@ -1,8 +1,9 @@
 /* eslint-disable no-new */
 import StateMachineBuilder from '@andybalham/state-machine-builder-v2';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Stack } from 'aws-cdk-lib';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
@@ -55,10 +56,30 @@ export default class QuoteProcessor extends Construct {
 
     // Lender reader
 
+    // https://bobbyhadz.com/blog/aws-cdk-iam-policy-example
+    // https://bobbyhadz.com/blog/aws-cdk-add-lambda-permission
+    // https://bobbyhadz.com/blog/cdk-get-region-accountid
+    // https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-access.html
+
     const lenderLookupFunction = new NodejsFunction(this, 'LenderLookup', {
       environment: {},
       logRetention: RetentionDays.ONE_DAY,
     });
+
+    lenderLookupFunction.role?.attachInlinePolicy(
+      new Policy(this, 'GetLendersPolicy', {
+        statements: [
+          new PolicyStatement({
+            resources: [
+              `arn:aws:ssm:${Stack.of(this).region}:${
+                Stack.of(this).account
+              }:parameter/lenders`,
+            ],
+            actions: ['ssm:GetParametersByPath'],
+          }),
+        ],
+      })
+    );
 
     // State machine
 

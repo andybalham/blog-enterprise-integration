@@ -11,23 +11,21 @@ export const handler = async (
 ): Promise<QuoteProcessorState> => {
   console.log(JSON.stringify({ event: state }, null, 2));
 
-  // TODO 30Sep22: Actually retrieve the lender information
-  
   const lenderParams = await ssm
     .getParametersByPath({
       Path: '/lenders',
     })
     .promise();
 
-  console.log(JSON.stringify({ lenderParams }, null, 2));
+  console.log(
+    JSON.stringify({ lenderParams: lenderParams.Parameters }, null, 2)
+  );
 
-  state.lenders = [
-    {
-      id: 'lender-id',
-      name: 'lender-name',
-      isEnabled: true,
-    },
-  ];
+  const lenderIds = lenderParams.Parameters?.filter(
+    (p) => p?.Value?.toLowerCase() === 'true'
+  ).map((p) => p.Name ?? '');
+
+  state.lenderIds = lenderIds;
 
   return state;
 };

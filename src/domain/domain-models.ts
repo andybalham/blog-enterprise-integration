@@ -31,9 +31,3 @@ export interface CreditReport {
   hasBankruptcies: boolean;
   creditScore: number;
 }
-
-export interface Lender {
-  id: string;
-  name: string;
-  isEnabled: boolean;
-}
