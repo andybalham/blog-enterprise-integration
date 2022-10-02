@@ -81,6 +81,17 @@ export default class QuoteProcessor extends Construct {
       })
     );
 
+    // Quote requester
+
+    const quoteRequesterFunction = new NodejsFunction(this, 'QuoteRequester', {
+      environment: {
+        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
+      },
+      logRetention: RetentionDays.ONE_DAY,
+    });
+
+    props.applicationEventBus.grantPutEventsTo(quoteRequesterFunction);
+
     // State machine
 
     const stateMachine = new StateMachine(this, 'StateMachine', {
@@ -98,6 +109,14 @@ export default class QuoteProcessor extends Construct {
         .lambdaInvoke('LookupLenders', {
           lambdaFunction: lenderLookupFunction,
           payloadResponseOnly: true,
+        })
+        .map('RequestQuotes', {
+          itemsPath: '$.lenders',
+          iterator: new StateMachineBuilder().lambdaInvoke('RequestQuote', {
+            lambdaFunction: quoteRequesterFunction,
+            payloadResponseOnly: true,
+          }),
+          resultPath: '$.quotes',
         })
         .lambdaInvoke('SendResponse', {
           lambdaFunction: responseSenderFunction,

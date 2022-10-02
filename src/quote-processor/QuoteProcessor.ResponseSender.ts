@@ -25,7 +25,7 @@ export const handler = async (
       loanDetails: quoteRequest.loanDetails,
       quoteResponse: {
         bestRate: 10,
-        lenderName: 'Honest Andy',
+        lenderId: 'Honest Andy',
       },
     },
   };

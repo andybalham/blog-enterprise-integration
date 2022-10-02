@@ -16,6 +16,7 @@ import {
   APPLICATION_EVENT_BUS_NAME,
   DATA_BUCKET_NAME,
 } from '../../src/credit-bureau/constants';
+import { LenderRegisterEntry } from '../../src/domain/domain-models';
 
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
@@ -93,18 +94,32 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.QuoteProcessedObserverId
     );
 
-    // TODO 30Sep22: Add an SSM parameter for our test lenders
+    // Add SSM parameters for our test lenders
 
-    new StringParameter(this, 'Lender1Parameter', {
-      parameterName: '/lenders/my-lender-id-1',
-      stringValue: 'true',
-      tier: ParameterTier.STANDARD,
-    });
+    const lenderRegisterEntries: LenderRegisterEntry[] = [
+      {
+        lenderId: 'Lender1',
+        lenderName: 'Lender One',
+        isEnabled: true,
+      },
+      {
+        lenderId: 'Lender2',
+        lenderName: 'Lender Two',
+        isEnabled: true,
+      },
+      {
+        lenderId: 'Lender3',
+        lenderName: 'Lender Three',
+        isEnabled: false,
+      },
+    ];
 
-    new StringParameter(this, 'Lender2Parameter', {
-      parameterName: '/lenders/my-lender-id-2',
-      stringValue: 'true',
-      tier: ParameterTier.STANDARD,
+    lenderRegisterEntries.forEach((l) => {
+      new StringParameter(this, `${l.lenderId}Parameter`, {
+        parameterName: `/lenders/${l.lenderId}`,
+        stringValue: JSON.stringify(l),
+        tier: ParameterTier.STANDARD,
+      });
     });
 
     // SUT

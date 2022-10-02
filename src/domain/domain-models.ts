@@ -4,8 +4,8 @@ export interface QuoteRequest {
 }
 
 export interface QuoteResponse {
+  lenderId: string;
   bestRate: number;
-  lenderName: string;
 }
 
 export interface LoanDetails {
@@ -30,4 +30,10 @@ export interface CreditReport {
   onElectoralRoll: boolean;
   hasBankruptcies: boolean;
   creditScore: number;
+}
+
+export interface LenderRegisterEntry {
+  lenderId: string;
+  lenderName: string;
+  isEnabled: boolean;
 }
