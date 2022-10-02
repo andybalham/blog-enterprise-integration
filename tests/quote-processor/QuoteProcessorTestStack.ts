@@ -11,6 +11,7 @@ import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
 import {
   CREDIT_REPORT_REQUESTED_PATTERN,
   QUOTE_PROCESSED_PATTERN,
+  RATE_REQUESTED_PATTERN,
 } from '../../src/domain/domain-event-patterns';
 import {
   APPLICATION_EVENT_BUS_NAME,
@@ -28,12 +29,17 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
   static readonly QuoteProcessedObserverId = 'QuoteProcessedObserver';
 
+  static readonly RateRequestedObserverId = 'RateRequestedObserver';
+
   static readonly MockCreditBureauId = 'MockCreditBureau';
 
   constructor(scope: Construct, id: string) {
     super(scope, id, {
       testStackId: QuoteProcessorTestStack.Id,
-      testFunctionIds: [QuoteProcessorTestStack.QuoteProcessedObserverId],
+      testFunctionIds: [
+        QuoteProcessorTestStack.QuoteProcessedObserverId,
+        QuoteProcessorTestStack.RateRequestedObserverId,
+      ],
     });
 
     // Data bucket
@@ -83,7 +89,16 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.MockCreditBureauId
     );
 
-    // Hook up event to observe
+    // Hook up events to observe
+
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
+        'RateRequestedRule',
+        eventBus,
+        RATE_REQUESTED_PATTERN
+      ),
+      QuoteProcessorTestStack.RateRequestedObserverId
+    );
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule(

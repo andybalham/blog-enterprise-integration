@@ -81,16 +81,16 @@ export default class QuoteProcessor extends Construct {
       })
     );
 
-    // Quote requester
+    // Rate requester
 
-    const quoteRequesterFunction = new NodejsFunction(this, 'QuoteRequester', {
+    const rateRequesterFunction = new NodejsFunction(this, 'RateRequester', {
       environment: {
         [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
-    props.applicationEventBus.grantPutEventsTo(quoteRequesterFunction);
+    props.applicationEventBus.grantPutEventsTo(rateRequesterFunction);
 
     // State machine
 
@@ -110,7 +110,7 @@ export default class QuoteProcessor extends Construct {
           lambdaFunction: lenderLookupFunction,
           payloadResponseOnly: true,
         })
-        .map('RequestQuotes', {
+        .map('RequestRates', {
           // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
           itemsPath: '$.lenders',
           parameters: {
@@ -118,8 +118,8 @@ export default class QuoteProcessor extends Construct {
             'creditReportReceived.$': '$.creditReportReceived',
             'lender.$': '$$.Map.Item.Value',
           },
-          iterator: new StateMachineBuilder().lambdaInvoke('RequestQuote', {
-            lambdaFunction: quoteRequesterFunction,
+          iterator: new StateMachineBuilder().lambdaInvoke('RequestRate', {
+            lambdaFunction: rateRequesterFunction,
             payloadResponseOnly: true,
           }),
           resultPath: '$.quotes',

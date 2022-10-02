@@ -17,6 +17,8 @@ export enum EventDetailType {
   QuoteProcessed = 'QuoteProcessed',
   CreditReportRequested = 'CreditReportRequested',
   CreditReportReceived = 'CreditReportReceived',
+  RateRequested = 'RateRequested',
+  RateReceived = 'RateReceived',
 }
 
 // TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
@@ -26,6 +28,7 @@ export interface DomainEventMetadata {
   service: EventService;
   correlationId: string;
   requestId: string;
+  // TODO 02Oct22: Add requestStartTime and eventTime
 }
 
 export interface DomainEventBase {
@@ -66,4 +69,12 @@ export type CreditReportReceived = DomainEvent<{
   resultType: 'SUCCEEDED' | 'FAILED';
   taskToken: string;
   creditReportDataUrl?: string;
+}>;
+
+export type RateRequested = DomainEvent<{
+  lenderId: string;
+  quoteReference: string;
+  quoteRequestDataUrl: string;
+  creditReportDataUrl: string;
+  taskToken: string;
 }>;
