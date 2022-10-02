@@ -7,3 +7,9 @@ export interface QuoteProcessorState {
   lenders?: LenderRegisterEntry[];
   quotes?: QuoteResponse[];
 }
+
+export interface QuoteRequestState {
+  lender: LenderRegisterEntry;
+  quoteSubmitted: QuoteSubmitted;
+  creditReportReceived: CreditReportReceived;
+}

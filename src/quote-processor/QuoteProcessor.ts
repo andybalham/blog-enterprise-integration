@@ -111,7 +111,13 @@ export default class QuoteProcessor extends Construct {
           payloadResponseOnly: true,
         })
         .map('RequestQuotes', {
+          // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
           itemsPath: '$.lenders',
+          parameters: {
+            'quoteSubmitted.$': '$.quoteSubmitted',
+            'creditReportReceived.$': '$.creditReportReceived',
+            'lender.$': '$$.Map.Item.Value',
+          },
           iterator: new StateMachineBuilder().lambdaInvoke('RequestQuote', {
             lambdaFunction: quoteRequesterFunction,
             payloadResponseOnly: true,
