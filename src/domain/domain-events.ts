@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { LoanDetails, QuoteResponse } from './domain-models';
+import { LoanDetails, LenderQuote } from './domain-models';
 
 export enum EventDomain {
   LoanBroker = 'LoanBroker',
@@ -10,6 +10,7 @@ export enum EventService {
   RequestApi = 'RequestApi',
   QuoteProcessor = 'QuoteProcessor',
   CreditBureau = 'CreditBureau',
+  LenderGateway = 'LenderGateway',
 }
 
 export enum EventDetailType {
@@ -56,7 +57,7 @@ export type QuoteSubmitted = DomainEvent<{
 
 export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
-  quoteResponse: QuoteResponse;
+  quoteResponse: LenderQuote;
   loanDetails: LoanDetails;
 }>;
 
@@ -72,7 +73,7 @@ export type CreditReportReceived = DomainEvent<{
   creditReportDataUrl?: string;
 }>;
 
-export type RateRequested = DomainEvent<{
+export type LenderRateRequested = DomainEvent<{
   lenderId: string;
   quoteReference: string;
   quoteRequestDataUrl: string;
@@ -80,8 +81,8 @@ export type RateRequested = DomainEvent<{
   taskToken: string;
 }>;
 
-export type RateReceived = DomainEvent<{
+export type LenderRateReceived = DomainEvent<{
   resultType: 'SUCCEEDED' | 'FAILED';
-  rateDataUrl: string;
+  rateDataUrl?: string;
   taskToken: string;
 }>;

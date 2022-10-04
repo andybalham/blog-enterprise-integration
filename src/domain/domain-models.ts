@@ -3,9 +3,9 @@ export interface QuoteRequest {
   loanDetails: LoanDetails;
 }
 
-export interface QuoteResponse {
+export interface LenderQuote {
   lenderId: string;
-  bestRate: number;
+  rate: number;
 }
 
 export interface LoanDetails {

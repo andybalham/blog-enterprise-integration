@@ -24,7 +24,7 @@ export const handler = async (
       quoteReference: state.quoteSubmitted.data.quoteReference,
       loanDetails: quoteRequest.loanDetails,
       quoteResponse: {
-        bestRate: 10,
+        rate: 10,
         lenderId: 'Honest Andy',
       },
     },

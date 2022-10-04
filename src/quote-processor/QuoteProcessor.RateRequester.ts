@@ -5,7 +5,7 @@ import {
   EventDetailType,
   EventDomain,
   EventService,
-  RateRequested,
+  LenderRateRequested,
 } from '../domain/domain-events';
 import { putDomainEventAsync } from '../lib/utils';
 import { APPLICATION_EVENT_BUS_NAME } from './constants';
@@ -16,7 +16,7 @@ const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
 export const handler = async (event: QuoteRequestState): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  const rateRequested: RateRequested = {
+  const lenderRateRequested: LenderRateRequested = {
     metadata: {
       domain: EventDomain.LoanBroker,
       service: EventService.QuoteProcessor,
@@ -36,6 +36,6 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
   await putDomainEventAsync({
     eventBusName,
     detailType: EventDetailType.RateRequested,
-    event: rateRequested,
+    event: lenderRateRequested,
   });
 };

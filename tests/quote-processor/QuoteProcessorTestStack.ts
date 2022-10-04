@@ -10,16 +10,18 @@ import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
 import {
   CREDIT_REPORT_REQUESTED_PATTERN,
-  getLenderRateRequestedPattern,
   QUOTE_PROCESSED_PATTERN,
   RATE_REQUESTED_PATTERN,
 } from '../../src/domain/domain-event-patterns';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  APPLICATION_EVENT_BUS_NAME as CREDIT_BUREAU_APPLICATION_EVENT_BUS_NAME,
+  DATA_BUCKET_NAME as CREDIT_BUREAU_DATA_BUCKET_NAME,
 } from '../../src/credit-bureau/constants';
 import { LenderRegisterEntry } from '../../src/domain/domain-models';
-import { LENDER_ID_NAME } from './QuoteProcessorTestStack.MockLender';
+import {
+  APPLICATION_EVENT_BUS_NAME as LENDER_GATEWAY_APPLICATION_EVENT_BUS_NAME,
+  DATA_BUCKET_NAME as LENDER_GATEWAY_DATA_BUCKET_NAME,
+} from '../../src/lender-gateway/constants';
 
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
@@ -72,8 +74,8 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.MockCreditBureauId,
       {
         environment: {
-          [APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
-          [DATA_BUCKET_NAME]: bucket.bucketName,
+          [CREDIT_BUREAU_APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
+          [CREDIT_BUREAU_DATA_BUCKET_NAME]: bucket.bucketName,
         },
         logRetention: RetentionDays.ONE_DAY,
       }
@@ -93,19 +95,15 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.MockCreditBureauId
     );
 
-    // Mock lenders
-
-    const LENDER_1_ID = 'Lender1';
-    const LENDER_2_ID = 'Lender2';
+    // Mock lender
 
     const mockLenderFunction = new NodejsFunction(
       this,
       QuoteProcessorTestStack.MockLenderId,
       {
         environment: {
-          [LENDER_ID_NAME]: LENDER_1_ID,
-          [APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
-          [DATA_BUCKET_NAME]: bucket.bucketName,
+          [LENDER_GATEWAY_APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
+          [LENDER_GATEWAY_DATA_BUCKET_NAME]: bucket.bucketName,
         },
         logRetention: RetentionDays.ONE_DAY,
       }
@@ -120,7 +118,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'RateRequestedMockRule',
         eventBus,
-        getLenderRateRequestedPattern(LENDER_1_ID)
+        RATE_REQUESTED_PATTERN
       ),
       QuoteProcessorTestStack.MockLenderId
     );
@@ -129,13 +127,18 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     const lenderRegisterEntries: LenderRegisterEntry[] = [
       {
-        lenderId: LENDER_1_ID,
+        lenderId: 'Lender1',
         lenderName: 'Lender One',
         isEnabled: true,
       },
       {
-        lenderId: LENDER_2_ID,
+        lenderId: 'Lender2',
         lenderName: 'Lender Two',
+        isEnabled: true,
+      },
+      {
+        lenderId: 'Lender3',
+        lenderName: 'Lender Three',
         isEnabled: false,
       },
     ];

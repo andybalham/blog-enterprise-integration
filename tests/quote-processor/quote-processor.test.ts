@@ -12,6 +12,7 @@ import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
 import { getQuoteSubmittedEvent } from '../lib/utils';
 import QuoteProcessorTestStack from './QuoteProcessorTestStack';
+import { MockLenderResponse } from './QuoteProcessorTestStack.MockLender';
 
 jest.setTimeout(2 * 60 * 1000);
 
@@ -63,11 +64,22 @@ describe('QuoteProcessor Tests', () => {
       onElectoralRoll: true,
     };
 
+    const lender1Response: MockLenderResponse = {
+      resultType: 'SUCCEEDED',
+      lenderQuote: {
+        lenderId: 'Lender1',
+        rate: 3,
+      },
+    };
+
     await testClient.initialiseTestAsync({
       testId: 'quote-processed-event-published',
       inputs: {
         creditReportResultType: 'SUCCEEDED',
         creditReport,
+        lenderResponses: {
+          Lender1: lender1Response,
+        },
       },
     });
 
