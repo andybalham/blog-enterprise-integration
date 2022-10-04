@@ -10,6 +10,7 @@ import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
 import {
   CREDIT_REPORT_REQUESTED_PATTERN,
+  getLenderRateRequestedPattern,
   QUOTE_PROCESSED_PATTERN,
   RATE_REQUESTED_PATTERN,
 } from '../../src/domain/domain-event-patterns';
@@ -18,6 +19,7 @@ import {
   DATA_BUCKET_NAME,
 } from '../../src/credit-bureau/constants';
 import { LenderRegisterEntry } from '../../src/domain/domain-models';
+import { LENDER_ID_NAME } from './QuoteProcessorTestStack.MockLender';
 
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
@@ -32,6 +34,8 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
   static readonly RateRequestedObserverId = 'RateRequestedObserver';
 
   static readonly MockCreditBureauId = 'MockCreditBureau';
+
+  static readonly MockLenderId = 'MockLender';
 
   constructor(scope: Construct, id: string) {
     super(scope, id, {
@@ -89,6 +93,61 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       QuoteProcessorTestStack.MockCreditBureauId
     );
 
+    // Mock lenders
+
+    const LENDER_1_ID = 'Lender1';
+    const LENDER_2_ID = 'Lender2';
+
+    const mockLenderFunction = new NodejsFunction(
+      this,
+      QuoteProcessorTestStack.MockLenderId,
+      {
+        environment: {
+          [LENDER_ID_NAME]: LENDER_1_ID,
+          [APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
+          [DATA_BUCKET_NAME]: bucket.bucketName,
+        },
+        logRetention: RetentionDays.ONE_DAY,
+      }
+    );
+
+    this.addTestFunction(mockLenderFunction);
+
+    bucket.grantReadWrite(mockLenderFunction);
+    eventBus.grantPutEventsTo(mockLenderFunction);
+
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
+        'RateRequestedMockRule',
+        eventBus,
+        getLenderRateRequestedPattern(LENDER_1_ID)
+      ),
+      QuoteProcessorTestStack.MockLenderId
+    );
+
+    // Add SSM parameters for our test lenders
+
+    const lenderRegisterEntries: LenderRegisterEntry[] = [
+      {
+        lenderId: LENDER_1_ID,
+        lenderName: 'Lender One',
+        isEnabled: true,
+      },
+      {
+        lenderId: LENDER_2_ID,
+        lenderName: 'Lender Two',
+        isEnabled: false,
+      },
+    ];
+
+    lenderRegisterEntries.forEach((l) => {
+      new StringParameter(this, `${l.lenderId}Parameter`, {
+        parameterName: `/lenders/${l.lenderId}`,
+        stringValue: JSON.stringify(l),
+        tier: ParameterTier.STANDARD,
+      });
+    });
+
     // Hook up events to observe
 
     this.addEventBridgeRuleTargetFunction(
@@ -108,34 +167,6 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       ),
       QuoteProcessorTestStack.QuoteProcessedObserverId
     );
-
-    // Add SSM parameters for our test lenders
-
-    const lenderRegisterEntries: LenderRegisterEntry[] = [
-      {
-        lenderId: 'Lender1',
-        lenderName: 'Lender One',
-        isEnabled: true,
-      },
-      {
-        lenderId: 'Lender2',
-        lenderName: 'Lender Two',
-        isEnabled: true,
-      },
-      {
-        lenderId: 'Lender3',
-        lenderName: 'Lender Three',
-        isEnabled: false,
-      },
-    ];
-
-    lenderRegisterEntries.forEach((l) => {
-      new StringParameter(this, `${l.lenderId}Parameter`, {
-        parameterName: `/lenders/${l.lenderId}`,
-        stringValue: JSON.stringify(l),
-        tier: ParameterTier.STANDARD,
-      });
-    });
 
     // SUT
 

@@ -12,4 +12,5 @@ export interface QuoteRequestState {
   lender: LenderRegisterEntry;
   quoteSubmitted: QuoteSubmitted;
   creditReportReceived: CreditReportReceived;
+  taskToken: string;
 }

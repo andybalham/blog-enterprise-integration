@@ -120,7 +120,14 @@ export default class QuoteProcessor extends Construct {
           },
           iterator: new StateMachineBuilder().lambdaInvoke('RequestRate', {
             lambdaFunction: rateRequesterFunction,
-            payloadResponseOnly: true,
+            integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+            payload: TaskInput.fromObject({
+              taskToken: JsonPath.taskToken,
+              'quoteSubmitted.$': '$.quoteSubmitted',
+              'creditReportReceived.$': '$.creditReportReceived',
+              'lender.$': '$.lender',
+            }),
+            resultPath: '$.creditReportReceived',
           }),
           resultPath: '$.quotes',
         })

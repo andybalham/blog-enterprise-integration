@@ -17,10 +17,25 @@ export const CREDIT_REPORT_RECEIVED_PATTERN = {
 };
 
 export const QUOTE_PROCESSOR_CALLBACK_PATTERN = {
-  detailType: [EventDetailType.CreditReportReceived],
+  detailType: [
+    EventDetailType.CreditReportReceived,
+    EventDetailType.RateReceived,
+  ],
 };
 
-// TODO 02Oct22: Need to have a function to get a pattern per lender
 export const RATE_REQUESTED_PATTERN = {
   detailType: [EventDetailType.RateRequested],
+};
+
+export const getLenderRateRequestedPattern = (
+  lenderId: string
+): Record<string, any> => ({
+  ...RATE_REQUESTED_PATTERN,
+  detail: {
+    data: { lenderId: [lenderId] },
+  },
+});
+
+export const RATE_RECEIVED_PATTERN = {
+  detailType: [EventDetailType.RateReceived],
 };

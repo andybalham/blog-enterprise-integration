@@ -21,14 +21,14 @@ export enum EventDetailType {
   RateReceived = 'RateReceived',
 }
 
-// TODO 04Sep22: Look at https://www.boyney.io/blog/2022-02-11-event-payload-patterns
+// https://www.boyney.io/blog/2022-02-11-event-payload-patterns
 
 export interface DomainEventMetadata {
   domain: EventDomain;
   service: EventService;
   correlationId: string;
   requestId: string;
-  // TODO 02Oct22: Add requestStartTime and eventTime
+  // TODO 02Oct22: Add requestTimestamp?
 }
 
 export interface DomainEventBase {
@@ -43,6 +43,7 @@ export interface DomainEvent<TData extends Record<string, any>>
 }
 
 export interface CallbackData extends Record<string, any> {
+  resultType: 'SUCCEEDED' | 'FAILED';
   taskToken: string;
 }
 
@@ -76,5 +77,11 @@ export type RateRequested = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;
   creditReportDataUrl: string;
+  taskToken: string;
+}>;
+
+export type RateReceived = DomainEvent<{
+  resultType: 'SUCCEEDED' | 'FAILED';
+  rateDataUrl: string;
   taskToken: string;
 }>;
