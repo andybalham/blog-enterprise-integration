@@ -62,6 +62,7 @@ export const handler = async (
       requestId: event.detail.metadata.requestId,
     },
     data: {
+      lenderId: event.detail.data.lenderId,
       resultType: lenderResponse.resultType,
       rateDataUrl,
       taskToken: event.detail.data.taskToken,

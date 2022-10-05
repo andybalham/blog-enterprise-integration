@@ -104,7 +104,7 @@ export default class QuoteProcessor extends Construct {
             'state.$': '$',
           }),
           resultPath: '$.creditReportReceived',
-          timeout: Duration.seconds(30), // Don't wait forever for a reply
+          timeout: Duration.seconds(10),
         })
         .lambdaInvoke('LookupLenders', {
           lambdaFunction: lenderLookupFunction,
@@ -127,9 +127,9 @@ export default class QuoteProcessor extends Construct {
               'creditReportReceived.$': '$.creditReportReceived',
               'lender.$': '$.lender',
             }),
-            resultPath: '$.creditReportReceived',
+            timeout: Duration.seconds(10),
           }),
-          resultPath: '$.quotes',
+          resultPath: '$.lenderRatesReceived',
         })
         .lambdaInvoke('SendResponse', {
           lambdaFunction: responseSenderFunction,

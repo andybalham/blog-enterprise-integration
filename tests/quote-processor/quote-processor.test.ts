@@ -68,7 +68,15 @@ describe('QuoteProcessor Tests', () => {
       resultType: 'SUCCEEDED',
       lenderQuote: {
         lenderId: 'Lender1',
-        rate: 3,
+        rate: 1,
+      },
+    };
+
+    const lender2Response: MockLenderResponse = {
+      resultType: 'SUCCEEDED',
+      lenderQuote: {
+        lenderId: 'Lender2',
+        rate: 2,
       },
     };
 
@@ -79,6 +87,7 @@ describe('QuoteProcessor Tests', () => {
         creditReport,
         lenderResponses: {
           Lender1: lender1Response,
+          Lender2: lender2Response,
         },
       },
     });
@@ -97,6 +106,7 @@ describe('QuoteProcessor Tests', () => {
       await testClient.pollTestAsync({
         filterById: QuoteProcessorTestStack.QuoteProcessedObserverId,
         until: async (o) => o.length > 0,
+        timeoutSeconds: 30,
       });
 
     // Assert

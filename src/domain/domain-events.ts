@@ -82,6 +82,7 @@ export type LenderRateRequested = DomainEvent<{
 }>;
 
 export type LenderRateReceived = DomainEvent<{
+  lenderId: string;
   resultType: 'SUCCEEDED' | 'FAILED';
   rateDataUrl?: string;
   taskToken: string;

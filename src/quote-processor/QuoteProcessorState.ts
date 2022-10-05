@@ -1,11 +1,15 @@
-import { CreditReportReceived, QuoteSubmitted } from '../domain/domain-events';
-import { LenderRegisterEntry, LenderQuote } from '../domain/domain-models';
+import {
+  CreditReportReceived,
+  LenderRateReceived,
+  QuoteSubmitted,
+} from '../domain/domain-events';
+import { LenderRegisterEntry } from '../domain/domain-models';
 
 export interface QuoteProcessorState {
   quoteSubmitted: QuoteSubmitted;
   creditReportReceived?: CreditReportReceived;
   lenders?: LenderRegisterEntry[];
-  quotes?: LenderQuote[];
+  lenderRatesReceived?: LenderRateReceived[];
 }
 
 export interface QuoteRequestState {
