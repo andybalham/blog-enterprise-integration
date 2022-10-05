@@ -139,6 +139,11 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       {
         lenderId: 'Lender3',
         lenderName: 'Lender Three',
+        isEnabled: true,
+      },
+      {
+        lenderId: 'Lender4',
+        lenderName: 'Lender Four',
         isEnabled: false,
       },
     ];

@@ -118,17 +118,25 @@ export default class QuoteProcessor extends Construct {
             'creditReportReceived.$': '$.creditReportReceived',
             'lender.$': '$$.Map.Item.Value',
           },
-          iterator: new StateMachineBuilder().lambdaInvoke('RequestRate', {
-            lambdaFunction: rateRequesterFunction,
-            integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
-            payload: TaskInput.fromObject({
-              taskToken: JsonPath.taskToken,
-              'quoteSubmitted.$': '$.quoteSubmitted',
-              'creditReportReceived.$': '$.creditReportReceived',
-              'lender.$': '$.lender',
-            }),
-            timeout: Duration.seconds(10),
-          }),
+          iterator: new StateMachineBuilder()
+            .lambdaInvoke('RequestRate', {
+              lambdaFunction: rateRequesterFunction,
+              integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+              payload: TaskInput.fromObject({
+                taskToken: JsonPath.taskToken,
+                'quoteSubmitted.$': '$.quoteSubmitted',
+                'creditReportReceived.$': '$.creditReportReceived',
+                'lender.$': '$.lender',
+              }),
+              timeout: Duration.seconds(10),
+              catches: [
+                {
+                  handler: 'RequestRateErrorHandler',
+                },
+              ],
+            })
+            .end()
+            .pass('RequestRateErrorHandler'),
           resultPath: '$.lenderRatesReceived',
         })
         .lambdaInvoke('SendResponse', {
