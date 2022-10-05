@@ -96,6 +96,7 @@ export default class QuoteProcessor extends Construct {
 
     const stateMachine = new StateMachine(this, 'StateMachine', {
       definition: new StateMachineBuilder()
+
         .lambdaInvoke('RequestCreditReport', {
           lambdaFunction: creditReportRequesterFunction,
           integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
@@ -105,11 +106,18 @@ export default class QuoteProcessor extends Construct {
           }),
           resultPath: '$.creditReportReceived',
           timeout: Duration.seconds(10),
+          catches: [
+            {
+              handler: 'RequestCreditReportErrorHandler',
+            },
+          ],
         })
+
         .lambdaInvoke('LookupLenders', {
           lambdaFunction: lenderLookupFunction,
           payloadResponseOnly: true,
         })
+
         .map('RequestRates', {
           // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
           itemsPath: '$.lenders',
@@ -118,7 +126,9 @@ export default class QuoteProcessor extends Construct {
             'creditReportReceived.$': '$.creditReportReceived',
             'lender.$': '$$.Map.Item.Value',
           },
+          resultPath: '$.lenderRatesReceived',
           iterator: new StateMachineBuilder()
+
             .lambdaInvoke('RequestRate', {
               lambdaFunction: rateRequesterFunction,
               integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
@@ -137,12 +147,18 @@ export default class QuoteProcessor extends Construct {
             })
             .end()
             .pass('RequestRateErrorHandler'),
-          resultPath: '$.lenderRatesReceived',
         })
+
+        .next('SendResponse')
+
+        .pass('RequestCreditReportErrorHandler')
+        .next('SendResponse')
+
         .lambdaInvoke('SendResponse', {
           lambdaFunction: responseSenderFunction,
           payloadResponseOnly: true,
         })
+
         .build(this),
     });
 
