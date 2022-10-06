@@ -39,7 +39,7 @@ export const handler = async (
   console.log(JSON.stringify({ event }, null, 2));
 
   const quoteRequest = await fetchFromUrlAsync<QuoteRequest>(
-    event.detail.data.quoteRequestDataUrl
+    event.detail.data.request.quoteRequestDataUrl
   );
 
   const isTestRequest =
@@ -97,9 +97,11 @@ export const handler = async (
           TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
       };
 
+      const { quoteReference } = event.detail.data.request;
+
       const creditReportDataUrl = await getDataUrlAsync({
         bucketName: dataBucketName,
-        key: `${event.detail.data.quoteReference}/${event.detail.data.quoteReference}-credit-report.json`,
+        key: `${quoteReference}/${quoteReference}-credit-report.json`,
         data: JSON.stringify(creditReport),
       });
 
@@ -113,7 +115,7 @@ export const handler = async (
         data: {
           resultType: 'SUCCEEDED',
           taskToken: event.detail.data.taskToken,
-          creditReportDataUrl,
+          response: { creditReportDataUrl },
         },
       };
     }

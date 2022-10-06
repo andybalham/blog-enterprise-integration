@@ -19,8 +19,10 @@ export const handler = async (event: Record<string, any>): Promise<void> => {
   const creditReportRequested: CreditReportRequested = {
     metadata: state.quoteSubmitted.metadata,
     data: {
-      quoteReference: state.quoteSubmitted.data.quoteReference,
-      quoteRequestDataUrl: state.quoteSubmitted.data.quoteRequestDataUrl,
+      request: {
+        quoteReference: state.quoteSubmitted.data.quoteReference,
+        quoteRequestDataUrl: state.quoteSubmitted.data.quoteRequestDataUrl,
+      },
       taskToken: event.taskToken,
     },
   };

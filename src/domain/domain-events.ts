@@ -43,13 +43,6 @@ export interface DomainEvent<TData extends Record<string, any>>
   data: TData;
 }
 
-export interface CallbackData extends Record<string, any> {
-  resultType: 'SUCCEEDED' | 'FAILED';
-  taskToken: string;
-}
-
-export type CallbackDomainEvent = DomainEvent<CallbackData>;
-
 export type QuoteSubmitted = DomainEvent<{
   quoteReference: string;
   quoteRequestDataUrl: string;
@@ -61,29 +54,56 @@ export type QuoteProcessed = DomainEvent<{
   loanDetails: LoanDetails;
 }>;
 
-export type CreditReportRequested = DomainEvent<{
-  quoteReference: string;
-  quoteRequestDataUrl: string;
+export interface AsyncRequestBase {
   taskToken: string;
-}>;
+  request: Record<string, any>;
+}
 
-export type CreditReportReceived = DomainEvent<{
+export interface AsyncRequest<T extends Record<string, any>>
+  extends AsyncRequestBase {
+  taskToken: string;
+  request: T;
+}
+
+export interface AsyncResponseBase {
   resultType: 'SUCCEEDED' | 'FAILED';
   taskToken: string;
-  creditReportDataUrl?: string;
-}>;
+  response?: Record<string, any>;
+}
 
-export type LenderRateRequested = DomainEvent<{
-  lenderId: string;
-  quoteReference: string;
-  quoteRequestDataUrl: string;
-  creditReportDataUrl: string;
+export interface AsyncResponse<T extends Record<string, any>>
+  extends AsyncResponseBase {
   taskToken: string;
-}>;
+  response?: T;
+}
 
-export type LenderRateReceived = DomainEvent<{
-  lenderId: string;
-  resultType: 'SUCCEEDED' | 'FAILED';
-  rateDataUrl?: string;
-  taskToken: string;
-}>;
+export type CallbackDomainEvent = DomainEvent<AsyncResponseBase>;
+
+export type CreditReportRequested = DomainEvent<
+  AsyncRequest<{
+    quoteReference: string;
+    quoteRequestDataUrl: string;
+  }>
+>;
+
+export type CreditReportReceived = DomainEvent<
+  AsyncResponse<{
+    creditReportDataUrl?: string;
+  }>
+>;
+
+export type LenderRateRequested = DomainEvent<
+  AsyncRequest<{
+    lenderId: string;
+    quoteReference: string;
+    quoteRequestDataUrl: string;
+    creditReportDataUrl: string;
+  }>
+>;
+
+export type LenderRateReceived = DomainEvent<
+  AsyncResponse<{
+    lenderId: string;
+    rateDataUrl?: string;
+  }>
+>;

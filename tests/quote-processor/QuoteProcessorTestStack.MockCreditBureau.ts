@@ -31,7 +31,9 @@ export const handler = async (
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  const quoteRequest = await fetchFromUrlAsync<QuoteRequest>(event.detail.data.quoteRequestDataUrl);
+  const quoteRequest = await fetchFromUrlAsync<QuoteRequest>(
+    event.detail.data.request.quoteRequestDataUrl
+  );
 
   console.log(JSON.stringify({ quoteRequest }, null, 2));
 
@@ -46,9 +48,11 @@ export const handler = async (
 
   console.log(JSON.stringify({ creditReport }, null, 2));
 
+  const { quoteReference } = event.detail.data.request;
+
   const creditReportDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
-    key: `${event.detail.data.quoteReference}/${event.detail.data.quoteReference}-credit-report.json`,
+    key: `${quoteReference}/${quoteReference}-credit-report.json`,
     data: JSON.stringify(creditReport),
   });
 
@@ -62,7 +66,9 @@ export const handler = async (
     data: {
       resultType: creditReportResultType,
       taskToken: event.detail.data.taskToken,
-      creditReportDataUrl,
+      response: {
+        creditReportDataUrl,
+      },
     },
   };
 

@@ -36,9 +36,11 @@ export const handler = async (
 
   console.log(JSON.stringify({ testProps }, null, 2));
 
+  const { lenderId } = event.detail.data.request;
+
   const lenderResponse: MockLenderResponse | undefined = testProps.inputs
     ?.lenderResponses
-    ? testProps.inputs.lenderResponses[event.detail.data.lenderId]
+    ? testProps.inputs.lenderResponses[lenderId]
     : undefined;
 
   if (!lenderResponse) {
@@ -47,9 +49,11 @@ export const handler = async (
 
   let rateDataUrl: string | undefined;
   if (lenderResponse.resultType === 'SUCCEEDED') {
+    const { quoteReference } = event.detail.data.request;
+
     rateDataUrl = await getDataUrlAsync({
       bucketName: dataBucketName,
-      key: `${event.detail.data.quoteReference}/${event.detail.data.quoteReference}-quote-${event.detail.data.lenderId}.json`,
+      key: `${quoteReference}/${quoteReference}-quote-${lenderId}.json`,
       data: JSON.stringify(lenderResponse.lenderQuote),
     });
   }
@@ -62,9 +66,11 @@ export const handler = async (
       requestId: event.detail.metadata.requestId,
     },
     data: {
-      lenderId: event.detail.data.lenderId,
+      response: {
+        lenderId,
+        rateDataUrl,
+      },
       resultType: lenderResponse.resultType,
-      rateDataUrl,
       taskToken: event.detail.data.taskToken,
     },
   };
