@@ -7,6 +7,7 @@ import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
+  IChainable,
   IntegrationPattern,
   JsonPath,
   StateMachine,
@@ -95,71 +96,12 @@ export default class QuoteProcessor extends Construct {
     // State machine
 
     const stateMachine = new StateMachine(this, 'StateMachine', {
-      definition: new StateMachineBuilder()
-
-        .lambdaInvoke('RequestCreditReport', {
-          lambdaFunction: creditReportRequesterFunction,
-          integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
-          payload: TaskInput.fromObject({
-            taskToken: JsonPath.taskToken,
-            'state.$': '$',
-          }),
-          resultPath: '$.creditReportReceived',
-          timeout: Duration.seconds(10),
-          catches: [
-            {
-              handler: 'RequestCreditReportErrorHandler',
-            },
-          ],
-        })
-
-        .lambdaInvoke('LookupLenders', {
-          lambdaFunction: lenderLookupFunction,
-          payloadResponseOnly: true,
-        })
-
-        .map('RequestRates', {
-          // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
-          itemsPath: '$.lenders',
-          parameters: {
-            'quoteSubmitted.$': '$.quoteSubmitted',
-            'creditReportReceived.$': '$.creditReportReceived',
-            'lender.$': '$$.Map.Item.Value',
-          },
-          resultPath: '$.lenderRatesReceived',
-          iterator: new StateMachineBuilder()
-
-            .lambdaInvoke('RequestRate', {
-              lambdaFunction: rateRequesterFunction,
-              integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
-              payload: TaskInput.fromObject({
-                taskToken: JsonPath.taskToken,
-                'quoteSubmitted.$': '$.quoteSubmitted',
-                'creditReportReceived.$': '$.creditReportReceived',
-                'lender.$': '$.lender',
-              }),
-              timeout: Duration.seconds(10),
-              catches: [
-                {
-                  handler: 'RequestRateErrorHandler',
-                },
-              ],
-            })
-            .end()
-            .pass('RequestRateErrorHandler'),
-        })
-
-        .next('SendResponse')
-
-        .pass('RequestCreditReportErrorHandler')
-        .next('SendResponse')
-
-        .lambdaInvoke('SendResponse', {
-          lambdaFunction: responseSenderFunction,
-          payloadResponseOnly: true,
-        })
-
-        .build(this),
+      definition: this.getStateMachine({
+        creditReportRequesterFunction,
+        lenderLookupFunction,
+        rateRequesterFunction,
+        responseSenderFunction,
+      }),
     });
 
     // Request handler function
@@ -206,5 +148,64 @@ export default class QuoteProcessor extends Construct {
     );
 
     stateMachine.grantTaskResponse(callbackHandlerFunction);
+  }
+
+  private getStateMachine({
+    creditReportRequesterFunction,
+    lenderLookupFunction,
+    rateRequesterFunction,
+    responseSenderFunction,
+  }: {
+    creditReportRequesterFunction: NodejsFunction;
+    lenderLookupFunction: NodejsFunction;
+    rateRequesterFunction: NodejsFunction;
+    responseSenderFunction: NodejsFunction;
+  }): IChainable {
+    return new StateMachineBuilder()
+
+      .lambdaInvoke('RequestCreditReport', {
+        lambdaFunction: creditReportRequesterFunction,
+        integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+        payload: TaskInput.fromObject({
+          taskToken: JsonPath.taskToken,
+          'state.$': '$',
+        }),
+        resultPath: '$.creditReportReceived',
+        timeout: Duration.seconds(10),
+      })
+
+      .lambdaInvoke('LookupLenders', {
+        lambdaFunction: lenderLookupFunction,
+        payloadResponseOnly: true,
+      })
+
+      .map('RequestRates', {
+        // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
+        itemsPath: '$.lenders',
+        parameters: {
+          'quoteSubmitted.$': '$.quoteSubmitted',
+          'creditReportReceived.$': '$.creditReportReceived',
+          'lender.$': '$$.Map.Item.Value',
+        },
+        resultPath: '$.lenderRatesReceived',
+        iterator: new StateMachineBuilder().lambdaInvoke('RequestRate', {
+          lambdaFunction: rateRequesterFunction,
+          integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+          payload: TaskInput.fromObject({
+            taskToken: JsonPath.taskToken,
+            'quoteSubmitted.$': '$.quoteSubmitted',
+            'creditReportReceived.$': '$.creditReportReceived',
+            'lender.$': '$.lender',
+          }),
+          timeout: Duration.seconds(10),
+        }),
+      })
+
+      .lambdaInvoke('SendResponse', {
+        lambdaFunction: responseSenderFunction,
+        payloadResponseOnly: true,
+      })
+
+      .build(this);
   }
 }

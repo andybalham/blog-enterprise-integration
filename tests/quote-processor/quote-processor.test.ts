@@ -64,19 +64,20 @@ describe('QuoteProcessor Tests', () => {
       onElectoralRoll: true,
     };
 
-    const lender1Response: MockLenderResponse = {
-      resultType: 'SUCCEEDED',
-      lenderQuote: {
-        lenderId: 'Lender1',
-        rate: 1,
+    const lenderResponses: Record<string, MockLenderResponse> = {
+      [QuoteProcessorTestStack.LENDER_1_ID]: {
+        resultType: 'SUCCEEDED',
+        lenderQuote: {
+          lenderId: QuoteProcessorTestStack.LENDER_1_ID,
+          rate: 1,
+        },
       },
-    };
-
-    const lender2Response: MockLenderResponse = {
-      resultType: 'SUCCEEDED',
-      lenderQuote: {
-        lenderId: 'Lender2',
-        rate: 2,
+      [QuoteProcessorTestStack.LENDER_2_ID]: {
+        resultType: 'SUCCEEDED',
+        lenderQuote: {
+          lenderId: QuoteProcessorTestStack.LENDER_2_ID,
+          rate: 2,
+        },
       },
     };
 
@@ -85,10 +86,7 @@ describe('QuoteProcessor Tests', () => {
       inputs: {
         creditReportResultType: 'SUCCEEDED',
         creditReport,
-        lenderResponses: {
-          Lender1: lender1Response,
-          Lender2: lender2Response,
-        },
+        lenderResponses,
       },
     });
 

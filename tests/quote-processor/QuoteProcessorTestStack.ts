@@ -39,6 +39,12 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
   static readonly MockLenderId = 'MockLender';
 
+  static readonly LENDER_1_ID = 'Lender1';
+
+  static readonly LENDER_2_ID = 'Lender2';
+
+  static readonly LENDER_3_ID = 'Lender3';
+
   constructor(scope: Construct, id: string) {
     super(scope, id, {
       testStackId: QuoteProcessorTestStack.Id,
@@ -127,23 +133,18 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     const lenderRegisterEntries: LenderRegisterEntry[] = [
       {
-        lenderId: 'Lender1',
+        lenderId: QuoteProcessorTestStack.LENDER_1_ID,
         lenderName: 'Lender One',
         isEnabled: true,
       },
       {
-        lenderId: 'Lender2',
+        lenderId: QuoteProcessorTestStack.LENDER_2_ID,
         lenderName: 'Lender Two',
         isEnabled: true,
       },
       {
-        lenderId: 'Lender3',
+        lenderId: QuoteProcessorTestStack.LENDER_3_ID,
         lenderName: 'Lender Three',
-        isEnabled: true,
-      },
-      {
-        lenderId: 'Lender4',
-        lenderName: 'Lender Four',
         isEnabled: false,
       },
     ];
