@@ -6,7 +6,10 @@ import {
   IntegrationTestClient,
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
-import { EventDetailType } from '../../src/domain/domain-events';
+import {
+  EventDetailType,
+  QuoteProcessed,
+} from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
@@ -69,7 +72,7 @@ describe('QuoteProcessor Tests', () => {
         resultType: 'SUCCEEDED',
         lenderQuote: {
           lenderId: QuoteProcessorTestStack.LENDER_1_ID,
-          rate: 1,
+          rate: 3,
         },
       },
       [QuoteProcessorTestStack.LENDER_2_ID]: {
@@ -123,12 +126,16 @@ describe('QuoteProcessor Tests', () => {
       quoteSubmitted.metadata.requestId
     );
 
-    expect(observationData.detail.data.quoteReference).toBe(
+    const quoteProcessed = observationData.detail as QuoteProcessed;
+
+    expect(quoteProcessed.data.quoteReference).toBe(
       quoteSubmitted.data.quoteReference
     );
 
-    expect(observationData.detail.data.loanDetails).toEqual(
-      quoteRequest.loanDetails
+    expect(quoteProcessed.data.loanDetails).toEqual(quoteRequest.loanDetails);
+
+    expect(quoteProcessed.data.bestLenderQuote).toEqual(
+      lenderResponses[QuoteProcessorTestStack.LENDER_2_ID].lenderQuote
     );
   });
 });

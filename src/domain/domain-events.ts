@@ -50,8 +50,8 @@ export type QuoteSubmitted = DomainEvent<{
 
 export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
-  quoteResponse: LenderQuote;
   loanDetails: LoanDetails;
+  bestLenderQuote?: LenderQuote;
 }>;
 
 export interface AsyncRequestBase {
