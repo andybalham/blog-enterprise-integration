@@ -30,9 +30,11 @@ export const handler = async (
     lenderQuotePromises
   );
 
-  const lenderQuotes = lenderQuotePromiseResults
-    .filter((r) => r.status === 'fulfilled')
-    .map((r) => ((r as any).value));
+  const lenderQuotes = (
+    lenderQuotePromiseResults.filter(
+      (r) => r.status === 'fulfilled'
+    ) as PromiseFulfilledResult<LenderQuote>[]
+  ).map((r) => r.value);
 
   console.log(JSON.stringify({ lenderQuotes }, null, 2));
 
