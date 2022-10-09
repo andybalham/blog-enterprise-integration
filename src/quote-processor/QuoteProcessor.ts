@@ -168,7 +168,6 @@ export default class QuoteProcessor extends Construct {
 
       .lambdaInvoke('LookupLenders', {
         lambdaFunction: lenderLookupFunction,
-        payloadResponseOnly: true,
       })
 
       .map('RequestRates', {
@@ -196,9 +195,14 @@ export default class QuoteProcessor extends Construct {
 
       .lambdaInvoke('SendResponse', {
         lambdaFunction: responseSenderFunction,
-        payloadResponseOnly: true,
       })
 
-      .build(this);
+      .build(this, {
+        defaultProps: {
+          lambdaInvoke: {
+            payloadResponseOnly: true,
+          },
+        },
+      });
   }
 }
