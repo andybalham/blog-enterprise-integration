@@ -6,13 +6,7 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import {
-  IChainable,
-  IntegrationPattern,
-  JsonPath,
-  StateMachine,
-  TaskInput,
-} from 'aws-cdk-lib/aws-stepfunctions';
+import { IChainable, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import {
   QUOTE_PROCESSOR_CALLBACK_PATTERN,
@@ -163,13 +157,11 @@ export default class QuoteProcessor extends Construct {
   }): IChainable {
     return new StateMachineBuilder()
 
-      .lambdaInvoke('RequestCreditReport', {
+      .lambdaInvokeWaitForTaskToken('RequestCreditReport', {
         lambdaFunction: creditReportRequesterFunction,
-        integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
-        payload: TaskInput.fromObject({
-          taskToken: JsonPath.taskToken,
+        parameters: {
           'state.$': '$',
-        }),
+        },
         resultPath: '$.creditReportReceived',
         timeout: Duration.seconds(10),
       })
@@ -188,17 +180,18 @@ export default class QuoteProcessor extends Construct {
           'lender.$': '$$.Map.Item.Value',
         },
         resultPath: '$.lenderRatesReceived',
-        iterator: new StateMachineBuilder().lambdaInvoke('RequestRate', {
-          lambdaFunction: rateRequesterFunction,
-          integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
-          payload: TaskInput.fromObject({
-            taskToken: JsonPath.taskToken,
-            'quoteSubmitted.$': '$.quoteSubmitted',
-            'creditReportReceived.$': '$.creditReportReceived',
-            'lender.$': '$.lender',
-          }),
-          timeout: Duration.seconds(10),
-        }),
+        iterator: new StateMachineBuilder().lambdaInvokeWaitForTaskToken(
+          'RequestRate',
+          {
+            lambdaFunction: rateRequesterFunction,
+            parameters: {
+              'quoteSubmitted.$': '$.quoteSubmitted',
+              'creditReportReceived.$': '$.creditReportReceived',
+              'lender.$': '$.lender',
+            },
+            timeout: Duration.seconds(10),
+          }
+        ),
       })
 
       .lambdaInvoke('SendResponse', {

@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@andybalham/cdk-cloud-test-kit": "^1.0.8",
-    "@andybalham/state-machine-builder-v2": "^2.0.1",
+    "@andybalham/state-machine-builder-v2": "^2.0.3",
     "aws-cdk-lib": "^2.42.0",
     "aws-sdk": "^2.1218.0",
     "axios": "^0.27.2",
