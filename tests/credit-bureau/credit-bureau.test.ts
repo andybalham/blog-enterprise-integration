@@ -17,7 +17,7 @@ import {
   EventDomain,
   EventService,
 } from '../../src/domain/domain-events';
-import { CreditReport } from '../../src/domain/domain-models';
+import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import {
   fetchFromUrlAsync,
   getDataUrlAsync,
@@ -100,7 +100,7 @@ describe('CreditBureau tests', () => {
       expectedResultType: 'FAILED',
     },
   ].forEach((theory) => {
-    test(`${JSON.stringify(theory)}`, async () => {
+    test(`Test response: ${JSON.stringify(theory)}`, async () => {
       // Arrange
 
       const quoteRequestDataUrl = await getDataUrlAsync({
@@ -118,8 +118,10 @@ describe('CreditBureau tests', () => {
           requestId: 'test-requestId',
         },
         data: {
-          quoteReference: 'test-quote-reference',
-          quoteRequestDataUrl,
+          request: {
+            quoteReference: 'test-quote-reference',
+            quoteRequestDataUrl,
+          },
           taskToken: 'test-task-token',
         },
       };
@@ -167,11 +169,13 @@ describe('CreditBureau tests', () => {
 
       if (theory.expectedResultType === 'SUCCEEDED') {
         //
-        expect(firstEvent.detail.data.creditReportDataUrl).toBeDefined();
+        expect(
+          firstEvent.detail.data.response?.creditReportDataUrl
+        ).toBeDefined();
 
         const actualCreditReport = await fetchFromUrlAsync<CreditReport>(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          firstEvent.detail.data.creditReportDataUrl!
+          firstEvent.detail.data.response!.creditReportDataUrl!
         );
 
         expect(actualCreditReport.reportReference).toBeDefined();
@@ -190,8 +194,94 @@ describe('CreditBureau tests', () => {
         expect(firstEvent.detail.data.resultType).toBe(
           theory.expectedResultType
         );
-        expect(firstEvent.detail.data.creditReportDataUrl).toBeUndefined();
+        expect(
+          firstEvent.detail.data.response?.creditReportDataUrl
+        ).toBeUndefined();
       }
     });
+  });
+
+  test(`Hash response`, async () => {
+    // Arrange
+
+    const quoteRequest: QuoteRequest = {
+      loanDetails: {
+        amount: 10000,
+        termMonths: 24,
+      },
+      personalDetails: {
+        firstName: 'Trevor',
+        lastName: 'Potato',
+        niNumber: 'YE342564T',
+        address: {
+          lines: ['Line1'],
+          postcode: 'HR8 35F',
+        },
+      },
+    };
+
+    const quoteRequestDataUrl = await getDataUrlAsync({
+      bucketName: dataBucket.bucketName,
+      key: 'test-quote-request',
+      data: JSON.stringify(quoteRequest),
+      expirySeconds: 5 * 60,
+    });
+
+    const creditReportRequested: CreditReportRequested = {
+      metadata: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.QuoteProcessor,
+        correlationId: 'test-correlationId',
+        requestId: 'test-requestId',
+      },
+      data: {
+        request: {
+          quoteReference: 'test-quote-reference',
+          quoteRequestDataUrl,
+        },
+        taskToken: 'test-task-token',
+      },
+    };
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: applicationEventBus.eventBusArn,
+      detailType: EventDetailType.CreditReportRequested,
+      event: creditReportRequested,
+    });
+
+    // Await
+
+    const { timedOut, observations } = await testClient.pollTestAsync({
+      until: async (o) => o.length > 0,
+    });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+
+    const firstEvent = observations[0].data as EventBridgeEvent<
+      'CreditReportReceived',
+      CreditReportReceived
+    >;
+
+    expect(firstEvent['detail-type']).toBe(
+      EventDetailType.CreditReportReceived
+    );
+
+    expect(firstEvent.detail.metadata.correlationId).toBe(
+      creditReportRequested.metadata.correlationId
+    );
+
+    expect(firstEvent.detail.metadata.requestId).toBe(
+      creditReportRequested.metadata.requestId
+    );
+
+    expect(firstEvent.detail.data.taskToken).toBe(
+      creditReportRequested.data.taskToken
+    );
+
+    expect(firstEvent.detail.data.response).toBeDefined();
   });
 });
