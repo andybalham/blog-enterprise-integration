@@ -104,6 +104,6 @@ export type LenderRateRequested = DomainEvent<
 export type LenderRateReceived = DomainEvent<
   AsyncResponse<{
     lenderId: string;
-    rateDataUrl?: string;
+    lenderQuoteDataUrl?: string;
   }>
 >;

@@ -5,7 +5,8 @@ export interface QuoteRequest {
 
 export interface LenderQuote {
   lenderId: string;
-  rate: number;
+  lenderName: string;
+  rate?: number;
 }
 
 export interface LoanDetails {
@@ -34,6 +35,5 @@ export interface CreditReport {
 
 export interface LenderRegisterEntry {
   lenderId: string;
-  lenderName: string;
   isEnabled: boolean;
 }

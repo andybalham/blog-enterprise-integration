@@ -68,7 +68,7 @@ export const handler = async (
     data: {
       response: {
         lenderId,
-        rateDataUrl,
+        lenderQuoteDataUrl: rateDataUrl,
       },
       resultType: lenderResponse.resultType,
       taskToken: event.detail.data.taskToken,

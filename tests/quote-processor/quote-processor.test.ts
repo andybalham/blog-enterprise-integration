@@ -72,6 +72,7 @@ describe('QuoteProcessor Tests', () => {
         resultType: 'SUCCEEDED',
         lenderQuote: {
           lenderId: QuoteProcessorTestStack.LENDER_1_ID,
+          lenderName: 'Lender One',
           rate: 3,
         },
       },
@@ -79,6 +80,7 @@ describe('QuoteProcessor Tests', () => {
         resultType: 'SUCCEEDED',
         lenderQuote: {
           lenderId: QuoteProcessorTestStack.LENDER_2_ID,
+          lenderName: 'Lender Two',
           rate: 2,
         },
       },

@@ -134,17 +134,14 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
     const lenderRegisterEntries: LenderRegisterEntry[] = [
       {
         lenderId: QuoteProcessorTestStack.LENDER_1_ID,
-        lenderName: 'Lender One',
         isEnabled: true,
       },
       {
         lenderId: QuoteProcessorTestStack.LENDER_2_ID,
-        lenderName: 'Lender Two',
         isEnabled: true,
       },
       {
         lenderId: QuoteProcessorTestStack.LENDER_3_ID,
-        lenderName: 'Lender Three',
         isEnabled: false,
       },
     ];

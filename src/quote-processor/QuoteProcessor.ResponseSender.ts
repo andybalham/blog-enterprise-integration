@@ -20,10 +20,10 @@ export const handler = async (
 
   const lenderQuotePromises =
     state.lenderRatesReceived
-      ?.filter((lrr) => lrr.data.response?.rateDataUrl)
+      ?.filter((lrr) => lrr.data.response?.lenderQuoteDataUrl)
       .map(async (lrr) =>
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        fetchFromUrlAsync<LenderQuote>(lrr.data.response!.rateDataUrl!)
+        fetchFromUrlAsync<LenderQuote>(lrr.data.response!.lenderQuoteDataUrl!)
       ) ?? [];
 
   const lenderQuotePromiseResults = await Promise.allSettled(
