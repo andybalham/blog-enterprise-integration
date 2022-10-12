@@ -9,7 +9,9 @@ import LenderGateway, {
 } from '../../src/lender-gateway/LenderGateway';
 import { LENDER_RATE_RECEIVED_PATTERN } from '../../src/domain/domain-event-patterns';
 
-export const TEST_LENDER_ID = 'lender-qBFgcW8v3uso8y7GuYjoE';
+export const TEST_LENDER_ID = 'test-lender-id';
+
+export const LENDERS_PARAMETER_PATH_PREFIX = 'lender-gateway-test-lenders';
 
 export default class LenderGatewayTestStack extends IntegrationTestStack {
   //
@@ -65,6 +67,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
       lenderConfig,
       applicationEventBus,
       dataBucket,
+      lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
     });
 
     // Tag resources for testing

@@ -28,6 +28,7 @@ export interface LenderGatewayProps {
   lenderConfig: LenderConfig;
   applicationEventBus: EventBus;
   dataBucket: Bucket;
+  lendersParameterPathPrefix: string;
 }
 
 export default class LenderGateway extends Construct {
@@ -48,7 +49,6 @@ export default class LenderGateway extends Construct {
       'LenderRateRequestedPattern',
       {
         eventBus: props.applicationEventBus,
-        // eventPattern: LENDER_RATE_REQUESTED_PATTERN,
         eventPattern: getLenderRateRequestedPattern(
           props.lenderConfig.lenderId
         ),
@@ -68,7 +68,7 @@ export default class LenderGateway extends Construct {
     };
 
     new StringParameter(this, `${props.lenderConfig.lenderId}Parameter`, {
-      parameterName: `/lenders/${props.lenderConfig.lenderId}`,
+      parameterName: `/${props.lendersParameterPathPrefix}/${props.lenderConfig.lenderId}`,
       stringValue: JSON.stringify(lenderRegisterEntry),
       tier: ParameterTier.STANDARD,
     });

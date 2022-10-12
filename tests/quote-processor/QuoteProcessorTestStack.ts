@@ -24,6 +24,7 @@ import {
 } from '../../src/lender-gateway/constants';
 
 const lendersParameterPathPrefix = 'quote-processor-test-lenders';
+
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
   static readonly Id = 'QuoteProcessorTestStack';

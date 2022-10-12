@@ -25,6 +25,7 @@ import {
   putDomainEventAsync,
 } from '../../src/lib/utils';
 import LenderGatewayTestStack, {
+  LENDERS_PARAMETER_PATH_PREFIX,
   TEST_LENDER_ID,
 } from './LenderGatewayTestStack';
 
@@ -61,7 +62,7 @@ describe('LenderGateway tests', () => {
   test(`SSM parameter is registered`, async () => {
     const lenderParams = await ssm
       .getParametersByPath({
-        Path: '/lenders',
+        Path: `/${LENDERS_PARAMETER_PATH_PREFIX}`,
       })
       .promise();
 
