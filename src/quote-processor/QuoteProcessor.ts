@@ -12,10 +12,15 @@ import {
   QUOTE_PROCESSOR_CALLBACK_PATTERN,
   QUOTE_SUBMITTED_PATTERN,
 } from '../domain/domain-event-patterns';
-import { APPLICATION_EVENT_BUS_NAME, STATE_MACHINE_ARN } from './constants';
+import {
+  APPLICATION_EVENT_BUS_NAME,
+  LENDERS_PARAMETER_PATH_PREFIX,
+  STATE_MACHINE_ARN,
+} from './constants';
 
 export interface QuoteProcessorProps {
   applicationEventBus: EventBus;
+  lendersParameterPathPrefix: string;
 }
 
 export default class QuoteProcessor extends Construct {
@@ -57,7 +62,9 @@ export default class QuoteProcessor extends Construct {
     // https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-access.html
 
     const lenderLookupFunction = new NodejsFunction(this, 'LenderLookup', {
-      environment: {},
+      environment: {
+        [LENDERS_PARAMETER_PATH_PREFIX]: props.lendersParameterPathPrefix,
+      },
       logRetention: RetentionDays.ONE_DAY,
     });
 
@@ -68,7 +75,7 @@ export default class QuoteProcessor extends Construct {
             resources: [
               `arn:aws:ssm:${Stack.of(this).region}:${
                 Stack.of(this).account
-              }:parameter/lenders`,
+              }:parameter/${props.lendersParameterPathPrefix}`,
             ],
             actions: ['ssm:GetParametersByPath'],
           }),

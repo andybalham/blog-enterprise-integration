@@ -23,6 +23,7 @@ import {
   DATA_BUCKET_NAME as LENDER_GATEWAY_DATA_BUCKET_NAME,
 } from '../../src/lender-gateway/constants';
 
+const lendersParameterPathPrefix = 'quote-processor-test-lenders';
 export default class QuoteProcessorTestStack extends IntegrationTestStack {
   //
   static readonly Id = 'QuoteProcessorTestStack';
@@ -148,7 +149,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     lenderRegisterEntries.forEach((l) => {
       new StringParameter(this, `${l.lenderId}Parameter`, {
-        parameterName: `/lenders/${l.lenderId}`,
+        parameterName: `/${lendersParameterPathPrefix}/${l.lenderId}`,
         stringValue: JSON.stringify(l),
         tier: ParameterTier.STANDARD,
       });
@@ -178,6 +179,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     new QuoteProcessor(this, 'SUT', {
       applicationEventBus: eventBus,
+      lendersParameterPathPrefix,
     });
 
     // Tag resources for testing
