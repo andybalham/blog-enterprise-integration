@@ -91,7 +91,7 @@ export const handler = async (
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.RateReceived,
+    detailType: EventDetailType.LenderRateReceived,
     event: lenderRateReceived,
   });
 };

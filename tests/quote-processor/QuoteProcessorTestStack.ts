@@ -11,7 +11,7 @@ import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
 import {
   CREDIT_REPORT_REQUESTED_PATTERN,
   QUOTE_PROCESSED_PATTERN,
-  RATE_REQUESTED_PATTERN,
+  LENDER_RATE_REQUESTED_PATTERN,
 } from '../../src/domain/domain-event-patterns';
 import {
   APPLICATION_EVENT_BUS_NAME as CREDIT_BUREAU_APPLICATION_EVENT_BUS_NAME,
@@ -124,7 +124,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'RateRequestedMockRule',
         eventBus,
-        RATE_REQUESTED_PATTERN
+        LENDER_RATE_REQUESTED_PATTERN
       ),
       QuoteProcessorTestStack.MockLenderId
     );
@@ -160,7 +160,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'RateRequestedRule',
         eventBus,
-        RATE_REQUESTED_PATTERN
+        LENDER_RATE_REQUESTED_PATTERN
       ),
       QuoteProcessorTestStack.RateRequestedObserverId
     );

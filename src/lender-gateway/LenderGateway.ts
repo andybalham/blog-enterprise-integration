@@ -48,6 +48,7 @@ export default class LenderGateway extends Construct {
       'LenderRateRequestedPattern',
       {
         eventBus: props.applicationEventBus,
+        // eventPattern: LENDER_RATE_REQUESTED_PATTERN,
         eventPattern: getLenderRateRequestedPattern(
           props.lenderConfig.lenderId
         ),

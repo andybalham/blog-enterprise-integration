@@ -19,23 +19,23 @@ export const CREDIT_REPORT_RECEIVED_PATTERN = {
 export const QUOTE_PROCESSOR_CALLBACK_PATTERN = {
   detailType: [
     EventDetailType.CreditReportReceived,
-    EventDetailType.RateReceived,
+    EventDetailType.LenderRateReceived,
   ],
 };
 
-export const RATE_REQUESTED_PATTERN = {
-  detailType: [EventDetailType.RateRequested],
+export const LENDER_RATE_REQUESTED_PATTERN = {
+  detailType: [EventDetailType.LenderRateRequested],
 };
 
 export const getLenderRateRequestedPattern = (
   lenderId: string
 ): Record<string, any> => ({
-  ...RATE_REQUESTED_PATTERN,
+  ...LENDER_RATE_REQUESTED_PATTERN,
   detail: {
-    data: { lenderId: [lenderId] },
+    data: { request: { lenderId: [lenderId] } },
   },
 });
 
-export const RATE_RECEIVED_PATTERN = {
-  detailType: [EventDetailType.RateReceived],
+export const LENDER_RATE_RECEIVED_PATTERN = {
+  detailType: [EventDetailType.LenderRateReceived],
 };

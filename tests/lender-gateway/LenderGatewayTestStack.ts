@@ -7,7 +7,9 @@ import { Construct } from 'constructs';
 import LenderGateway, {
   LenderConfig,
 } from '../../src/lender-gateway/LenderGateway';
-import { getLenderRateRequestedPattern } from '../../src/domain/domain-event-patterns';
+import { LENDER_RATE_RECEIVED_PATTERN } from '../../src/domain/domain-event-patterns';
+
+export const TEST_LENDER_ID = 'lender-qBFgcW8v3uso8y7GuYjoE';
 
 export default class LenderGatewayTestStack extends IntegrationTestStack {
   //
@@ -41,7 +43,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
     );
 
     const lenderConfig: LenderConfig = {
-      lenderId: 'test-lender-id',
+      lenderId: TEST_LENDER_ID,
       lenderName: 'Test Lender Name',
       rate: 6.66,
       allowBankruptcies: true,
@@ -52,7 +54,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'Rule',
         applicationEventBus,
-        getLenderRateRequestedPattern(lenderConfig.lenderId)
+        LENDER_RATE_RECEIVED_PATTERN
       ),
       LenderGatewayTestStack.EventObserverId
     );

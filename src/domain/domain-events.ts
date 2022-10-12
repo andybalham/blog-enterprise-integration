@@ -18,8 +18,8 @@ export enum EventDetailType {
   QuoteProcessed = 'QuoteProcessed',
   CreditReportRequested = 'CreditReportRequested',
   CreditReportReceived = 'CreditReportReceived',
-  RateRequested = 'RateRequested',
-  RateReceived = 'RateReceived',
+  LenderRateRequested = 'LenderRateRequested',
+  LenderRateReceived = 'LenderRateReceived',
 }
 
 // https://www.boyney.io/blog/2022-02-11-event-payload-patterns

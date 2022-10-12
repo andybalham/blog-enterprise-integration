@@ -39,7 +39,7 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.RateRequested,
+    detailType: EventDetailType.LenderRateRequested,
     event: lenderRateRequested,
   });
 };
