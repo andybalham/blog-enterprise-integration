@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { LoanDetails, LenderQuote } from './domain-models';
+import { LoanDetails, LenderRate } from './domain-models';
 
 export enum EventDomain {
   LoanBroker = 'LoanBroker',
@@ -51,7 +51,7 @@ export type QuoteSubmitted = DomainEvent<{
 export type QuoteProcessed = DomainEvent<{
   quoteReference: string;
   loanDetails: LoanDetails;
-  bestLenderQuote?: LenderQuote;
+  bestLenderRate?: LenderRate;
 }>;
 
 export interface AsyncRequestBase {
@@ -104,6 +104,6 @@ export type LenderRateRequested = DomainEvent<
 export type LenderRateReceived = DomainEvent<
   AsyncResponse<{
     lenderId: string;
-    lenderQuoteDataUrl?: string;
+    lenderRateDataUrl?: string;
   }>
 >;

@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 
 import { EventDetailType, QuoteProcessed } from '../domain/domain-events';
-import { LenderQuote, QuoteRequest } from '../domain/domain-models';
+import { LenderRate, QuoteRequest } from '../domain/domain-models';
 import { fetchFromUrlAsync, putDomainEventAsync } from '../lib/utils';
 import { APPLICATION_EVENT_BUS_NAME } from './constants';
 import { QuoteProcessorState } from './QuoteProcessorState';
@@ -18,36 +18,35 @@ export const handler = async (
     state.quoteSubmitted.data.quoteRequestDataUrl
   );
 
-  const lenderQuotePromises =
+  const lenderRatePromises =
     state.lenderRatesReceived
-      ?.filter((lrr) => lrr.data.response?.lenderQuoteDataUrl)
+      ?.filter((lrr) => lrr.data.response?.lenderRateDataUrl)
       .map(async (lrr) =>
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        fetchFromUrlAsync<LenderQuote>(lrr.data.response!.lenderQuoteDataUrl!)
+        fetchFromUrlAsync<LenderRate>(lrr.data.response!.lenderRateDataUrl!)
       ) ?? [];
 
-  const lenderQuotePromiseResults = await Promise.allSettled(
-    lenderQuotePromises
-  );
+  const lenderRatePromiseResults = await Promise.allSettled(lenderRatePromises);
 
-  const lenderQuotes = (
-    lenderQuotePromiseResults.filter(
+  const lenderRates = (
+    lenderRatePromiseResults.filter(
       (r) => r.status === 'fulfilled'
-    ) as PromiseFulfilledResult<LenderQuote>[]
+    ) as PromiseFulfilledResult<LenderRate>[]
   ).map((r) => r.value);
 
-  console.log(JSON.stringify({ lenderQuotes }, null, 2));
+  console.log(JSON.stringify({ lenderRates }, null, 2));
 
-  const bestLenderQuote = lenderQuotes.reduce((lq1, lq2) =>
-    lq1.rate < lq2.rate ? lq1 : lq2
-  );
+  const bestLenderRate = lenderRates
+    .filter((lr) => lr.rate)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    .reduce((lr1, lr2) => (lr1.rate! < lr2.rate! ? lr1 : lr2));
 
   const quoteProcessed: QuoteProcessed = {
     metadata: state.quoteSubmitted.metadata,
     data: {
       quoteReference: state.quoteSubmitted.data.quoteReference,
       loanDetails: quoteRequest.loanDetails,
-      bestLenderQuote,
+      bestLenderRate,
     },
   };
 

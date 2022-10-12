@@ -3,7 +3,7 @@ export interface QuoteRequest {
   loanDetails: LoanDetails;
 }
 
-export interface LenderQuote {
+export interface LenderRate {
   lenderId: string;
   lenderName: string;
   rate?: number;

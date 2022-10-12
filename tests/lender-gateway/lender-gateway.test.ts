@@ -15,10 +15,15 @@ import {
 } from '../../src/domain/domain-events';
 import {
   CreditReport,
+  LenderRate,
   LenderRegisterEntry,
   QuoteRequest,
 } from '../../src/domain/domain-models';
-import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
+import {
+  fetchFromUrlAsync,
+  getDataUrlAsync,
+  putDomainEventAsync,
+} from '../../src/lib/utils';
 import LenderGatewayTestStack, {
   TEST_LENDER_ID,
 } from './LenderGatewayTestStack';
@@ -163,6 +168,13 @@ describe('LenderGateway tests', () => {
       lenderRateRequested.data.taskToken
     );
 
-    expect(firstEvent.detail.data.response).toBeDefined();
+    expect(firstEvent.detail.data.response?.lenderRateDataUrl).toBeDefined();
+
+    const lenderRate = await fetchFromUrlAsync<LenderRate>(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      firstEvent.detail.data.response!.lenderRateDataUrl!
+    );
+
+    expect(lenderRate.lenderId).toBe(TEST_LENDER_ID);
   });
 });

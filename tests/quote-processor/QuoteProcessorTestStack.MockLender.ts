@@ -10,7 +10,7 @@ import {
   EventService,
   EventDetailType,
 } from '../../src/domain/domain-events';
-import { LenderQuote } from '../../src/domain/domain-models';
+import { LenderRate } from '../../src/domain/domain-models';
 import {
   APPLICATION_EVENT_BUS_NAME,
   DATA_BUCKET_NAME,
@@ -24,7 +24,7 @@ const documentClient = new DocumentClient();
 
 export interface MockLenderResponse {
   resultType: 'SUCCEEDED' | 'FAILED';
-  lenderQuote?: LenderQuote;
+  lenderRate?: LenderRate;
 }
 
 export const handler = async (
@@ -54,7 +54,7 @@ export const handler = async (
     rateDataUrl = await getDataUrlAsync({
       bucketName: dataBucketName,
       key: `${quoteReference}/${quoteReference}-quote-${lenderId}.json`,
-      data: JSON.stringify(lenderResponse.lenderQuote),
+      data: JSON.stringify(lenderResponse.lenderRate),
     });
   }
 
@@ -68,7 +68,7 @@ export const handler = async (
     data: {
       response: {
         lenderId,
-        lenderQuoteDataUrl: rateDataUrl,
+        lenderRateDataUrl: rateDataUrl,
       },
       resultType: lenderResponse.resultType,
       taskToken: event.detail.data.taskToken,

@@ -12,7 +12,7 @@ import {
 } from '../domain/domain-events';
 import {
   CreditReport,
-  LenderQuote,
+  LenderRate,
   QuoteRequest,
 } from '../domain/domain-models';
 import {
@@ -63,16 +63,16 @@ export const handler = async (
     (!lenderConfig.minimumCreditScore ||
       creditReport.creditScore >= lenderConfig.minimumCreditScore);
 
-  const lenderQuote: LenderQuote = {
+  const lenderRate: LenderRate = {
     lenderId: lenderConfig.lenderId,
     lenderName: lenderConfig.lenderName,
     rate: isRateAvailable ? lenderConfig.rate : undefined,
   };
 
-  const lenderQuoteDataUrl = await getDataUrlAsync({
+  const lenderRateDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
     key: `${quoteReference}/${quoteReference}-quote-${lenderConfig.lenderId}.json`,
-    data: JSON.stringify(lenderQuote),
+    data: JSON.stringify(lenderRate),
   });
 
   const lenderRateReceived: LenderRateReceived = {
@@ -85,7 +85,10 @@ export const handler = async (
     data: {
       resultType: 'SUCCEEDED',
       taskToken: event.detail.data.taskToken,
-      response: { lenderId: lenderConfig.lenderId, lenderQuoteDataUrl },
+      response: {
+        lenderId: lenderConfig.lenderId,
+        lenderRateDataUrl,
+      },
     },
   };
 

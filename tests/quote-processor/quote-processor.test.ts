@@ -70,7 +70,7 @@ describe('QuoteProcessor Tests', () => {
     const lenderResponses: Record<string, MockLenderResponse> = {
       [QuoteProcessorTestStack.LENDER_1_ID]: {
         resultType: 'SUCCEEDED',
-        lenderQuote: {
+        lenderRate: {
           lenderId: QuoteProcessorTestStack.LENDER_1_ID,
           lenderName: 'Lender One',
           rate: 3,
@@ -78,7 +78,7 @@ describe('QuoteProcessor Tests', () => {
       },
       [QuoteProcessorTestStack.LENDER_2_ID]: {
         resultType: 'SUCCEEDED',
-        lenderQuote: {
+        lenderRate: {
           lenderId: QuoteProcessorTestStack.LENDER_2_ID,
           lenderName: 'Lender Two',
           rate: 2,
@@ -136,8 +136,8 @@ describe('QuoteProcessor Tests', () => {
 
     expect(quoteProcessed.data.loanDetails).toEqual(quoteRequest.loanDetails);
 
-    expect(quoteProcessed.data.bestLenderQuote).toEqual(
-      lenderResponses[QuoteProcessorTestStack.LENDER_2_ID].lenderQuote
+    expect(quoteProcessed.data.bestLenderRate).toEqual(
+      lenderResponses[QuoteProcessorTestStack.LENDER_2_ID].lenderRate
     );
   });
 });
