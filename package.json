@@ -25,9 +25,16 @@
     "test-lender-gateway-hotswap": "cdk deploy LenderGatewayTestStack --hotswap --app \"npx ts-node tests/lender-gateway-test-app.ts\"",
     "test-lender-gateway-destroy": "cdk destroy LenderGatewayTestStack --app \"npx ts-node tests/lender-gateway-test-app.ts\"",
     "test-destroy-all": "cdk destroy --all --app \"npx ts-node tests/test-cdk-app.ts\"",
-    "cdk-synth": "cdk synth ApplicationStack > .cdk-synth.yml",
-    "cdk-deploy": "cdk deploy ApplicationStack",
-    "cdk-destroy": "cdk destroy --all"
+    "application-synth": "cdk synth ApplicationStack > .cdk-synth.yml",
+    "application-deploy": "cdk deploy ApplicationStack",
+    "application-destroy": "cdk destroy ApplicationStack",
+    "lender-steady-synth": "cdk synth LenderSteadyStack > .cdk-synth.yml",
+    "lender-steady-deploy": "cdk deploy LenderSteadyStack",
+    "lender-steady-destroy": "cdk destroy LenderSteadyStack",
+    "lender666-synth": "cdk synth Lender666Stack > .cdk-synth.yml",
+    "lender666-deploy": "cdk deploy Lender666Stack",
+    "lender666-destroy": "cdk destroy Lender666Stack",
+    "destroy-all": "cdk destroy --all"
   },
   "repository": {
     "type": "git",

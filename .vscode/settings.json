@@ -29,6 +29,13 @@
       "sideBar.background": "#003f3f",
       "activityBar.background": "#008585",
       "activityBar.activeBackground": "#00d4d4"
+    },
+    "[Default Light+]": {
+      "titleBar.activeBackground": "#008585",
+      "titleBar.activeForeground": "#ffffff",
+      "sideBar.background": "#cde9e9",
+      "activityBar.background": "#008585",
+      "activityBar.activeBackground": "#00d4d4"
     }
   },
   "serverlessConsole.services": [

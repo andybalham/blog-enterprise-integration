@@ -3,28 +3,25 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import QuoteProcessor from '../quote-processor/QuoteProcessor';
-import RequestApi from '../request-api/RequestApi';
+import LenderGateway, { LenderConfig } from '../lender-gateway/LenderGateway';
 
-export interface ApplicationStackProps extends StackProps {
+export interface LenderStackProps extends StackProps {
+  lenderConfig: LenderConfig;
   dataBucket: Bucket;
   applicationEventBus: EventBus;
   lendersParameterPathPrefix: string;
 }
 
-export default class ApplicationStack extends Stack {
+export default class LenderStack extends Stack {
   //
-  constructor(scope: Construct, id: string, props: ApplicationStackProps) {
+  constructor(scope: Construct, id: string, props: LenderStackProps) {
     super(scope, id, props);
 
-    new QuoteProcessor(this, 'QuoteProcessor', {
+    new LenderGateway(this, `LenderGateway${props.lenderConfig.lenderId}`, {
       lendersParameterPathPrefix: props.lendersParameterPathPrefix,
       applicationEventBus: props.applicationEventBus,
-    });
-
-    new RequestApi(this, 'RequestApi', {
-      applicationEventBus: props.applicationEventBus,
       dataBucket: props.dataBucket,
+      lenderConfig: props.lenderConfig,
     });
   }
 }

@@ -1,8 +1,11 @@
 /* eslint-disable no-new */
 import * as cdk from 'aws-cdk-lib';
 import DataStack from './stacks/DataStack';
-import RequestApiStack from './stacks/ApplicationStack';
+import ApplicationStack from './stacks/ApplicationStack';
 import MessagingStack from './stacks/MessagingStack';
+import LenderStack from './stacks/LenderStack';
+
+const LENDERS_PARAMETER_PATH_PREFIX = 'prod-lenders';
 
 const app = new cdk.App();
 cdk.Tags.of(app).add('app', 'LoanBrokerProd');
@@ -11,7 +14,40 @@ const dataStack = new DataStack(app, 'DataStack');
 
 const messagingStack = new MessagingStack(app, 'MessagingStack');
 
-new RequestApiStack(app, 'ApplicationStack', {
+new ApplicationStack(app, 'ApplicationStack', {
+  lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   applicationEventBus: messagingStack.applicationEventBus,
   dataBucket: dataStack.dataBucket,
+});
+
+new LenderStack(app, 'Lender666Stack', {
+  lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
+  applicationEventBus: messagingStack.applicationEventBus,
+  dataBucket: dataStack.dataBucket,
+  lenderConfig: {
+    lenderId: 'Lender666',
+    lenderName: 'Six-Six-Six Money',
+    rate: 6.66,
+    allowBankruptcies: true,
+    allowNotOnElectoralRoll: true,
+    minimumCreditScore: 0,
+    minimumTermMonths: 0,
+    maximumAmount: 1000000,
+  },
+});
+
+new LenderStack(app, 'LenderSteadyStack', {
+  lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
+  applicationEventBus: messagingStack.applicationEventBus,
+  dataBucket: dataStack.dataBucket,
+  lenderConfig: {
+    lenderId: 'LenderSteady',
+    lenderName: 'Steady Finance',
+    rate: 3,
+    allowBankruptcies: false,
+    allowNotOnElectoralRoll: false,
+    minimumCreditScore: 500,
+    minimumTermMonths: 24,
+    maximumAmount: 10000,
+  },
 });
