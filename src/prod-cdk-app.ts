@@ -20,6 +20,8 @@ new ApplicationStack(app, 'ApplicationStack', {
   dataBucket: dataStack.dataBucket,
 });
 
+// TODO 17Oct22: Need a CreditBureauStack
+
 new LenderStack(app, 'Lender666Stack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   applicationEventBus: messagingStack.applicationEventBus,

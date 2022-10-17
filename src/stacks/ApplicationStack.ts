@@ -20,6 +20,7 @@ export default class ApplicationStack extends Stack {
     new QuoteProcessor(this, 'QuoteProcessor', {
       lendersParameterPathPrefix: props.lendersParameterPathPrefix,
       applicationEventBus: props.applicationEventBus,
+      dataBucket: props.dataBucket,
     });
 
     new RequestApi(this, 'RequestApi', {

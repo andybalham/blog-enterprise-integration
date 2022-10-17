@@ -90,6 +90,58 @@
           "stage": "dev"
         }
       ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Application Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "ApplicationStack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Lender 666 Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "Lender666Stack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Lender Steady Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "LenderSteadyStack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Data Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "DataStack",
+          "stage": "dev"
+        }
+      ]
     }
   ]
 }
