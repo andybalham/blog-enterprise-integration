@@ -6,6 +6,7 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { IChainable, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import {
@@ -14,12 +15,14 @@ import {
 } from '../domain/domain-event-patterns';
 import {
   APPLICATION_EVENT_BUS_NAME,
+  DATA_BUCKET_NAME,
   LENDERS_PARAMETER_PATH_PREFIX,
   STATE_MACHINE_ARN,
 } from './constants';
 
 export interface QuoteProcessorProps {
   applicationEventBus: EventBus;
+  dataBucket: Bucket;
   lendersParameterPathPrefix: string;
 }
 
@@ -33,11 +36,13 @@ export default class QuoteProcessor extends Construct {
     const responseSenderFunction = new NodejsFunction(this, 'ResponseSender', {
       environment: {
         [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
+        [DATA_BUCKET_NAME]: props.dataBucket.bucketName,
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
     props.applicationEventBus.grantPutEventsTo(responseSenderFunction);
+    props.dataBucket.grantReadWrite(responseSenderFunction);
 
     // Credit report requester
 

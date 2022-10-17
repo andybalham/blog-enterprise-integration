@@ -180,6 +180,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     new QuoteProcessor(this, 'SUT', {
       applicationEventBus: eventBus,
+      dataBucket: bucket,
       lendersParameterPathPrefix,
     });
 

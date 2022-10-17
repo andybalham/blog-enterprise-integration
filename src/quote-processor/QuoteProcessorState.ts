@@ -3,13 +3,14 @@ import {
   LenderRateReceived,
   QuoteSubmitted,
 } from '../domain/domain-events';
-import { LenderRegisterEntry } from '../domain/domain-models';
+import { LenderRate, LenderRegisterEntry } from '../domain/domain-models';
 
 export interface QuoteProcessorState {
   quoteSubmitted: QuoteSubmitted;
   creditReportReceived?: CreditReportReceived;
   lenders?: LenderRegisterEntry[];
   lenderRatesReceived?: LenderRateReceived[];
+  bestLenderRate?: LenderRate;
 }
 
 export interface QuoteRequestState {

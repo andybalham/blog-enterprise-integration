@@ -1,13 +1,17 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 
+import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
 import { EventDetailType, QuoteProcessed } from '../domain/domain-events';
 import { LenderRate, QuoteRequest } from '../domain/domain-models';
 import { fetchFromUrlAsync, putDomainEventAsync } from '../lib/utils';
-import { APPLICATION_EVENT_BUS_NAME } from './constants';
+import { APPLICATION_EVENT_BUS_NAME, DATA_BUCKET_NAME } from './constants';
 import { QuoteProcessorState } from './QuoteProcessorState';
 
 const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
+const bucketName = process.env[DATA_BUCKET_NAME];
+
+const s3 = new S3();
 
 export const handler = async (
   state: QuoteProcessorState
@@ -37,9 +41,20 @@ export const handler = async (
   console.log(JSON.stringify({ lenderRates }, null, 2));
 
   const bestLenderRate = lenderRates
-    .filter((lr) => lr.rate)
+    .filter((lr) => lr.rate !== undefined)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     .reduce((lr1, lr2) => (lr1.rate! < lr2.rate! ? lr1 : lr2));
+
+  // eslint-disable-next-line no-param-reassign
+  state.bestLenderRate = bestLenderRate;
+
+  await s3
+    .putObject({
+      Bucket: bucketName,
+      Key: `${state.quoteSubmitted.data.quoteReference}/${state.quoteSubmitted.data.quoteReference}-best-rate.json`,
+      Body: JSON.stringify({ bestLenderRate }),
+    } as PutObjectRequest)
+    .promise();
 
   const quoteProcessed: QuoteProcessed = {
     metadata: state.quoteSubmitted.metadata,
