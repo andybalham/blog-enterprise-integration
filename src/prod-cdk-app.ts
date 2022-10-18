@@ -4,6 +4,7 @@ import DataStack from './stacks/DataStack';
 import ApplicationStack from './stacks/ApplicationStack';
 import MessagingStack from './stacks/MessagingStack';
 import LenderStack from './stacks/LenderStack';
+import WebhookStack from './stacks/WebhookStack';
 
 const LENDERS_PARAMETER_PATH_PREFIX = 'prod-lenders';
 
@@ -50,4 +51,8 @@ new LenderStack(app, 'LenderSteadyStack', {
     minimumTermMonths: 24,
     maximumAmount: 10000,
   },
+});
+
+new WebhookStack(app, 'WebhookStack', {
+  applicationEventBus: messagingStack.applicationEventBus,
 });
