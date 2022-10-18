@@ -71,5 +71,7 @@ export const handler = async (
     event: quoteProcessed,
   });
 
+  console.log(JSON.stringify({ quoteProcessed }, null, 2));
+
   return state;
 };
