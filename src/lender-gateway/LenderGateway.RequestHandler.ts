@@ -71,7 +71,7 @@ export const handler = async (
 
   const lenderRateDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
-    key: `${quoteReference}/${quoteReference}-quote-${lenderConfig.lenderId}.json`,
+    key: `${lenderConfig.lenderId}/${quoteReference}-quote-${lenderConfig.lenderId}.json`,
     data: JSON.stringify(lenderRate),
   });
 

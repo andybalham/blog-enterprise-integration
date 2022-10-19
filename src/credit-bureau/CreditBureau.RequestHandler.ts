@@ -76,7 +76,7 @@ async function handleRequestAsync(
 
   const creditReportDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
-    key: `${quoteReference}/${quoteReference}-credit-report.json`,
+    key: `${quoteReference}-credit-report.json`,
     data: JSON.stringify(creditReport),
   });
 

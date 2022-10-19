@@ -5,6 +5,7 @@ import ApplicationStack from './stacks/ApplicationStack';
 import MessagingStack from './stacks/MessagingStack';
 import LenderStack from './stacks/LenderStack';
 import WebhookStack from './stacks/WebhookStack';
+import CreditBureauStack from './stacks/CreditBureauStack';
 
 const LENDERS_PARAMETER_PATH_PREFIX = 'prod-lenders';
 
@@ -18,13 +19,18 @@ const messagingStack = new MessagingStack(app, 'MessagingStack');
 new ApplicationStack(app, 'ApplicationStack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.dataBucket,
+  dataBucket: dataStack.quoteProcessorBucket,
+});
+
+new CreditBureauStack(app, 'CreditBureauStack', {
+  applicationEventBus: messagingStack.applicationEventBus,
+  dataBucket: dataStack.creditBureauBucket,
 });
 
 new LenderStack(app, 'Lender666Stack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.dataBucket,
+  dataBucket: dataStack.lenderGatewayBucket,
   lenderConfig: {
     lenderId: 'Lender666',
     lenderName: 'Six-Six-Six Money',
@@ -40,7 +46,7 @@ new LenderStack(app, 'Lender666Stack', {
 new LenderStack(app, 'LenderSteadyStack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.dataBucket,
+  dataBucket: dataStack.lenderGatewayBucket,
   lenderConfig: {
     lenderId: 'LenderSteady',
     lenderName: 'Steady Finance',

@@ -31,6 +31,7 @@
       "activityBar.activeBackground": "#00d4d4"
     },
     "[Default Light+]": {
+      "panel.background": "#def3f3",
       "terminal.background": "#eff8f8",
       "titleBar.activeBackground": "#008585",
       "titleBar.activeForeground": "#ffffff",
