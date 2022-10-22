@@ -5,17 +5,20 @@ import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
 import { EventDetailType, QuoteProcessed } from '../domain/domain-events';
 import { LenderRate, QuoteRequest } from '../domain/domain-models';
 import { fetchFromUrlAsync, putDomainEventAsync } from '../lib/utils';
-import { APPLICATION_EVENT_BUS_NAME, DATA_BUCKET_NAME } from './constants';
-import { QuoteProcessorState } from './QuoteProcessorState';
+import {
+  LOAN_BROKER_EVENT_BUS,
+  LOAN_BROKER_DATA_BUCKET_NAME,
+} from './constants';
+import { LoanBrokerState } from './LoanBrokerState';
 
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-const bucketName = process.env[DATA_BUCKET_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
+const bucketName = process.env[LOAN_BROKER_DATA_BUCKET_NAME];
 
 const s3 = new S3();
 
 export const handler = async (
-  state: QuoteProcessorState
-): Promise<QuoteProcessorState> => {
+  state: LoanBrokerState
+): Promise<LoanBrokerState> => {
   console.log(JSON.stringify({ state }, null, 2));
 
   const quoteRequest = await fetchFromUrlAsync<QuoteRequest>(
@@ -51,7 +54,7 @@ export const handler = async (
   await s3
     .putObject({
       Bucket: bucketName,
-      Key: `${state.quoteSubmitted.data.quoteReference}/${state.quoteSubmitted.data.quoteReference}-best-rate.json`,
+      Key: `${state.quoteSubmitted.data.quoteReference}-best-rate.json`,
       Body: JSON.stringify({ bestLenderRate }),
     } as PutObjectRequest)
     .promise();

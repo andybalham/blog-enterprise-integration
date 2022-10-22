@@ -11,7 +11,7 @@ import { QUOTE_PROCESSED_PATTERN } from '../domain/domain-event-patterns';
 dotenv.config();
 
 export interface WebhookStackProps extends StackProps {
-  applicationEventBus: EventBus;
+  loanBrokerEventBus: EventBus;
 }
 
 export default class WebhookStack extends Stack {
@@ -21,14 +21,14 @@ export default class WebhookStack extends Stack {
 
     const webhookSenderFunction = new NodejsFunction(this, 'WebhookSender', {
       environment: {
-        APPLICATION_EVENT_BUS_NAME: props.applicationEventBus.eventBusName,
+        LOAN_BROKER_EVENT_BUS: props.loanBrokerEventBus.eventBusName,
         WEBHOOK_URL: process.env.WEBHOOK_URL ?? '<undefined>',
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
     const quoteProcessedCallbackRule = new Rule(this, id, {
-      eventBus: props.applicationEventBus,
+      eventBus: props.loanBrokerEventBus,
       eventPattern: QUOTE_PROCESSED_PATTERN,
     });
 

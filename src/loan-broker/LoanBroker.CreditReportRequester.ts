@@ -6,15 +6,15 @@ import {
   CreditReportRequested,
 } from '../domain/domain-events';
 import { putDomainEventAsync } from '../lib/utils';
-import { APPLICATION_EVENT_BUS_NAME } from './constants';
-import { QuoteProcessorState } from './QuoteProcessorState';
+import { LOAN_BROKER_EVENT_BUS } from './constants';
+import { LoanBrokerState } from './LoanBrokerState';
 
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 
 export const handler = async (event: Record<string, any>): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  const state = event.state as QuoteProcessorState;
+  const state = event.state as LoanBrokerState;
 
   const creditReportRequested: CreditReportRequested = {
     metadata: state.quoteSubmitted.metadata,

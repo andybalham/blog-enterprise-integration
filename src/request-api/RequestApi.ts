@@ -4,12 +4,12 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
-  DATA_BUCKET_NAME,
-  APPLICATION_EVENT_BUS_NAME,
+  REQUEST_API_DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
 } from './RequestApi.EventPublisher';
 
 export interface RequestApiProps {
-  applicationEventBus: EventBus;
+  loanBrokerEventBus: EventBus;
   dataBucket: Bucket;
 }
 
@@ -22,13 +22,13 @@ export default class RequestApi extends Construct {
 
     const eventPublisherFunction = new NodejsFunction(this, 'EventPublisher', {
       environment: {
-        [DATA_BUCKET_NAME]: props.dataBucket.bucketName,
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
+        [REQUEST_API_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
       },
     });
 
     props.dataBucket.grantReadWrite(eventPublisherFunction);
-    props.applicationEventBus.grantPutEventsTo(eventPublisherFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(eventPublisherFunction);
 
     this.api = new RestApi(this, 'RequestApi');
 

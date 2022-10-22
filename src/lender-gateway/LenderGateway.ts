@@ -7,8 +7,8 @@ import { Construct } from 'constructs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { getLenderRateRequestedPattern } from '../domain/domain-event-patterns';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
+  LENDER_GATEWAY_DATA_BUCKET_NAME,
   LENDER_CONFIG,
 } from './constants';
 import { LenderRegisterEntry } from '../domain/domain-models';
@@ -26,7 +26,7 @@ export interface LenderConfig {
 
 export interface LenderGatewayProps {
   lenderConfig: LenderConfig;
-  applicationEventBus: EventBus;
+  loanBrokerEventBus: EventBus;
   dataBucket: Bucket;
   lendersParameterPathPrefix: string;
 }
@@ -39,8 +39,8 @@ export default class LenderGateway extends Construct {
     const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
       environment: {
         [LENDER_CONFIG]: JSON.stringify(props.lenderConfig),
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusArn,
-        [DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
+        [LENDER_GATEWAY_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
       },
     });
 
@@ -48,7 +48,7 @@ export default class LenderGateway extends Construct {
       this,
       'LenderRateRequestedPattern',
       {
-        eventBus: props.applicationEventBus,
+        eventBus: props.loanBrokerEventBus,
         eventPattern: getLenderRateRequestedPattern(
           props.lenderConfig.lenderId
         ),
@@ -60,7 +60,7 @@ export default class LenderGateway extends Construct {
     );
 
     props.dataBucket.grantReadWrite(requestHandlerFunction);
-    props.applicationEventBus.grantPutEventsTo(requestHandlerFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(requestHandlerFunction);
 
     const lenderRegisterEntry: LenderRegisterEntry = {
       lenderId: props.lenderConfig.lenderId,

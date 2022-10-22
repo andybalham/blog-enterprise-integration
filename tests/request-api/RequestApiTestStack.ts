@@ -50,7 +50,7 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     // SUT
 
     const sut = new RequestApi(this, 'SUT', {
-      applicationEventBus: eventBus,
+      loanBrokerEventBus: eventBus,
       dataBucket: bucket,
     });
 

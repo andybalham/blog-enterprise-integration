@@ -56,19 +56,6 @@
     },
     {
       "type": "cloudformation",
-      "title": "Queue Processor Stack",
-      "timeOffsetInMs": 0,
-      "awsProfile": "default",
-      "stacks": [
-        {
-          "region": "eu-west-2",
-          "stackName": "QuoteProcessorTestStack",
-          "stage": "dev"
-        }
-      ]
-    },
-    {
-      "type": "cloudformation",
       "title": "Credit Bureau Test Stack",
       "timeOffsetInMs": 0,
       "awsProfile": "default",
@@ -89,19 +76,6 @@
         {
           "region": "eu-west-2",
           "stackName": "LenderGatewayTestStack",
-          "stage": "dev"
-        }
-      ]
-    },
-    {
-      "type": "cloudformation",
-      "title": "Application Stack",
-      "timeOffsetInMs": 0,
-      "awsProfile": "default",
-      "stacks": [
-        {
-          "region": "eu-west-2",
-          "stackName": "ApplicationStack",
           "stage": "dev"
         }
       ]
@@ -134,13 +108,26 @@
     },
     {
       "type": "cloudformation",
-      "title": "Data Stack",
+      "title": "Request API",
       "timeOffsetInMs": 0,
       "awsProfile": "default",
       "stacks": [
         {
           "region": "eu-west-2",
-          "stackName": "DataStack",
+          "stackName": "RequestApiStack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Loan Broker",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "LoanBrokerStack",
           "stage": "dev"
         }
       ]

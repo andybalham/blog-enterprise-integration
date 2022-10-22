@@ -15,7 +15,12 @@ export const handler = async (
 
   const response = await axios.post(
     process.env.WEBHOOK_URL ?? '<undefined>',
-    event.detail.data,
+    {
+      quoteReference: event.detail.data.quoteReference,
+      loanDetails: event.detail.data.loanDetails,
+      lenderName: event.detail.data.bestLenderRate?.lenderName,
+      bestRate: event.detail.data.bestLenderRate?.rate,
+    },
     {
       headers: { 'x-correlation-id': event.detail.metadata.correlationId },
     }

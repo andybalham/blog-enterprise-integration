@@ -12,13 +12,13 @@ import {
 } from '../../src/domain/domain-events';
 import { LenderRate } from '../../src/domain/domain-models';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
+  LENDER_GATEWAY_DATA_BUCKET_NAME,
 } from '../../src/lender-gateway/constants';
 import { getDataUrlAsync, putDomainEventAsync } from '../../src/lib/utils';
 
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-const dataBucketName = process.env[DATA_BUCKET_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
+const dataBucketName = process.env[LENDER_GATEWAY_DATA_BUCKET_NAME];
 
 const documentClient = new DocumentClient();
 

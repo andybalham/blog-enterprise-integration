@@ -19,7 +19,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
 
   static readonly DataBucketId = 'DataBucketId';
 
-  static readonly ApplicationEventBusId = 'ApplicationEventBusId';
+  static readonly LoanBrokerEventBusId = 'LoanBrokerEventBusId';
 
   static readonly EventObserverId = 'EventObserver';
 
@@ -39,9 +39,9 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
       ],
     });
 
-    const applicationEventBus = new EventBus(
+    const loanBrokerEventBus = new EventBus(
       this,
-      LenderGatewayTestStack.ApplicationEventBusId
+      LenderGatewayTestStack.LoanBrokerEventBusId
     );
 
     const lenderConfig: LenderConfig = {
@@ -55,7 +55,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule(
         'Rule',
-        applicationEventBus,
+        loanBrokerEventBus,
         LENDER_RATE_RECEIVED_PATTERN
       ),
       LenderGatewayTestStack.EventObserverId
@@ -65,7 +65,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
 
     new LenderGateway(this, 'SUT', {
       lenderConfig,
-      applicationEventBus,
+      loanBrokerEventBus,
       dataBucket,
       lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
     });
@@ -73,8 +73,8 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
     // Tag resources for testing
 
     this.addTestResourceTag(
-      applicationEventBus,
-      LenderGatewayTestStack.ApplicationEventBusId
+      loanBrokerEventBus,
+      LenderGatewayTestStack.LoanBrokerEventBusId
     );
 
     this.addTestResourceTag(dataBucket, LenderGatewayTestStack.DataBucketId);

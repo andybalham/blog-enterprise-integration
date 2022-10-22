@@ -6,7 +6,7 @@ import StepFunctions, {
 } from 'aws-sdk/clients/stepfunctions';
 import { QuoteSubmitted } from '../domain/domain-events';
 import { STATE_MACHINE_ARN } from './constants';
-import { QuoteProcessorState } from './QuoteProcessorState';
+import { LoanBrokerState } from './LoanBrokerState';
 
 const stateMachineArn = process.env[STATE_MACHINE_ARN];
 const stepFunctions = new StepFunctions();
@@ -19,13 +19,13 @@ export const handler = async (
   if (stateMachineArn === undefined)
     throw new Error('stateMachineArn === undefined');
 
-  const quoteProcessorState: QuoteProcessorState = {
+  const loanBrokerState: LoanBrokerState = {
     quoteSubmitted: event.detail,
   };
 
   const params: StartExecutionInput = {
     stateMachineArn,
-    input: JSON.stringify(quoteProcessorState),
+    input: JSON.stringify(loanBrokerState),
   };
 
   await stepFunctions.startExecution(params).promise();

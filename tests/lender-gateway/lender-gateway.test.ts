@@ -40,7 +40,7 @@ describe('LenderGateway tests', () => {
   const ssm = new SSM();
 
   let dataBucket: S3TestClient;
-  let applicationEventBus: EventBridgeTestClient;
+  let loanBrokerEventBus: EventBridgeTestClient;
 
   beforeAll(async () => {
     await testClient.initialiseClientAsync();
@@ -49,8 +49,8 @@ describe('LenderGateway tests', () => {
       LenderGatewayTestStack.DataBucketId
     );
 
-    applicationEventBus = testClient.getEventBridgeTestClient(
-      LenderGatewayTestStack.ApplicationEventBusId
+    loanBrokerEventBus = testClient.getEventBridgeTestClient(
+      LenderGatewayTestStack.LoanBrokerEventBusId
     );
   });
 
@@ -117,7 +117,7 @@ describe('LenderGateway tests', () => {
     const lenderRateRequested: LenderRateRequested = {
       metadata: {
         domain: EventDomain.LoanBroker,
-        service: EventService.QuoteProcessor,
+        service: EventService.LoanBroker,
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
       },
@@ -135,7 +135,7 @@ describe('LenderGateway tests', () => {
     // Act
 
     await putDomainEventAsync({
-      eventBusName: applicationEventBus.eventBusArn,
+      eventBusName: loanBrokerEventBus.eventBusArn,
       detailType: EventDetailType.LenderRateRequested,
       event: lenderRateRequested,
     });

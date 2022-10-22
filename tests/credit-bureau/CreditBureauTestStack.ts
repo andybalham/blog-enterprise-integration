@@ -13,7 +13,7 @@ export default class CreditBureauTestStack extends IntegrationTestStack {
 
   static readonly DataBucketId = 'DataBucketId';
 
-  static readonly ApplicationEventBusId = 'ApplicationEventBusId';
+  static readonly LoanBrokerEventBusId = 'LoanBrokerEventBusId';
 
   static readonly EventObserverId = 'EventObserver';
 
@@ -35,7 +35,7 @@ export default class CreditBureauTestStack extends IntegrationTestStack {
 
     const eventBus = new EventBus(
       this,
-      CreditBureauTestStack.ApplicationEventBusId
+      CreditBureauTestStack.LoanBrokerEventBusId
     );
 
     this.addEventBridgeRuleTargetFunction(
@@ -50,7 +50,7 @@ export default class CreditBureauTestStack extends IntegrationTestStack {
     // SUT
 
     new CreditBureau(this, 'SUT', {
-      applicationEventBus: eventBus,
+      loanBrokerEventBus: eventBus,
       dataBucket: bucket,
     });
 
@@ -58,7 +58,7 @@ export default class CreditBureauTestStack extends IntegrationTestStack {
 
     this.addTestResourceTag(
       eventBus,
-      CreditBureauTestStack.ApplicationEventBusId
+      CreditBureauTestStack.LoanBrokerEventBusId
     );
 
     this.addTestResourceTag(bucket, CreditBureauTestStack.DataBucketId);

@@ -5,10 +5,13 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { CREDIT_REPORT_REQUESTED_PATTERN } from '../domain/domain-event-patterns';
-import { APPLICATION_EVENT_BUS_NAME, DATA_BUCKET_NAME } from './constants';
+import {
+  LOAN_BROKER_EVENT_BUS,
+  CREDIT_BUREAU_DATA_BUCKET_NAME,
+} from './constants';
 
 export interface CreditBureauProps {
-  applicationEventBus: EventBus;
+  loanBrokerEventBus: EventBus;
   dataBucket: Bucket;
 }
 
@@ -19,8 +22,8 @@ export default class CreditBureau extends Construct {
 
     const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
       environment: {
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusArn,
-        [DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
+        [CREDIT_BUREAU_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
       },
     });
 
@@ -28,7 +31,7 @@ export default class CreditBureau extends Construct {
       this,
       'CreditReportReceivedRule',
       {
-        eventBus: props.applicationEventBus,
+        eventBus: props.loanBrokerEventBus,
         eventPattern: CREDIT_REPORT_REQUESTED_PATTERN,
       }
     );
@@ -38,6 +41,6 @@ export default class CreditBureau extends Construct {
     );
 
     props.dataBucket.grantReadWrite(requestHandlerFunction);
-    props.applicationEventBus.grantPutEventsTo(requestHandlerFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(requestHandlerFunction);
   }
 }

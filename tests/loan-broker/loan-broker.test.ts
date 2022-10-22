@@ -14,29 +14,27 @@ import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
 import { getQuoteSubmittedEvent } from '../lib/utils';
-import QuoteProcessorTestStack from './QuoteProcessorTestStack';
-import { MockLenderResponse } from './QuoteProcessorTestStack.MockLender';
+import LoanBrokerTestStack from './LoanBrokerTestStack';
+import { MockLenderResponse } from './LoanBrokerTestStack.MockLender';
 
 jest.setTimeout(2 * 60 * 1000);
 
-describe('QuoteProcessor Tests', () => {
+describe('LoanBroker Tests', () => {
   //
   const testClient = new IntegrationTestClient({
-    testStackId: QuoteProcessorTestStack.Id,
+    testStackId: LoanBrokerTestStack.Id,
   });
 
   let dataBucket: S3TestClient;
-  let applicationEventBus: EventBridgeTestClient;
+  let loanBrokerEventBus: EventBridgeTestClient;
 
   beforeAll(async () => {
     await testClient.initialiseClientAsync();
 
-    dataBucket = testClient.getS3TestClient(
-      QuoteProcessorTestStack.DataBucketId
-    );
+    dataBucket = testClient.getS3TestClient(LoanBrokerTestStack.DataBucketId);
 
-    applicationEventBus = testClient.getEventBridgeTestClient(
-      QuoteProcessorTestStack.ApplicationEventBusId
+    loanBrokerEventBus = testClient.getEventBridgeTestClient(
+      LoanBrokerTestStack.LoanBrokerEventBusId
     );
   });
 
@@ -68,18 +66,18 @@ describe('QuoteProcessor Tests', () => {
     };
 
     const lenderResponses: Record<string, MockLenderResponse> = {
-      [QuoteProcessorTestStack.LENDER_1_ID]: {
+      [LoanBrokerTestStack.LENDER_1_ID]: {
         resultType: 'SUCCEEDED',
         lenderRate: {
-          lenderId: QuoteProcessorTestStack.LENDER_1_ID,
+          lenderId: LoanBrokerTestStack.LENDER_1_ID,
           lenderName: 'Lender One',
           rate: 3,
         },
       },
-      [QuoteProcessorTestStack.LENDER_2_ID]: {
+      [LoanBrokerTestStack.LENDER_2_ID]: {
         resultType: 'SUCCEEDED',
         lenderRate: {
-          lenderId: QuoteProcessorTestStack.LENDER_2_ID,
+          lenderId: LoanBrokerTestStack.LENDER_2_ID,
           lenderName: 'Lender Two',
           rate: 2,
         },
@@ -98,7 +96,7 @@ describe('QuoteProcessor Tests', () => {
     // Act
 
     await putDomainEventAsync({
-      eventBusName: applicationEventBus.eventBusArn,
+      eventBusName: loanBrokerEventBus.eventBusArn,
       detailType: EventDetailType.QuoteSubmitted,
       event: quoteSubmitted,
     });
@@ -107,7 +105,7 @@ describe('QuoteProcessor Tests', () => {
 
     const { observations: quoteProcessedObservations, timedOut } =
       await testClient.pollTestAsync({
-        filterById: QuoteProcessorTestStack.QuoteProcessedObserverId,
+        filterById: LoanBrokerTestStack.QuoteProcessedObserverId,
         until: async (o) => o.length > 0,
         timeoutSeconds: 30,
       });
@@ -137,7 +135,7 @@ describe('QuoteProcessor Tests', () => {
     expect(quoteProcessed.data.loanDetails).toEqual(quoteRequest.loanDetails);
 
     expect(quoteProcessed.data.bestLenderRate).toEqual(
-      lenderResponses[QuoteProcessorTestStack.LENDER_2_ID].lenderRate
+      lenderResponses[LoanBrokerTestStack.LENDER_2_ID].lenderRate
     );
   });
 });

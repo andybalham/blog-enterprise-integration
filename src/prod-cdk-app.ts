@@ -1,36 +1,35 @@
 /* eslint-disable no-new */
 import * as cdk from 'aws-cdk-lib';
-import DataStack from './stacks/DataStack';
-import ApplicationStack from './stacks/ApplicationStack';
+import LoanBrokerStack from './stacks/LoanBrokerStack';
 import MessagingStack from './stacks/MessagingStack';
-import LenderStack from './stacks/LenderStack';
+import LenderGatewayStack from './stacks/LenderGatewayStack';
 import WebhookStack from './stacks/WebhookStack';
 import CreditBureauStack from './stacks/CreditBureauStack';
+import RequestApiStack from './stacks/RequestApiStack';
 
 const LENDERS_PARAMETER_PATH_PREFIX = 'prod-lenders';
 
 const app = new cdk.App();
 cdk.Tags.of(app).add('app', 'LoanBrokerProd');
 
-const dataStack = new DataStack(app, 'DataStack');
-
 const messagingStack = new MessagingStack(app, 'MessagingStack');
 
-new ApplicationStack(app, 'ApplicationStack', {
+new LoanBrokerStack(app, 'LoanBrokerStack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
-  applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.quoteProcessorBucket,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
+});
+
+new RequestApiStack(app, 'RequestApiStack', {
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
 });
 
 new CreditBureauStack(app, 'CreditBureauStack', {
-  applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.creditBureauBucket,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
 });
 
-new LenderStack(app, 'Lender666Stack', {
+new LenderGatewayStack(app, 'Lender666Stack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
-  applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.lenderGatewayBucket,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
   lenderConfig: {
     lenderId: 'Lender666',
     lenderName: 'Six-Six-Six Money',
@@ -43,10 +42,9 @@ new LenderStack(app, 'Lender666Stack', {
   },
 });
 
-new LenderStack(app, 'LenderSteadyStack', {
+new LenderGatewayStack(app, 'LenderSteadyStack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
-  applicationEventBus: messagingStack.applicationEventBus,
-  dataBucket: dataStack.lenderGatewayBucket,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
   lenderConfig: {
     lenderId: 'LenderSteady',
     lenderName: 'Steady Finance',
@@ -60,5 +58,5 @@ new LenderStack(app, 'LenderSteadyStack', {
 });
 
 new WebhookStack(app, 'WebhookStack', {
-  applicationEventBus: messagingStack.applicationEventBus,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
 });

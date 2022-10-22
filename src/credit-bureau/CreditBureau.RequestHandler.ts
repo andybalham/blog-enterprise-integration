@@ -18,8 +18,8 @@ import {
   putDomainEventAsync,
 } from '../lib/utils';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
+  CREDIT_BUREAU_DATA_BUCKET_NAME,
   TEST_FIRST_NAME,
   TEST_HIGH_CREDIT_SCORE,
   TEST_LAST_NAME_FAILED,
@@ -31,8 +31,8 @@ import {
   TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
 } from './constants';
 
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-const dataBucketName = process.env[DATA_BUCKET_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
+const dataBucketName = process.env[CREDIT_BUREAU_DATA_BUCKET_NAME];
 
 export const handler = async (
   event: EventBridgeEvent<'CreditReportRequested', CreditReportRequested>
@@ -74,11 +74,10 @@ async function handleRequestAsync(
 
   const { quoteReference } = creditReportRequested.data.request;
 
-  const creditReportDataUrl = await getDataUrlAsync({
-    bucketName: dataBucketName,
-    key: `${quoteReference}-credit-report.json`,
-    data: JSON.stringify(creditReport),
-  });
+  const creditReportDataUrl = await getCreditReportDataUrl(
+    quoteReference,
+    creditReport
+  );
 
   const creditReportReceived = {
     metadata: {
@@ -154,11 +153,10 @@ async function handleTestRequestAsync(
 
     const { quoteReference } = creditReportRequested.data.request;
 
-    const creditReportDataUrl = await getDataUrlAsync({
-      bucketName: dataBucketName,
-      key: `${quoteReference}/${quoteReference}-credit-report.json`,
-      data: JSON.stringify(creditReport),
-    });
+    const creditReportDataUrl = await getCreditReportDataUrl(
+      quoteReference,
+      creditReport
+    );
 
     creditReportReceived = {
       metadata: {
@@ -179,6 +177,17 @@ async function handleTestRequestAsync(
     eventBusName,
     detailType: EventDetailType.CreditReportReceived,
     event: creditReportReceived,
+  });
+}
+
+async function getCreditReportDataUrl(
+  quoteReference: string,
+  creditReport: CreditReport
+): Promise<string> {
+  return getDataUrlAsync({
+    bucketName: dataBucketName,
+    key: `${quoteReference}-credit-report.json`,
+    data: JSON.stringify(creditReport),
   });
 }
 

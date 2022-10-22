@@ -5,7 +5,7 @@ import {
 } from '../domain/domain-events';
 import { LenderRate, LenderRegisterEntry } from '../domain/domain-models';
 
-export interface QuoteProcessorState {
+export interface LoanBrokerState {
   quoteSubmitted: QuoteSubmitted;
   creditReportReceived?: CreditReportReceived;
   lenders?: LenderRegisterEntry[];

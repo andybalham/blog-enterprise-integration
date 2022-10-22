@@ -8,7 +8,7 @@ export enum EventDomain {
 
 export enum EventService {
   RequestApi = 'RequestApi',
-  QuoteProcessor = 'QuoteProcessor',
+  LoanBroker = 'LoanBroker',
   CreditBureau = 'CreditBureau',
   LenderGateway = 'LenderGateway',
 }

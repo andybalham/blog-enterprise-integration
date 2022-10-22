@@ -7,31 +7,31 @@ import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
-import QuoteProcessor from '../../src/quote-processor/QuoteProcessor';
+import LoanBroker from '../../src/loan-broker/LoanBroker';
 import {
   CREDIT_REPORT_REQUESTED_PATTERN,
   QUOTE_PROCESSED_PATTERN,
   LENDER_RATE_REQUESTED_PATTERN,
 } from '../../src/domain/domain-event-patterns';
 import {
-  APPLICATION_EVENT_BUS_NAME as CREDIT_BUREAU_APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME as CREDIT_BUREAU_DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS as CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS,
+  CREDIT_BUREAU_DATA_BUCKET_NAME,
 } from '../../src/credit-bureau/constants';
 import { LenderRegisterEntry } from '../../src/domain/domain-models';
 import {
-  APPLICATION_EVENT_BUS_NAME as LENDER_GATEWAY_APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME as LENDER_GATEWAY_DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS as LENDER_GATEWAY_LOAN_BROKER_EVENT_BUS,
+  LENDER_GATEWAY_DATA_BUCKET_NAME,
 } from '../../src/lender-gateway/constants';
 
 const lendersParameterPathPrefix = 'quote-processor-test-lenders';
 
-export default class QuoteProcessorTestStack extends IntegrationTestStack {
+export default class LoanBrokerTestStack extends IntegrationTestStack {
   //
-  static readonly Id = 'QuoteProcessorTestStack';
+  static readonly Id = 'LoanBrokerTestStack';
 
   static readonly DataBucketId = 'DataBucket';
 
-  static readonly ApplicationEventBusId = 'ApplicationEventBus';
+  static readonly LoanBrokerEventBusId = 'LoanBrokerEventBus';
 
   static readonly QuoteProcessedObserverId = 'QuoteProcessedObserver';
 
@@ -49,10 +49,10 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
   constructor(scope: Construct, id: string) {
     super(scope, id, {
-      testStackId: QuoteProcessorTestStack.Id,
+      testStackId: LoanBrokerTestStack.Id,
       testFunctionIds: [
-        QuoteProcessorTestStack.QuoteProcessedObserverId,
-        QuoteProcessorTestStack.RateRequestedObserverId,
+        LoanBrokerTestStack.QuoteProcessedObserverId,
+        LoanBrokerTestStack.RateRequestedObserverId,
       ],
     });
 
@@ -72,17 +72,17 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
 
     const eventBus = new EventBus(
       this,
-      QuoteProcessorTestStack.ApplicationEventBusId
+      LoanBrokerTestStack.LoanBrokerEventBusId
     );
 
     // Mock credit bureau
 
     const mockCreditBureauFunction = new NodejsFunction(
       this,
-      QuoteProcessorTestStack.MockCreditBureauId,
+      LoanBrokerTestStack.MockCreditBureauId,
       {
         environment: {
-          [CREDIT_BUREAU_APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
+          [CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS]: eventBus.eventBusArn,
           [CREDIT_BUREAU_DATA_BUCKET_NAME]: bucket.bucketName,
         },
         logRetention: RetentionDays.ONE_DAY,
@@ -100,17 +100,17 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
         eventBus,
         CREDIT_REPORT_REQUESTED_PATTERN
       ),
-      QuoteProcessorTestStack.MockCreditBureauId
+      LoanBrokerTestStack.MockCreditBureauId
     );
 
     // Mock lender
 
     const mockLenderFunction = new NodejsFunction(
       this,
-      QuoteProcessorTestStack.MockLenderId,
+      LoanBrokerTestStack.MockLenderId,
       {
         environment: {
-          [LENDER_GATEWAY_APPLICATION_EVENT_BUS_NAME]: eventBus.eventBusArn,
+          [LENDER_GATEWAY_LOAN_BROKER_EVENT_BUS]: eventBus.eventBusArn,
           [LENDER_GATEWAY_DATA_BUCKET_NAME]: bucket.bucketName,
         },
         logRetention: RetentionDays.ONE_DAY,
@@ -128,22 +128,22 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
         eventBus,
         LENDER_RATE_REQUESTED_PATTERN
       ),
-      QuoteProcessorTestStack.MockLenderId
+      LoanBrokerTestStack.MockLenderId
     );
 
     // Add SSM parameters for our test lenders
 
     const lenderRegisterEntries: LenderRegisterEntry[] = [
       {
-        lenderId: QuoteProcessorTestStack.LENDER_1_ID,
+        lenderId: LoanBrokerTestStack.LENDER_1_ID,
         isEnabled: true,
       },
       {
-        lenderId: QuoteProcessorTestStack.LENDER_2_ID,
+        lenderId: LoanBrokerTestStack.LENDER_2_ID,
         isEnabled: true,
       },
       {
-        lenderId: QuoteProcessorTestStack.LENDER_3_ID,
+        lenderId: LoanBrokerTestStack.LENDER_3_ID,
         isEnabled: false,
       },
     ];
@@ -164,7 +164,7 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
         eventBus,
         LENDER_RATE_REQUESTED_PATTERN
       ),
-      QuoteProcessorTestStack.RateRequestedObserverId
+      LoanBrokerTestStack.RateRequestedObserverId
     );
 
     this.addEventBridgeRuleTargetFunction(
@@ -173,23 +173,20 @@ export default class QuoteProcessorTestStack extends IntegrationTestStack {
         eventBus,
         QUOTE_PROCESSED_PATTERN
       ),
-      QuoteProcessorTestStack.QuoteProcessedObserverId
+      LoanBrokerTestStack.QuoteProcessedObserverId
     );
 
     // SUT
 
-    new QuoteProcessor(this, 'SUT', {
-      applicationEventBus: eventBus,
+    new LoanBroker(this, 'SUT', {
+      loanBrokerEventBus: eventBus,
       dataBucket: bucket,
       lendersParameterPathPrefix,
     });
 
     // Tag resources for testing
 
-    this.addTestResourceTag(bucket, QuoteProcessorTestStack.DataBucketId);
-    this.addTestResourceTag(
-      eventBus,
-      QuoteProcessorTestStack.ApplicationEventBusId
-    );
+    this.addTestResourceTag(bucket, LoanBrokerTestStack.DataBucketId);
+    this.addTestResourceTag(eventBus, LoanBrokerTestStack.LoanBrokerEventBusId);
   }
 }

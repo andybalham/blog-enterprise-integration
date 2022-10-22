@@ -42,15 +42,15 @@ describe('CreditBureau tests', () => {
   });
 
   let dataBucket: S3TestClient;
-  let applicationEventBus: EventBridgeTestClient;
+  let loanBrokerEventBus: EventBridgeTestClient;
 
   beforeAll(async () => {
     await testClient.initialiseClientAsync();
 
     dataBucket = testClient.getS3TestClient(CreditBureauTestStack.DataBucketId);
 
-    applicationEventBus = testClient.getEventBridgeTestClient(
-      CreditBureauTestStack.ApplicationEventBusId
+    loanBrokerEventBus = testClient.getEventBridgeTestClient(
+      CreditBureauTestStack.LoanBrokerEventBusId
     );
   });
 
@@ -113,7 +113,7 @@ describe('CreditBureau tests', () => {
       const creditReportRequested: CreditReportRequested = {
         metadata: {
           domain: EventDomain.LoanBroker,
-          service: EventService.QuoteProcessor,
+          service: EventService.LoanBroker,
           correlationId: 'test-correlationId',
           requestId: 'test-requestId',
         },
@@ -129,7 +129,7 @@ describe('CreditBureau tests', () => {
       // Act
 
       await putDomainEventAsync({
-        eventBusName: applicationEventBus.eventBusArn,
+        eventBusName: loanBrokerEventBus.eventBusArn,
         detailType: EventDetailType.CreditReportRequested,
         event: creditReportRequested,
       });
@@ -230,7 +230,7 @@ describe('CreditBureau tests', () => {
     const creditReportRequested: CreditReportRequested = {
       metadata: {
         domain: EventDomain.LoanBroker,
-        service: EventService.QuoteProcessor,
+        service: EventService.LoanBroker,
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
       },
@@ -246,7 +246,7 @@ describe('CreditBureau tests', () => {
     // Act
 
     await putDomainEventAsync({
-      eventBusName: applicationEventBus.eventBusArn,
+      eventBusName: loanBrokerEventBus.eventBusArn,
       detailType: EventDetailType.CreditReportRequested,
       event: creditReportRequested,
     });

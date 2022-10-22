@@ -14,34 +14,34 @@ import {
   QUOTE_SUBMITTED_PATTERN,
 } from '../domain/domain-event-patterns';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
+  LOAN_BROKER_DATA_BUCKET_NAME,
   LENDERS_PARAMETER_PATH_PREFIX,
   STATE_MACHINE_ARN,
 } from './constants';
 
-export interface QuoteProcessorProps {
-  applicationEventBus: EventBus;
+export interface LoanBrokerProps {
+  loanBrokerEventBus: EventBus;
   dataBucket: Bucket;
   lendersParameterPathPrefix: string;
 }
 
-export default class QuoteProcessor extends Construct {
+export default class LoanBroker extends Construct {
   //
-  constructor(scope: Construct, id: string, props: QuoteProcessorProps) {
+  constructor(scope: Construct, id: string, props: LoanBrokerProps) {
     super(scope, id);
 
     // Response sender function
 
     const responseSenderFunction = new NodejsFunction(this, 'ResponseSender', {
       environment: {
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
-        [DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
+        [LOAN_BROKER_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
-    props.applicationEventBus.grantPutEventsTo(responseSenderFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(responseSenderFunction);
     props.dataBucket.grantReadWrite(responseSenderFunction);
 
     // Credit report requester
@@ -51,13 +51,13 @@ export default class QuoteProcessor extends Construct {
       'CreditReportRequester',
       {
         environment: {
-          [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
+          [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
         },
         logRetention: RetentionDays.ONE_DAY,
       }
     );
 
-    props.applicationEventBus.grantPutEventsTo(creditReportRequesterFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(creditReportRequesterFunction);
 
     // Lender reader
 
@@ -92,12 +92,12 @@ export default class QuoteProcessor extends Construct {
 
     const rateRequesterFunction = new NodejsFunction(this, 'RateRequester', {
       environment: {
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusName,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
-    props.applicationEventBus.grantPutEventsTo(rateRequesterFunction);
+    props.loanBrokerEventBus.grantPutEventsTo(rateRequesterFunction);
 
     // State machine
 
@@ -114,14 +114,14 @@ export default class QuoteProcessor extends Construct {
 
     const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
       environment: {
-        [APPLICATION_EVENT_BUS_NAME]: props.applicationEventBus.eventBusArn,
+        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
         [STATE_MACHINE_ARN]: stateMachine.stateMachineArn,
       },
       logRetention: RetentionDays.ONE_DAY,
     });
 
     const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
-      eventBus: props.applicationEventBus,
+      eventBus: props.loanBrokerEventBus,
       eventPattern: QUOTE_SUBMITTED_PATTERN,
     });
 
@@ -144,12 +144,12 @@ export default class QuoteProcessor extends Construct {
       }
     );
 
-    const quoteProcessorCallbackRule = new Rule(this, id, {
-      eventBus: props.applicationEventBus,
+    const loanBrokerCallbackRule = new Rule(this, id, {
+      eventBus: props.loanBrokerEventBus,
       eventPattern: QUOTE_PROCESSOR_CALLBACK_PATTERN,
     });
 
-    quoteProcessorCallbackRule.addTarget(
+    loanBrokerCallbackRule.addTarget(
       new LambdaFunctionTarget(callbackHandlerFunction)
     );
 

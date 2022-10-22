@@ -3,19 +3,19 @@ import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import CreditBureau from '../credit-bureau/CreditBureau';
 import { blogBucketProps } from '../lib/blog-props';
+import RequestApi from '../request-api/RequestApi';
 
-export interface CreditBureauStackProps extends StackProps {
+export interface RequestApiStackProps extends StackProps {
   loanBrokerEventBus: EventBus;
 }
 
-export default class CreditBureauStack extends Stack {
+export default class RequestApiStack extends Stack {
   //
-  constructor(scope: Construct, id: string, props: CreditBureauStackProps) {
+  constructor(scope: Construct, id: string, props: RequestApiStackProps) {
     super(scope, id, props);
 
-    const dataBucket = new Bucket(this, 'CreditBureauBucket', {
+    const dataBucket = new Bucket(this, 'RequestApiBucket', {
       ...blogBucketProps, // We wouldn't set these in production
       lifecycleRules: [
         {
@@ -24,7 +24,7 @@ export default class CreditBureauStack extends Stack {
       ],
     });
 
-    new CreditBureau(this, 'CreditBureau', {
+    new RequestApi(this, 'RequestApi', {
       loanBrokerEventBus: props.loanBrokerEventBus,
       dataBucket,
     });

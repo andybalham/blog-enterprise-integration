@@ -4,15 +4,15 @@
 import SSM from 'aws-sdk/clients/ssm';
 import { LenderRegisterEntry } from '../domain/domain-models';
 import { LENDERS_PARAMETER_PATH_PREFIX } from './constants';
-import { QuoteProcessorState } from './QuoteProcessorState';
+import { LoanBrokerState } from './LoanBrokerState';
 
 const ssm = new SSM();
 
 const lendersParameterPathPrefix = process.env[LENDERS_PARAMETER_PATH_PREFIX];
 
 export const handler = async (
-  state: QuoteProcessorState
-): Promise<QuoteProcessorState> => {
+  state: LoanBrokerState
+): Promise<LoanBrokerState> => {
   console.log(JSON.stringify({ event: state }, null, 2));
 
   if (lendersParameterPathPrefix === undefined)

@@ -15,11 +15,11 @@ import {
   EventService,
 } from '../domain/domain-events';
 
-export const DATA_BUCKET_NAME = 'DATA_BUCKET_NAME';
-export const APPLICATION_EVENT_BUS_NAME = 'APPLICATION_EVENT_BUS_NAME';
+export const REQUEST_API_DATA_BUCKET_NAME = 'REQUEST_API_DATA_BUCKET_NAME';
+export const LOAN_BROKER_EVENT_BUS = 'LOAN_BROKER_EVENT_BUS';
 
-const bucketName = process.env[DATA_BUCKET_NAME];
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
+const bucketName = process.env[REQUEST_API_DATA_BUCKET_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
@@ -36,7 +36,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   const quoteRequestDataUrl = await getDataUrlAsync({
     bucketName,
-    key: `${quoteReference}/${quoteReference}-quote-request.json`,
+    key: `${quoteReference}-quote-request.json`,
     data: event.body,
     expirySeconds: 5 * 60, // 5 minutes
   });

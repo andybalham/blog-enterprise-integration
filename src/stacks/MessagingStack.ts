@@ -4,12 +4,12 @@ import { Construct } from 'constructs';
 
 export default class MessagingStack extends Stack {
   //
-  readonly applicationEventBus: EventBus;
+  readonly loanBrokerEventBus: EventBus;
 
   constructor(scope: Construct, id: string) {
     //
     super(scope, id);
 
-    this.applicationEventBus = new EventBus(this, 'ApplicationEventBus');
+    this.loanBrokerEventBus = new EventBus(this, 'LoanBrokerEventBus');
   }
 }

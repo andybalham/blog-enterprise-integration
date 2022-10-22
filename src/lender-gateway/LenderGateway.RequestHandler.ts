@@ -21,15 +21,15 @@ import {
   putDomainEventAsync,
 } from '../lib/utils';
 import {
-  APPLICATION_EVENT_BUS_NAME,
-  DATA_BUCKET_NAME,
+  LOAN_BROKER_EVENT_BUS,
+  LENDER_GATEWAY_DATA_BUCKET_NAME,
   LENDER_CONFIG,
 } from './constants';
 import { LenderConfig } from './LenderGateway';
 
 const lenderConfigJson = process.env[LENDER_CONFIG];
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
-const dataBucketName = process.env[DATA_BUCKET_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
+const dataBucketName = process.env[LENDER_GATEWAY_DATA_BUCKET_NAME];
 
 export const handler = async (
   event: EventBridgeEvent<'LenderRateRequested', LenderRateRequested>
@@ -71,7 +71,7 @@ export const handler = async (
 
   const lenderRateDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
-    key: `${lenderConfig.lenderId}/${quoteReference}-quote-${lenderConfig.lenderId}.json`,
+    key: `${quoteReference}-quote-${lenderConfig.lenderId}.json`,
     data: JSON.stringify(lenderRate),
   });
 

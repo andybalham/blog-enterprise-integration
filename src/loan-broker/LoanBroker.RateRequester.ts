@@ -7,10 +7,10 @@ import {
   LenderRateRequested,
 } from '../domain/domain-events';
 import { putDomainEventAsync } from '../lib/utils';
-import { APPLICATION_EVENT_BUS_NAME } from './constants';
-import { QuoteRequestState } from './QuoteProcessorState';
+import { LOAN_BROKER_EVENT_BUS } from './constants';
+import { QuoteRequestState } from './LoanBrokerState';
 
-const eventBusName = process.env[APPLICATION_EVENT_BUS_NAME];
+const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 
 export const handler = async (event: QuoteRequestState): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
@@ -20,7 +20,7 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
   const lenderRateRequested: LenderRateRequested = {
     metadata: {
       domain: EventDomain.LoanBroker,
-      service: EventService.QuoteProcessor,
+      service: EventService.LoanBroker,
       correlationId: event.quoteSubmitted.metadata.correlationId,
       requestId: event.quoteSubmitted.metadata.requestId,
     },
