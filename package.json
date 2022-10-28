@@ -41,14 +41,8 @@
     "webhook-synth": "cdk synth WebhookStack > .cdk-synth.yml",
     "webhook-deploy": "cdk deploy WebhookStack",
     "webhook-destroy": "cdk destroy WebhookStack",
-    "lender-steady-synth": "cdk synth LenderSteadyStack > .cdk-synth.yml",
-    "lender-steady-deploy": "cdk deploy LenderSteadyStack",
-    "lender-steady-destroy": "cdk destroy LenderSteadyStack",
-    "lender666-synth": "cdk synth Lender666Stack > .cdk-synth.yml",
-    "lender666-deploy": "cdk deploy Lender666Stack",
-    "lender666-destroy": "cdk destroy Lender666Stack",
     "application-deploy": "cdk deploy LoanBrokerStack RequestApiStack CreditBureauStack WebhookStack",
-    "lenders-deploy": "cdk deploy LenderSteadyStack Lender666Stack",
+    "lenders-deploy": "cdk deploy LenderSteadyStack Lender666Stack LenderSmallBundlesStack",
     "destroy-all": "cdk destroy --all"
   },
   "repository": {

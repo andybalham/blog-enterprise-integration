@@ -42,6 +42,21 @@ new LenderGatewayStack(app, 'Lender666Stack', {
   },
 });
 
+new LenderGatewayStack(app, 'LenderSmallBundlesStack', {
+  lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
+  loanBrokerEventBus: messagingStack.loanBrokerEventBus,
+  lenderConfig: {
+    lenderId: 'LenderSmallBundles',
+    lenderName: 'Small Bundles',
+    rate: 5,
+    allowBankruptcies: true,
+    allowNotOnElectoralRoll: true,
+    minimumCreditScore: 250,
+    minimumTermMonths: 3,
+    maximumAmount: 2000,
+  },
+});
+
 new LenderGatewayStack(app, 'LenderSteadyStack', {
   lendersParameterPathPrefix: LENDERS_PARAMETER_PATH_PREFIX,
   loanBrokerEventBus: messagingStack.loanBrokerEventBus,
