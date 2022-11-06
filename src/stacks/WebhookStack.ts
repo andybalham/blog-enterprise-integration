@@ -6,7 +6,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import dotenv from 'dotenv';
-import { QUOTE_PROCESSED_PATTERN } from '../domain/domain-event-patterns';
+import { QUOTE_PROCESSED_PATTERN_V1 } from '../domain/domain-event-patterns';
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ export default class WebhookStack extends Stack {
 
     const quoteProcessedCallbackRule = new Rule(this, id, {
       eventBus: props.loanBrokerEventBus,
-      eventPattern: QUOTE_PROCESSED_PATTERN,
+      eventPattern: QUOTE_PROCESSED_PATTERN_V1,
     });
 
     quoteProcessedCallbackRule.addTarget(

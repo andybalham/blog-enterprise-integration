@@ -5,7 +5,7 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { getLenderRateRequestedPattern } from '../domain/domain-event-patterns';
+import { getLenderRateRequestedV1Pattern } from '../domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS,
   LENDER_GATEWAY_DATA_BUCKET_NAME,
@@ -49,7 +49,7 @@ export default class LenderGateway extends Construct {
       'LenderRateRequestedPattern',
       {
         eventBus: props.loanBrokerEventBus,
-        eventPattern: getLenderRateRequestedPattern(
+        eventPattern: getLenderRateRequestedV1Pattern(
           props.lenderConfig.lenderId
         ),
       }

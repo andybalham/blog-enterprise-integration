@@ -8,20 +8,24 @@ import {
 } from '../../src/credit-bureau/constants';
 import { QuoteRequest } from '../../src/domain/domain-models';
 
+export const emptyLoanDetails = {
+  amount: 0,
+  termMonths: 0,
+};
+
+export const emptyPersonalDetails = {
+  firstName: '',
+  lastName: '',
+  niNumber: '',
+  address: {
+    lines: [],
+    postcode: '',
+  },
+};
+
 export const emptyQuoteRequest: QuoteRequest = {
-  loanDetails: {
-    amount: 0,
-    termMonths: 0,
-  },
-  personalDetails: {
-    firstName: '',
-    lastName: '',
-    niNumber: '',
-    address: {
-      lines: [],
-      postcode: '',
-    },
-  },
+  loanDetails: emptyLoanDetails,
+  personalDetails: emptyPersonalDetails,
 };
 
 export const defaultTestQuoteRequest: QuoteRequest = {

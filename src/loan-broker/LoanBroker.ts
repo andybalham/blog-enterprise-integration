@@ -10,8 +10,8 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { IChainable, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import {
-  QUOTE_PROCESSOR_CALLBACK_PATTERN,
-  QUOTE_SUBMITTED_PATTERN,
+  LOAN_BROKER_CALLBACK_PATTERN_V1,
+  QUOTE_SUBMITTED_PATTERN_V1,
 } from '../domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS,
@@ -122,7 +122,7 @@ export default class LoanBroker extends Construct {
 
     const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
       eventBus: props.loanBrokerEventBus,
-      eventPattern: QUOTE_SUBMITTED_PATTERN,
+      eventPattern: QUOTE_SUBMITTED_PATTERN_V1,
     });
 
     quoteSubmittedRule.addTarget(
@@ -146,7 +146,7 @@ export default class LoanBroker extends Construct {
 
     const loanBrokerCallbackRule = new Rule(this, id, {
       eventBus: props.loanBrokerEventBus,
-      eventPattern: QUOTE_PROCESSOR_CALLBACK_PATTERN,
+      eventPattern: LOAN_BROKER_CALLBACK_PATTERN_V1,
     });
 
     loanBrokerCallbackRule.addTarget(

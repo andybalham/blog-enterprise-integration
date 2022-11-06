@@ -9,9 +9,9 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import LoanBroker from '../../src/loan-broker/LoanBroker';
 import {
-  CREDIT_REPORT_REQUESTED_PATTERN,
-  QUOTE_PROCESSED_PATTERN,
-  LENDER_RATE_REQUESTED_PATTERN,
+  CREDIT_REPORT_REQUESTED_PATTERN_V1,
+  QUOTE_PROCESSED_PATTERN_V1,
+  LENDER_RATE_REQUESTED_PATTERN_V1,
 } from '../../src/domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS as CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS,
@@ -98,7 +98,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'CreditReportRequestedMockRule',
         eventBus,
-        CREDIT_REPORT_REQUESTED_PATTERN
+        CREDIT_REPORT_REQUESTED_PATTERN_V1
       ),
       LoanBrokerTestStack.MockCreditBureauId
     );
@@ -126,7 +126,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'RateRequestedMockRule',
         eventBus,
-        LENDER_RATE_REQUESTED_PATTERN
+        LENDER_RATE_REQUESTED_PATTERN_V1
       ),
       LoanBrokerTestStack.MockLenderId
     );
@@ -162,7 +162,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'RateRequestedRule',
         eventBus,
-        LENDER_RATE_REQUESTED_PATTERN
+        LENDER_RATE_REQUESTED_PATTERN_V1
       ),
       LoanBrokerTestStack.RateRequestedObserverId
     );
@@ -171,7 +171,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'QuoteProcessedRule',
         eventBus,
-        QUOTE_PROCESSED_PATTERN
+        QUOTE_PROCESSED_PATTERN_V1
       ),
       LoanBrokerTestStack.QuoteProcessedObserverId
     );

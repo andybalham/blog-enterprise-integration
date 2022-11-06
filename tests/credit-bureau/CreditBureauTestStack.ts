@@ -5,7 +5,7 @@ import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import CreditBureau from '../../src/credit-bureau/CreditBureau';
-import { CREDIT_REPORT_RECEIVED_PATTERN } from '../../src/domain/domain-event-patterns';
+import { CREDIT_REPORT_RECEIVED_PATTERN_V1 } from '../../src/domain/domain-event-patterns';
 
 export default class CreditBureauTestStack extends IntegrationTestStack {
   //
@@ -42,7 +42,7 @@ export default class CreditBureauTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'Rule',
         eventBus,
-        CREDIT_REPORT_RECEIVED_PATTERN
+        CREDIT_REPORT_RECEIVED_PATTERN_V1
       ),
       CreditBureauTestStack.EventObserverId
     );

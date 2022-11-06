@@ -7,7 +7,7 @@ import { Construct } from 'constructs';
 import LenderGateway, {
   LenderConfig,
 } from '../../src/lender-gateway/LenderGateway';
-import { LENDER_RATE_RECEIVED_PATTERN } from '../../src/domain/domain-event-patterns';
+import { LENDER_RATE_RECEIVED_PATTERN_V1 } from '../../src/domain/domain-event-patterns';
 
 export const TEST_LENDER_ID = 'test-lender-id';
 
@@ -56,7 +56,7 @@ export default class LenderGatewayTestStack extends IntegrationTestStack {
       this.addEventBridgePatternRule(
         'Rule',
         loanBrokerEventBus,
-        LENDER_RATE_RECEIVED_PATTERN
+        LENDER_RATE_RECEIVED_PATTERN_V1
       ),
       LenderGatewayTestStack.EventObserverId
     );
