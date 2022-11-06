@@ -7,11 +7,11 @@ import {
 import { EventBridgeEvent } from 'aws-lambda';
 import SSM from 'aws-sdk/clients/ssm';
 import {
-  LenderRateReceived,
-  LenderRateRequested,
-  EventDetailType,
+  LenderRateReceivedV1,
+  EventType,
   EventDomain,
   EventService,
+  newLenderRateRequestedV1,
 } from '../../src/domain/domain-events';
 import {
   CreditReport,
@@ -114,12 +114,14 @@ describe('LenderGateway tests', () => {
       expirySeconds: 5 * 60,
     });
 
-    const lenderRateRequested: LenderRateRequested = {
-      metadata: {
-        domain: EventDomain.LoanBroker,
-        service: EventService.LoanBroker,
+    const lenderRateRequested = newLenderRateRequestedV1({
+      context: {
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LoanBroker,
       },
       data: {
         request: {
@@ -130,14 +132,13 @@ describe('LenderGateway tests', () => {
         },
         taskToken: 'test-task-token',
       },
-    };
+    });
 
     // Act
 
     await putDomainEventAsync({
       eventBusName: loanBrokerEventBus.eventBusArn,
-      detailType: EventDetailType.LenderRateRequested,
-      event: lenderRateRequested,
+      domainEvent: lenderRateRequested,
     });
 
     // Await
@@ -152,10 +153,10 @@ describe('LenderGateway tests', () => {
 
     const firstEvent = observations[0].data as EventBridgeEvent<
       'LenderRateReceived',
-      LenderRateReceived
+      LenderRateReceivedV1
     >;
 
-    expect(firstEvent['detail-type']).toBe(EventDetailType.LenderRateReceived);
+    expect(firstEvent['detail-type']).toBe(EventType.LenderRateReceived);
 
     expect(firstEvent.detail.metadata.correlationId).toBe(
       lenderRateRequested.metadata.correlationId

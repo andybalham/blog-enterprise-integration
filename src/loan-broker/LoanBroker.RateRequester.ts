@@ -1,10 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 import {
-  EventDetailType,
   EventDomain,
   EventService,
-  LenderRateRequested,
+  newLenderRateRequestedV1,
 } from '../domain/domain-events';
 import { putDomainEventAsync } from '../lib/utils';
 import { LOAN_BROKER_EVENT_BUS } from './constants';
@@ -17,12 +16,11 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
 
   // TODO 06Oct22: Assert creditReportDataUrl is not null?
 
-  const lenderRateRequested: LenderRateRequested = {
-    metadata: {
+  const lenderRateRequested = newLenderRateRequestedV1({
+    context: event.quoteSubmitted.metadata,
+    origin: {
       domain: EventDomain.LoanBroker,
       service: EventService.LoanBroker,
-      correlationId: event.quoteSubmitted.metadata.correlationId,
-      requestId: event.quoteSubmitted.metadata.requestId,
     },
     data: {
       request: {
@@ -35,11 +33,10 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
       },
       taskToken: event.taskToken,
     },
-  };
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.LenderRateRequested,
-    event: lenderRateRequested,
+    domainEvent: lenderRateRequested,
   });
 };

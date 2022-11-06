@@ -8,11 +8,10 @@ import {
   CREDIT_BUREAU_DATA_BUCKET_NAME,
 } from '../../src/credit-bureau/constants';
 import {
-  CreditReportReceived,
-  CreditReportRequested,
-  EventDetailType,
+  CreditReportRequestedV1,
   EventDomain,
   EventService,
+  newCreditReportReceivedV1,
 } from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import {
@@ -27,7 +26,7 @@ const dataBucketName = process.env[CREDIT_BUREAU_DATA_BUCKET_NAME];
 const documentClient = new DocumentClient();
 
 export const handler = async (
-  event: EventBridgeEvent<'CreditReportRequested', CreditReportRequested>
+  event: EventBridgeEvent<'CreditReportRequested', CreditReportRequestedV1>
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
@@ -56,12 +55,14 @@ export const handler = async (
     data: JSON.stringify(creditReport),
   });
 
-  const creditReportReceived: CreditReportReceived = {
-    metadata: {
-      domain: EventDomain.LoanBroker,
-      service: EventService.CreditBureau,
+  const creditReportReceived = newCreditReportReceivedV1({
+    context: {
       correlationId: event.detail.metadata.correlationId,
       requestId: event.detail.metadata.requestId,
+    },
+    origin: {
+      domain: EventDomain.LoanBroker,
+      service: EventService.CreditBureau,
     },
     data: {
       resultType: creditReportResultType,
@@ -70,13 +71,12 @@ export const handler = async (
         creditReportDataUrl,
       },
     },
-  };
+  });
 
   console.log(JSON.stringify({ creditReportReceived }, null, 2));
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.CreditReportReceived,
-    event: creditReportReceived,
+    domainEvent: creditReportReceived,
   });
 };

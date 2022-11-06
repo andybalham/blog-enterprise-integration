@@ -7,7 +7,7 @@ import EventBridge, {
   PutEventsRequestEntry,
   PutEventsResponse,
 } from 'aws-sdk/clients/eventbridge';
-import { DomainEvent, EventDetailType } from '../domain/domain-events';
+import { DomainEvent } from '../domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3();
@@ -63,19 +63,17 @@ export const getDataUrlAsync = async ({
 
 export const putDomainEventAsync = async <T extends Record<string, any>>({
   eventBusName,
-  detailType,
-  event: domainEvent,
+  domainEvent,
 }: {
   eventBusName?: string;
-  detailType: EventDetailType;
-  event: DomainEvent<T>;
+  domainEvent: DomainEvent<T>;
 }): Promise<PutEventsResponse> => {
   //
   if (eventBusName === undefined) throw new Error('eventBusName === undefined');
 
   const requestEntry: PutEventsRequestEntry = {
     Source: `${domainEvent.metadata.domain}.${domainEvent.metadata.service}`,
-    DetailType: detailType,
+    DetailType: domainEvent.metadata.eventType,
     Detail: JSON.stringify(domainEvent),
     EventBusName: eventBusName,
   };

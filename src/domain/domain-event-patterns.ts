@@ -1,30 +1,27 @@
-import { EventDetailType } from './domain-events';
+import { EventType } from './domain-events';
 
 export const QUOTE_PROCESSED_PATTERN = {
-  detailType: [EventDetailType.QuoteProcessed],
+  detailType: [EventType.QuoteProcessed],
 };
 
 export const QUOTE_SUBMITTED_PATTERN = {
-  detailType: [EventDetailType.QuoteSubmitted],
+  detailType: [EventType.QuoteSubmitted],
 };
 
 export const CREDIT_REPORT_REQUESTED_PATTERN = {
-  detailType: [EventDetailType.CreditReportRequested],
+  detailType: [EventType.CreditReportRequested],
 };
 
 export const CREDIT_REPORT_RECEIVED_PATTERN = {
-  detailType: [EventDetailType.CreditReportReceived],
+  detailType: [EventType.CreditReportReceived],
 };
 
 export const QUOTE_PROCESSOR_CALLBACK_PATTERN = {
-  detailType: [
-    EventDetailType.CreditReportReceived,
-    EventDetailType.LenderRateReceived,
-  ],
+  detailType: [EventType.CreditReportReceived, EventType.LenderRateReceived],
 };
 
 export const LENDER_RATE_REQUESTED_PATTERN = {
-  detailType: [EventDetailType.LenderRateRequested],
+  detailType: [EventType.LenderRateRequested],
 };
 
 export const getLenderRateRequestedPattern = (
@@ -37,5 +34,5 @@ export const getLenderRateRequestedPattern = (
 });
 
 export const LENDER_RATE_RECEIVED_PATTERN = {
-  detailType: [EventDetailType.LenderRateReceived],
+  detailType: [EventType.LenderRateReceived],
 };

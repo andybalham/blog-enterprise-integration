@@ -1,14 +1,11 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
-
 import { EventBridgeEvent } from 'aws-lambda';
 import {
-  EventDetailType,
   EventDomain,
   EventService,
-  LenderRateReceived,
-  LenderRateRequested,
+  LenderRateRequestedV1,
+  newLenderRateReceivedV1,
 } from '../domain/domain-events';
 import {
   CreditReport,
@@ -32,7 +29,7 @@ const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 const dataBucketName = process.env[LENDER_GATEWAY_DATA_BUCKET_NAME];
 
 export const handler = async (
-  event: EventBridgeEvent<'LenderRateRequested', LenderRateRequested>
+  event: EventBridgeEvent<'LenderRateRequested', LenderRateRequestedV1>
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
@@ -75,12 +72,11 @@ export const handler = async (
     data: JSON.stringify(lenderRate),
   });
 
-  const lenderRateReceived: LenderRateReceived = {
-    metadata: {
+  const lenderRateReceived = newLenderRateReceivedV1({
+    context: event.detail.metadata,
+    origin: {
       domain: EventDomain.LoanBroker,
       service: EventService.CreditBureau,
-      correlationId: event.detail.metadata.correlationId,
-      requestId: event.detail.metadata.requestId,
     },
     data: {
       resultType: 'SUCCEEDED',
@@ -90,11 +86,10 @@ export const handler = async (
         lenderRateDataUrl,
       },
     },
-  };
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.LenderRateReceived,
-    event: lenderRateReceived,
+    domainEvent: lenderRateReceived,
   });
 };

@@ -6,7 +6,7 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import RequestApi from '../../src/request-api/RequestApi';
-import { EventDetailType } from '../../src/domain/domain-events';
+import { EventType } from '../../src/domain/domain-events';
 
 export default class RequestApiTestStack extends IntegrationTestStack {
   //
@@ -42,7 +42,7 @@ export default class RequestApiTestStack extends IntegrationTestStack {
 
     this.addEventBridgeRuleTargetFunction(
       this.addEventBridgePatternRule('Rule', eventBus, {
-        detailType: [EventDetailType.QuoteSubmitted],
+        detailType: [EventType.QuoteSubmitted],
       }),
       RequestApiTestStack.EventObserverId
     );

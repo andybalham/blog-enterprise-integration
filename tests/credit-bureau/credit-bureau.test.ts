@@ -11,11 +11,11 @@ import {
   TEST_MEDIUM_CREDIT_SCORE,
 } from '../../src/credit-bureau/constants';
 import {
-  CreditReportReceived,
-  CreditReportRequested,
-  EventDetailType,
+  CreditReportReceivedV1,
+  EventType,
   EventDomain,
   EventService,
+  newCreditReportRequestedV1,
 } from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import {
@@ -110,12 +110,14 @@ describe('CreditBureau tests', () => {
         expirySeconds: 5 * 60,
       });
 
-      const creditReportRequested: CreditReportRequested = {
-        metadata: {
-          domain: EventDomain.LoanBroker,
-          service: EventService.LoanBroker,
+      const creditReportRequested = newCreditReportRequestedV1({
+        context: {
           correlationId: 'test-correlationId',
           requestId: 'test-requestId',
+        },
+        origin: {
+          domain: EventDomain.LoanBroker,
+          service: EventService.LoanBroker,
         },
         data: {
           request: {
@@ -124,14 +126,13 @@ describe('CreditBureau tests', () => {
           },
           taskToken: 'test-task-token',
         },
-      };
+      });
 
       // Act
 
       await putDomainEventAsync({
         eventBusName: loanBrokerEventBus.eventBusArn,
-        detailType: EventDetailType.CreditReportRequested,
-        event: creditReportRequested,
+        domainEvent: creditReportRequested,
       });
 
       // Await
@@ -146,12 +147,10 @@ describe('CreditBureau tests', () => {
 
       const firstEvent = observations[0].data as EventBridgeEvent<
         'CreditReportReceived',
-        CreditReportReceived
+        CreditReportReceivedV1
       >;
 
-      expect(firstEvent['detail-type']).toBe(
-        EventDetailType.CreditReportReceived
-      );
+      expect(firstEvent['detail-type']).toBe(EventType.CreditReportReceived);
 
       expect(firstEvent.detail.metadata.correlationId).toBe(
         creditReportRequested.metadata.correlationId
@@ -227,12 +226,14 @@ describe('CreditBureau tests', () => {
       expirySeconds: 5 * 60,
     });
 
-    const creditReportRequested: CreditReportRequested = {
-      metadata: {
-        domain: EventDomain.LoanBroker,
-        service: EventService.LoanBroker,
+    const creditReportRequested = newCreditReportRequestedV1({
+      context: {
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LoanBroker,
       },
       data: {
         request: {
@@ -241,14 +242,13 @@ describe('CreditBureau tests', () => {
         },
         taskToken: 'test-task-token',
       },
-    };
+    });
 
     // Act
 
     await putDomainEventAsync({
       eventBusName: loanBrokerEventBus.eventBusArn,
-      detailType: EventDetailType.CreditReportRequested,
-      event: creditReportRequested,
+      domainEvent: creditReportRequested,
     });
 
     // Await
@@ -263,12 +263,10 @@ describe('CreditBureau tests', () => {
 
     const firstEvent = observations[0].data as EventBridgeEvent<
       'CreditReportReceived',
-      CreditReportReceived
+      CreditReportReceivedV1
     >;
 
-    expect(firstEvent['detail-type']).toBe(
-      EventDetailType.CreditReportReceived
-    );
+    expect(firstEvent['detail-type']).toBe(EventType.CreditReportReceived);
 
     expect(firstEvent.detail.metadata.correlationId).toBe(
       creditReportRequested.metadata.correlationId

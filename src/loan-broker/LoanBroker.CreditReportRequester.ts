@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
-
 import {
-  EventDetailType,
-  CreditReportRequested,
+  EventDomain,
+  EventService,
+  newCreditReportRequestedV1,
 } from '../domain/domain-events';
 import { putDomainEventAsync } from '../lib/utils';
 import { LOAN_BROKER_EVENT_BUS } from './constants';
@@ -16,8 +16,11 @@ export const handler = async (event: Record<string, any>): Promise<void> => {
 
   const state = event.state as LoanBrokerState;
 
-  const creditReportRequested: CreditReportRequested = {
-    metadata: state.quoteSubmitted.metadata,
+  const creditReportRequested = newCreditReportRequestedV1({
+    origin: {
+      domain: EventDomain.LoanBroker,
+      service: EventService.LoanBroker,
+    },
     data: {
       request: {
         quoteReference: state.quoteSubmitted.data.quoteReference,
@@ -25,11 +28,11 @@ export const handler = async (event: Record<string, any>): Promise<void> => {
       },
       taskToken: event.taskToken,
     },
-  };
+    context: state.quoteSubmitted.metadata,
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.CreditReportRequested,
-    event: creditReportRequested,
+    domainEvent: creditReportRequested,
   });
 };

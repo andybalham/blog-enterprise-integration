@@ -10,9 +10,8 @@ import {
 } from '../lib/utils';
 import {
   EventDomain,
-  EventDetailType,
-  QuoteSubmitted,
   EventService,
+  newQuoteSubmittedV1,
 } from '../domain/domain-events';
 
 export const REQUEST_API_DATA_BUCKET_NAME = 'REQUEST_API_DATA_BUCKET_NAME';
@@ -45,10 +44,12 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
 
   const correlationId = event.headers['x-correlation-id'] ?? randomUUID();
 
-  const quoteSubmitted: QuoteSubmitted = {
-    metadata: {
+  const quoteSubmitted = newQuoteSubmittedV1({
+    context: {
       correlationId,
       requestId: event.requestContext.requestId,
+    },
+    origin: {
       domain: EventDomain.LoanBroker,
       service: EventService.RequestApi,
     },
@@ -56,12 +57,11 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
       quoteReference,
       quoteRequestDataUrl,
     },
-  };
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.QuoteSubmitted,
-    event: quoteSubmitted,
+    domainEvent: quoteSubmitted,
   });
 
   // Return the reference

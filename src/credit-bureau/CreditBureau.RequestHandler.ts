@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
-
 import { EventBridgeEvent } from 'aws-lambda';
 import crypto, { randomUUID } from 'crypto';
 import {
-  CreditReportReceived,
-  CreditReportRequested,
-  EventDetailType,
+  CreditReportReceivedV1,
+  CreditReportRequestedV1,
   EventDomain,
   EventService,
+  newCreditReportReceivedV1,
 } from '../domain/domain-events';
 import { CreditReport, QuoteRequest } from '../domain/domain-models';
 import {
@@ -35,7 +34,7 @@ const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 const dataBucketName = process.env[CREDIT_BUREAU_DATA_BUCKET_NAME];
 
 export const handler = async (
-  event: EventBridgeEvent<'CreditReportRequested', CreditReportRequested>
+  event: EventBridgeEvent<'CreditReportRequested', CreditReportRequestedV1>
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
@@ -56,9 +55,14 @@ export const handler = async (
   await handleRequestAsync(quoteRequest, event.detail);
 };
 
+const EVENT_ORIGIN = {
+  domain: EventDomain.LoanBroker,
+  service: EventService.CreditBureau,
+};
+
 async function handleRequestAsync(
   quoteRequest: QuoteRequest,
-  creditReportRequested: CreditReportRequested
+  creditReportRequested: CreditReportRequestedV1
 ): Promise<void> {
   const personalDetailsHash = crypto
     .createHash('sha256')
@@ -79,49 +83,40 @@ async function handleRequestAsync(
     creditReport
   );
 
-  const creditReportReceived = {
-    metadata: {
-      domain: EventDomain.LoanBroker,
-      service: EventService.CreditBureau,
-      correlationId: creditReportRequested.metadata.correlationId,
-      requestId: creditReportRequested.metadata.requestId,
-    },
+  const creditReportReceived = newCreditReportReceivedV1({
+    origin: EVENT_ORIGIN,
     data: {
       resultType: 'SUCCEEDED',
       taskToken: creditReportRequested.data.taskToken,
       response: { creditReportDataUrl },
     },
-  };
+    context: creditReportRequested.metadata,
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.CreditReportReceived,
-    event: creditReportReceived,
+    domainEvent: creditReportReceived,
   });
 }
 
 async function handleTestRequestAsync(
   quoteRequest: QuoteRequest,
-  creditReportRequested: CreditReportRequested
+  creditReportRequested: CreditReportRequestedV1
 ): Promise<void> {
   const isFailedRequest =
     quoteRequest.personalDetails.lastName === TEST_LAST_NAME_FAILED;
 
-  let creditReportReceived: CreditReportReceived;
+  let creditReportReceived: CreditReportReceivedV1;
 
   if (isFailedRequest) {
-    creditReportReceived = {
-      metadata: {
-        domain: EventDomain.LoanBroker,
-        service: EventService.CreditBureau,
-        correlationId: creditReportRequested.metadata.correlationId,
-        requestId: creditReportRequested.metadata.requestId,
-      },
+    creditReportReceived = newCreditReportReceivedV1({
+      origin: EVENT_ORIGIN,
       data: {
         resultType: 'FAILED',
         taskToken: creditReportRequested.data.taskToken,
       },
-    };
+      context: creditReportRequested.metadata,
+    });
   } else {
     //
     let creditScore = TEST_HIGH_CREDIT_SCORE;
@@ -158,25 +153,20 @@ async function handleTestRequestAsync(
       creditReport
     );
 
-    creditReportReceived = {
-      metadata: {
-        domain: EventDomain.LoanBroker,
-        service: EventService.CreditBureau,
-        correlationId: creditReportRequested.metadata.correlationId,
-        requestId: creditReportRequested.metadata.requestId,
-      },
+    creditReportReceived = newCreditReportReceivedV1({
+      origin: EVENT_ORIGIN,
       data: {
         resultType: 'SUCCEEDED',
         taskToken: creditReportRequested.data.taskToken,
         response: { creditReportDataUrl },
       },
-    };
+      context: creditReportRequested.metadata,
+    });
   }
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.CreditReportReceived,
-    event: creditReportReceived,
+    domainEvent: creditReportReceived,
   });
 }
 

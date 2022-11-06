@@ -1,11 +1,11 @@
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda';
 import axios from 'axios';
-import { QuoteProcessed } from '../domain/domain-events';
+import { QuoteProcessedV1 } from '../domain/domain-events';
 
 /* eslint-disable no-console */
 export const handler = async (
-  event: EventBridgeEvent<'QuoteProcessed', QuoteProcessed>
+  event: EventBridgeEvent<'QuoteProcessed', QuoteProcessedV1>
 ): Promise<any> => {
   console.log(JSON.stringify({ event }, null, 2));
 

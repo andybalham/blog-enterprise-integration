@@ -1,8 +1,11 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
-
 import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
-import { EventDetailType, QuoteProcessed } from '../domain/domain-events';
+import {
+  EventDomain,
+  EventService,
+  newQuoteProcessedV1,
+} from '../domain/domain-events';
 import { LenderRate, QuoteRequest } from '../domain/domain-models';
 import { fetchFromUrlAsync, putDomainEventAsync } from '../lib/utils';
 import {
@@ -59,19 +62,22 @@ export const handler = async (
     } as PutObjectRequest)
     .promise();
 
-  const quoteProcessed: QuoteProcessed = {
-    metadata: state.quoteSubmitted.metadata,
+  const quoteProcessed = newQuoteProcessedV1({
+    context: state.quoteSubmitted.metadata,
+    origin: {
+      domain: EventDomain.LoanBroker,
+      service: EventService.LoanBroker,
+    },
     data: {
       quoteReference: state.quoteSubmitted.data.quoteReference,
       loanDetails: quoteRequest.loanDetails,
       bestLenderRate,
     },
-  };
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.QuoteProcessed,
-    event: quoteProcessed,
+    domainEvent: quoteProcessed,
   });
 
   console.log(JSON.stringify({ quoteProcessed }, null, 2));

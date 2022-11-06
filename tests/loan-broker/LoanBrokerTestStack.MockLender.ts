@@ -4,11 +4,10 @@ import { getTestPropsAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLi
 import { EventBridgeEvent } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import {
-  LenderRateRequested,
-  LenderRateReceived,
+  LenderRateRequestedV1,
   EventDomain,
   EventService,
-  EventDetailType,
+  newLenderRateReceivedV1,
 } from '../../src/domain/domain-events';
 import { LenderRate } from '../../src/domain/domain-models';
 import {
@@ -28,7 +27,7 @@ export interface MockLenderResponse {
 }
 
 export const handler = async (
-  event: EventBridgeEvent<'RateRequested', LenderRateRequested>
+  event: EventBridgeEvent<'RateRequested', LenderRateRequestedV1>
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
@@ -58,12 +57,14 @@ export const handler = async (
     });
   }
 
-  const rateReceived: LenderRateReceived = {
-    metadata: {
-      domain: EventDomain.LoanBroker,
-      service: EventService.LenderGateway,
+  const rateReceived = newLenderRateReceivedV1({
+    context: {
       correlationId: event.detail.metadata.correlationId,
       requestId: event.detail.metadata.requestId,
+    },
+    origin: {
+      domain: EventDomain.LoanBroker,
+      service: EventService.LenderGateway,
     },
     data: {
       response: {
@@ -73,11 +74,10 @@ export const handler = async (
       resultType: lenderResponse.resultType,
       taskToken: event.detail.data.taskToken,
     },
-  };
+  });
 
   await putDomainEventAsync({
     eventBusName,
-    detailType: EventDetailType.CreditReportReceived,
-    event: rateReceived,
+    domainEvent: rateReceived,
   });
 };

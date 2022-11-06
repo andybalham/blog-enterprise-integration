@@ -4,7 +4,8 @@ import { S3TestClient } from '@andybalham/cdk-cloud-test-kit';
 import {
   EventDomain,
   EventService,
-  QuoteSubmitted,
+  newQuoteSubmittedV1,
+  QuoteSubmittedV1,
 } from '../../src/domain/domain-events';
 import { QuoteRequest } from '../../src/domain/domain-models';
 import { getDataUrlAsync } from '../../src/lib/utils';
@@ -12,7 +13,7 @@ import { getDataUrlAsync } from '../../src/lib/utils';
 export const getQuoteSubmittedEvent = async (
   dataBucket: S3TestClient,
   quoteRequest: QuoteRequest
-): Promise<QuoteSubmitted> => {
+): Promise<QuoteSubmittedV1> => {
   //
   const quoteRequestDataUrl = await getDataUrlAsync({
     bucketName: dataBucket.bucketName,
@@ -21,10 +22,12 @@ export const getQuoteSubmittedEvent = async (
     expirySeconds: 5 * 60,
   });
 
-  const quoteSubmitted: QuoteSubmitted = {
-    metadata: {
+  const quoteSubmitted = newQuoteSubmittedV1({
+    context: {
       correlationId: 'test-correlationId',
       requestId: 'test-requestId',
+    },
+    origin: {
       domain: EventDomain.LoanBroker,
       service: EventService.RequestApi,
     },
@@ -32,7 +35,7 @@ export const getQuoteSubmittedEvent = async (
       quoteReference: 'test-quoteReference',
       quoteRequestDataUrl,
     },
-  };
+  });
 
   return quoteSubmitted;
 };

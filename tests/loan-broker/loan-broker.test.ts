@@ -6,10 +6,7 @@ import {
   IntegrationTestClient,
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
-import {
-  EventDetailType,
-  QuoteProcessed,
-} from '../../src/domain/domain-events';
+import { EventType, QuoteProcessedV1 } from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
@@ -97,8 +94,7 @@ describe('LoanBroker Tests', () => {
 
     await putDomainEventAsync({
       eventBusName: loanBrokerEventBus.eventBusArn,
-      detailType: EventDetailType.QuoteSubmitted,
-      event: quoteSubmitted,
+      domainEvent: quoteSubmitted,
     });
 
     // Await
@@ -116,7 +112,7 @@ describe('LoanBroker Tests', () => {
 
     const observationData = quoteProcessedObservations[0].data;
 
-    expect(observationData['detail-type']).toBe(EventDetailType.QuoteProcessed);
+    expect(observationData['detail-type']).toBe(EventType.QuoteProcessed);
 
     expect(observationData.detail.metadata.correlationId).toBe(
       quoteSubmitted.metadata.correlationId
@@ -126,7 +122,7 @@ describe('LoanBroker Tests', () => {
       quoteSubmitted.metadata.requestId
     );
 
-    const quoteProcessed = observationData.detail as QuoteProcessed;
+    const quoteProcessed = observationData.detail as QuoteProcessedV1;
 
     expect(quoteProcessed.data.quoteReference).toBe(
       quoteSubmitted.data.quoteReference
