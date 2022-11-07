@@ -11,14 +11,30 @@ export const handler = async (
 ): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  // TODO 29Sep22: What about when the response should be an error?
+  if (event.detail.data.resultType === 'SUCCEEDED') {
+    //
+    const taskSuccessResponse = await stepFunctions
+      .sendTaskSuccess({
+        taskToken: event.detail.data.taskToken,
+        // TODO 07Nov22: Should this be the whole event detail or just the response?
+        output: JSON.stringify(event.detail),
+        // output: JSON.stringify(event.detail.data.response),
+      })
+      .promise();
 
-  const taskSuccessResponse = await stepFunctions
-    .sendTaskSuccess({
-      taskToken: event.detail.data.taskToken,
-      output: JSON.stringify(event.detail),
-    })
-    .promise();
+    console.log(JSON.stringify({ taskSuccessResponse }, null, 2));
+    //
+  } else {
+    //
+    const taskFailureResponse = await stepFunctions
+      .sendTaskFailure({
+        taskToken: event.detail.data.taskToken,
+        error: event.detail.data.error,
+      })
+      .promise();
 
-  console.log(JSON.stringify({ taskSuccessResponse }, null, 2));
+    console.log(
+      JSON.stringify({ taskSuccessResponse: taskFailureResponse }, null, 2)
+    );
+  }
 };

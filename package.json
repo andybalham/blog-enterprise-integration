@@ -59,6 +59,7 @@
     "@types/aws-lambda": "^8.10.81",
     "@types/jest": "^27.4.1",
     "@types/node": "^14.14.31",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "esbuild": "^0.12.17",
@@ -86,6 +87,7 @@
     "constructs": "^10.1.106",
     "dotenv": "^16.0.3",
     "nanoid": "^3.3.4",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "uuid": "^9.0.0"
   }
 }

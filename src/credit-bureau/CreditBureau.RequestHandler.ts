@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda';
-import crypto, { randomUUID } from 'crypto';
+import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreditReportReceivedV1,
   CreditReportRequestedV1,
@@ -70,7 +71,7 @@ async function handleRequestAsync(
     .digest('hex');
 
   const creditReport: CreditReport = {
-    reportReference: randomUUID(),
+    reportReference: uuidv4(),
     creditScore: getHashScore(personalDetailsHash, 0, 10, 1000),
     hasBankruptcies: getHashScore(personalDetailsHash, 10, 20, 100) > 80,
     onElectoralRoll: getHashScore(personalDetailsHash, 20, 30, 100) > 10,
@@ -113,6 +114,7 @@ async function handleTestRequestAsync(
       origin: EVENT_ORIGIN,
       data: {
         resultType: 'FAILED',
+        error: 'Test failure',
         taskToken: creditReportRequested.data.taskToken,
       },
       context: creditReportRequested.metadata,
@@ -136,7 +138,7 @@ async function handleTestRequestAsync(
       creditScore = TEST_LOW_CREDIT_SCORE;
 
     const creditReport: CreditReport = {
-      reportReference: randomUUID(),
+      reportReference: uuidv4(),
       creditScore,
       hasBankruptcies:
         quoteRequest.personalDetails.niNumber ===

@@ -66,14 +66,21 @@ export const handler = async (
       domain: EventDomain.LoanBroker,
       service: EventService.LenderGateway,
     },
-    data: {
-      response: {
-        lenderId,
-        lenderRateDataUrl: rateDataUrl,
-      },
-      resultType: lenderResponse.resultType,
-      taskToken: event.detail.data.taskToken,
-    },
+    data:
+      lenderResponse.resultType === 'SUCCEEDED'
+        ? {
+          response: {
+            lenderId,
+            lenderRateDataUrl: rateDataUrl,
+          },
+          resultType: lenderResponse.resultType,
+          taskToken: event.detail.data.taskToken,
+        }
+        : {
+          error: 'Mock error',
+          resultType: lenderResponse.resultType,
+          taskToken: event.detail.data.taskToken,
+        },
   });
 
   await putDomainEventAsync({

@@ -16,27 +16,31 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
 
   // TODO 06Oct22: Assert creditReportDataUrl is not null?
 
-  const lenderRateRequested = newLenderRateRequestedV1({
-    context: event.quoteSubmitted.metadata,
-    origin: {
-      domain: EventDomain.LoanBroker,
-      service: EventService.LoanBroker,
-    },
-    data: {
-      request: {
-        lenderId: event.lender.lenderId,
-        quoteReference: event.quoteSubmitted.data.quoteReference,
-        quoteRequestDataUrl: event.quoteSubmitted.data.quoteRequestDataUrl,
-        creditReportDataUrl:
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          event.creditReportReceived.data.response!.creditReportDataUrl!,
+  if (event.creditReportReceived.data.resultType === 'SUCCEEDED') {
+    const lenderRateRequested = newLenderRateRequestedV1({
+      context: event.quoteSubmitted.metadata,
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LoanBroker,
       },
-      taskToken: event.taskToken,
-    },
-  });
+      data: {
+        request: {
+          lenderId: event.lender.lenderId,
+          quoteReference: event.quoteSubmitted.data.quoteReference,
+          quoteRequestDataUrl: event.quoteSubmitted.data.quoteRequestDataUrl,
+          creditReportDataUrl:
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            event.creditReportReceived.data.response!.creditReportDataUrl!,
+        },
+        taskToken: event.taskToken,
+      },
+    });
 
-  await putDomainEventAsync({
-    eventBusName,
-    domainEvent: lenderRateRequested,
-  });
+    await putDomainEventAsync({
+      eventBusName,
+      domainEvent: lenderRateRequested,
+    });
+  } else {
+    // TODO 07Nov22: Handle the scenario where the credit report failed
+  }
 };

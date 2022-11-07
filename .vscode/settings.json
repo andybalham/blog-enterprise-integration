@@ -21,6 +21,7 @@
     "Runtimes",
     "stepfunctions",
     "TRes",
+    "uuidv",
     "vars"
   ],
   "workbench.colorCustomizations": {
@@ -35,7 +36,7 @@
       "terminal.background": "#eff8f8",
       "titleBar.activeBackground": "#008585",
       "titleBar.activeForeground": "#ffffff",
-      "sideBar.background": "#cde9e9",
+      "sideBar.background": "#def3f3",
       "activityBar.background": "#008585",
       "activityBar.activeBackground": "#00d4d4"
     }

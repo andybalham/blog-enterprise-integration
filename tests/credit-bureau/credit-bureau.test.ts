@@ -166,7 +166,7 @@ describe('CreditBureau tests', () => {
 
       expect(firstEvent.detail.data.resultType).toBe(theory.expectedResultType);
 
-      if (theory.expectedResultType === 'SUCCEEDED') {
+      if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
         //
         expect(
           firstEvent.detail.data.response?.creditReportDataUrl
@@ -193,9 +193,7 @@ describe('CreditBureau tests', () => {
         expect(firstEvent.detail.data.resultType).toBe(
           theory.expectedResultType
         );
-        expect(
-          firstEvent.detail.data.response?.creditReportDataUrl
-        ).toBeUndefined();
+        expect(firstEvent.detail.data.error).toBeDefined();
       }
     });
   });
@@ -280,6 +278,10 @@ describe('CreditBureau tests', () => {
       creditReportRequested.data.taskToken
     );
 
-    expect(firstEvent.detail.data.response).toBeDefined();
+    expect(firstEvent.detail.data.resultType).toBe('SUCCEEDED');
+
+    if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
+      expect(firstEvent.detail.data.response).toBeDefined();
+    }
   });
 });

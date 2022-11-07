@@ -170,13 +170,17 @@ describe('LenderGateway tests', () => {
       lenderRateRequested.data.taskToken
     );
 
-    expect(firstEvent.detail.data.response?.lenderRateDataUrl).toBeDefined();
+    expect(firstEvent.detail.data.resultType).toBe('SUCCEEDED');
 
-    const lenderRate = await fetchFromUrlAsync<LenderRate>(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      firstEvent.detail.data.response!.lenderRateDataUrl!
-    );
+    if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
+      expect(firstEvent.detail.data.response?.lenderRateDataUrl).toBeDefined();
 
-    expect(lenderRate.lenderId).toBe(TEST_LENDER_ID);
+      const lenderRate = await fetchFromUrlAsync<LenderRate>(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        firstEvent.detail.data.response!.lenderRateDataUrl!
+      );
+
+      expect(lenderRate.lenderId).toBe(TEST_LENDER_ID);
+    }
   });
 });

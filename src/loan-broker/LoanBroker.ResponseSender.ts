@@ -30,17 +30,23 @@ export const handler = async (
 
   const lenderRatePromises =
     state.lenderRatesReceived
-      ?.filter((lrr) => lrr.data.response?.lenderRateDataUrl)
+      ?.filter(
+        (lrr) =>
+          lrr.data.resultType === 'SUCCEEDED' &&
+          lrr.data.response?.lenderRateDataUrl
+      )
       .map(async (lrr) =>
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        fetchFromUrlAsync<LenderRate>(lrr.data.response!.lenderRateDataUrl!)
+        lrr.data.resultType === 'SUCCEEDED'
+          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          fetchFromUrlAsync<LenderRate>(lrr.data.response!.lenderRateDataUrl!)
+          : undefined
       ) ?? [];
 
   const lenderRatePromiseResults = await Promise.allSettled(lenderRatePromises);
 
   const lenderRates = (
     lenderRatePromiseResults.filter(
-      (r) => r.status === 'fulfilled'
+      (r) => r.status === 'fulfilled' && r.value
     ) as PromiseFulfilledResult<LenderRate>[]
   ).map((r) => r.value);
 

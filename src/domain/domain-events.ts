@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+import { v4 as uuidv4 } from 'uuid';
 import { LoanDetails, LenderRate } from './domain-models';
 
 export enum EventDomain {
@@ -69,8 +70,8 @@ export const newDomainEvent = <T extends Record<string, any>>({
 }): DomainEvent<T> => ({
     metadata: {
       ...schema,
-      correlationId: context?.correlationId ?? crypto.randomUUID(),
-      requestId: context?.requestId ?? crypto.randomUUID(),
+      correlationId: context?.correlationId ?? uuidv4(),
+      requestId: context?.requestId ?? uuidv4(),
       domain: origin.domain,
       service: origin.service,
       timestamp: new Date(),
@@ -89,18 +90,31 @@ export interface AsyncRequest<T extends Record<string, any>>
   readonly request: T;
 }
 
-export interface AsyncResponseBase {
-  readonly resultType: 'SUCCEEDED' | 'FAILED';
-  readonly taskToken: string;
-  readonly response?: Record<string, any>;
-}
-
-export interface AsyncResponse<T extends Record<string, any>>
-  extends AsyncResponseBase {
-  readonly response?: T;
-}
+export type AsyncResponseBase =
+  | {
+      readonly resultType: 'SUCCEEDED';
+      readonly taskToken: string;
+      readonly response: Record<string, any>;
+    }
+  | {
+      readonly resultType: 'FAILED';
+      readonly taskToken: string;
+      readonly error: string;
+    };
 
 export type CallbackDomainEvent = DomainEvent<AsyncResponseBase>;
+
+export type AsyncResponse<T extends Record<string, any>> =
+  | {
+      readonly resultType: 'SUCCEEDED';
+      readonly taskToken: string;
+      readonly response: T;
+    }
+  | {
+      readonly resultType: 'FAILED';
+      readonly taskToken: string;
+      readonly error: string;
+    };
 
 // QuoteSubmittedV1 ----------------------------------------
 
