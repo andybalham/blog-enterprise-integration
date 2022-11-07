@@ -24,36 +24,36 @@ export enum EventType {
 // https://www.boyney.io/blog/2022-02-11-event-payload-patterns
 
 export interface EventSchema {
-  eventType: EventType;
-  eventVersion: string;
+  readonly eventType: EventType;
+  readonly eventVersion: string;
 }
 
 export interface EventOrigin {
-  domain: EventDomain;
-  service: EventService;
+  readonly domain: EventDomain;
+  readonly service: EventService;
 }
 
 export interface EventContext {
-  correlationId: string;
-  requestId: string;
+  readonly correlationId: string;
+  readonly requestId: string;
 }
 
 export interface DomainEventMetadata
   extends EventSchema,
     EventOrigin,
     EventContext {
-  timestamp: Date;
+  readonly timestamp: Date;
 }
 
 export interface DomainEventBase {
-  metadata: DomainEventMetadata;
-  data: Record<string, any>;
+  readonly metadata: DomainEventMetadata;
+  readonly data: Record<string, any>;
 }
 
 export interface DomainEvent<TData extends Record<string, any>>
   extends DomainEventBase {
-  metadata: DomainEventMetadata;
-  data: TData;
+  readonly metadata: DomainEventMetadata;
+  readonly data: TData;
 }
 
 export const newDomainEvent = <T extends Record<string, any>>({
@@ -79,26 +79,25 @@ export const newDomainEvent = <T extends Record<string, any>>({
   });
 
 export interface AsyncRequestBase {
-  taskToken: string;
-  request: Record<string, any>;
+  readonly taskToken: string;
+  readonly request: Record<string, any>;
 }
 
 export interface AsyncRequest<T extends Record<string, any>>
   extends AsyncRequestBase {
-  taskToken: string;
-  request: T;
+  readonly taskToken: string;
+  readonly request: T;
 }
 
 export interface AsyncResponseBase {
-  resultType: 'SUCCEEDED' | 'FAILED';
-  taskToken: string;
-  response?: Record<string, any>;
+  readonly resultType: 'SUCCEEDED' | 'FAILED';
+  readonly taskToken: string;
+  readonly response?: Record<string, any>;
 }
 
 export interface AsyncResponse<T extends Record<string, any>>
   extends AsyncResponseBase {
-  taskToken: string;
-  response?: T;
+  readonly response?: T;
 }
 
 export type CallbackDomainEvent = DomainEvent<AsyncResponseBase>;
@@ -106,8 +105,8 @@ export type CallbackDomainEvent = DomainEvent<AsyncResponseBase>;
 // QuoteSubmittedV1 ----------------------------------------
 
 type QuoteSubmittedDataV1 = {
-  quoteReference: string;
-  quoteRequestDataUrl: string;
+  readonly quoteReference: string;
+  readonly quoteRequestDataUrl: string;
 };
 
 export type QuoteSubmittedV1 = DomainEvent<QuoteSubmittedDataV1>;
@@ -134,9 +133,9 @@ export const newQuoteSubmittedV1 = ({
 // QuoteProcessedV1 ----------------------------------------
 
 type QuoteProcessedDataV1 = {
-  quoteReference: string;
-  loanDetails: LoanDetails;
-  bestLenderRate?: LenderRate;
+  readonly quoteReference: string;
+  readonly loanDetails: LoanDetails;
+  readonly bestLenderRate?: LenderRate;
 };
 
 export type QuoteProcessedV1 = DomainEvent<QuoteProcessedDataV1>;
@@ -163,8 +162,8 @@ export const newQuoteProcessedV1 = ({
 // CreditReportRequestedV1 ----------------------------------------
 
 type CreditReportRequestedDataV1 = AsyncRequest<{
-  quoteReference: string;
-  quoteRequestDataUrl: string;
+  readonly quoteReference: string;
+  readonly quoteRequestDataUrl: string;
 }>;
 
 export type CreditReportRequestedV1 = DomainEvent<CreditReportRequestedDataV1>;
@@ -191,7 +190,7 @@ export const newCreditReportRequestedV1 = ({
 // CreditReportReceivedV1 ----------------------------------------
 
 type CreditReportReceivedDataV1 = AsyncResponse<{
-  creditReportDataUrl?: string;
+  readonly creditReportDataUrl?: string;
 }>;
 
 export type CreditReportReceivedV1 = DomainEvent<CreditReportReceivedDataV1>;
@@ -248,8 +247,8 @@ export const newLenderRateRequestedV1 = ({
 // LenderRateReceivedDataV1 ----------------------------------------
 
 type LenderRateReceivedDataV1 = AsyncResponse<{
-  lenderId: string;
-  lenderRateDataUrl?: string;
+  readonly lenderId: string;
+  readonly lenderRateDataUrl?: string;
 }>;
 
 export type LenderRateReceivedV1 = DomainEvent<LenderRateReceivedDataV1>;
