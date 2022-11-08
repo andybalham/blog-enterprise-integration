@@ -81,7 +81,7 @@ export const handler = async (
     data: {
       resultType: 'SUCCEEDED',
       taskToken: event.detail.data.taskToken,
-      response: {
+      payload: {
         lenderId: lenderConfig.lenderId,
         lenderRateDataUrl,
       },

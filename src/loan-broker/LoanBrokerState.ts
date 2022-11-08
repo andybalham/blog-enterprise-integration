@@ -1,21 +1,21 @@
 import {
-  CreditReportReceivedV1,
-  LenderRateReceivedV1,
+  CreditReportReceivedDataV1,
+  LenderRateReceivedDataV1,
   QuoteSubmittedV1,
 } from '../domain/domain-events';
 import { LenderRate, LenderRegisterEntry } from '../domain/domain-models';
 
 export interface LoanBrokerState {
   quoteSubmitted: QuoteSubmittedV1;
-  creditReportReceived?: CreditReportReceivedV1;
+  creditReportReceivedData?: CreditReportReceivedDataV1;
   lenders?: LenderRegisterEntry[];
-  lenderRatesReceived?: LenderRateReceivedV1[];
+  lenderRatesReceivedData?: LenderRateReceivedDataV1[];
   bestLenderRate?: LenderRate;
 }
 
 export interface QuoteRequestState {
   lender: LenderRegisterEntry;
   quoteSubmitted: QuoteSubmittedV1;
-  creditReportReceived: CreditReportReceivedV1;
+  creditReportReceivedData: CreditReportReceivedDataV1;
   taskToken: string;
 }

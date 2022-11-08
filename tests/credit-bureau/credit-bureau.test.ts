@@ -169,12 +169,11 @@ describe('CreditBureau tests', () => {
       if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
         //
         expect(
-          firstEvent.detail.data.response?.creditReportDataUrl
+          firstEvent.detail.data.payload.creditReportDataUrl
         ).toBeDefined();
 
         const actualCreditReport = await fetchFromUrlAsync<CreditReport>(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          firstEvent.detail.data.response!.creditReportDataUrl!
+          firstEvent.detail.data.payload.creditReportDataUrl
         );
 
         expect(actualCreditReport.reportReference).toBeDefined();
@@ -281,7 +280,7 @@ describe('CreditBureau tests', () => {
     expect(firstEvent.detail.data.resultType).toBe('SUCCEEDED');
 
     if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
-      expect(firstEvent.detail.data.response).toBeDefined();
+      expect(firstEvent.detail.data.payload).toBeDefined();
     }
   });
 });

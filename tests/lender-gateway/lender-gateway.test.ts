@@ -173,11 +173,10 @@ describe('LenderGateway tests', () => {
     expect(firstEvent.detail.data.resultType).toBe('SUCCEEDED');
 
     if (firstEvent.detail.data.resultType === 'SUCCEEDED') {
-      expect(firstEvent.detail.data.response?.lenderRateDataUrl).toBeDefined();
+      expect(firstEvent.detail.data.payload.lenderRateDataUrl).toBeDefined();
 
       const lenderRate = await fetchFromUrlAsync<LenderRate>(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        firstEvent.detail.data.response!.lenderRateDataUrl!
+        firstEvent.detail.data.payload.lenderRateDataUrl
       );
 
       expect(lenderRate.lenderId).toBe(TEST_LENDER_ID);

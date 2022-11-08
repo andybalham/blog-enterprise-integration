@@ -68,16 +68,16 @@ export const newDomainEvent = <T extends Record<string, any>>({
   data: T;
   context?: EventContext;
 }): DomainEvent<T> => ({
-    metadata: {
-      ...schema,
-      correlationId: context?.correlationId ?? uuidv4(),
-      requestId: context?.requestId ?? uuidv4(),
-      domain: origin.domain,
-      service: origin.service,
-      timestamp: new Date(),
-    },
-    data,
-  });
+  metadata: {
+    ...schema,
+    correlationId: context?.correlationId ?? uuidv4(),
+    requestId: context?.requestId ?? uuidv4(),
+    domain: origin.domain,
+    service: origin.service,
+    timestamp: new Date(),
+  },
+  data,
+});
 
 export interface AsyncRequestBase {
   readonly taskToken: string;
@@ -90,35 +90,36 @@ export interface AsyncRequest<T extends Record<string, any>>
   readonly request: T;
 }
 
+type AsyncResponseSucceededBase = {
+  readonly resultType: 'SUCCEEDED';
+  readonly taskToken: string;
+  readonly payload: Record<string, any>;
+};
+
+interface AsyncResponseSucceeded<T extends Record<string, any>>
+  extends AsyncResponseSucceededBase {
+  readonly payload: T;
+}
+
+type AsyncResponseFailed = {
+  readonly resultType: 'FAILED';
+  readonly taskToken: string;
+  readonly error: string;
+};
+
 export type AsyncResponseBase =
-  | {
-      readonly resultType: 'SUCCEEDED';
-      readonly taskToken: string;
-      readonly response: Record<string, any>;
-    }
-  | {
-      readonly resultType: 'FAILED';
-      readonly taskToken: string;
-      readonly error: string;
-    };
+  | AsyncResponseSucceededBase
+  | AsyncResponseFailed;
 
 export type CallbackDomainEvent = DomainEvent<AsyncResponseBase>;
 
 export type AsyncResponse<T extends Record<string, any>> =
-  | {
-      readonly resultType: 'SUCCEEDED';
-      readonly taskToken: string;
-      readonly response: T;
-    }
-  | {
-      readonly resultType: 'FAILED';
-      readonly taskToken: string;
-      readonly error: string;
-    };
+  | AsyncResponseSucceeded<T>
+  | AsyncResponseFailed;
 
 // QuoteSubmittedV1 ----------------------------------------
 
-type QuoteSubmittedDataV1 = {
+export type QuoteSubmittedDataV1 = {
   readonly quoteReference: string;
   readonly quoteRequestDataUrl: string;
 };
@@ -146,7 +147,7 @@ export const newQuoteSubmittedV1 = ({
 
 // QuoteProcessedV1 ----------------------------------------
 
-type QuoteProcessedDataV1 = {
+export type QuoteProcessedDataV1 = {
   readonly quoteReference: string;
   readonly loanDetails: LoanDetails;
   readonly bestLenderRate?: LenderRate;
@@ -175,7 +176,7 @@ export const newQuoteProcessedV1 = ({
 
 // CreditReportRequestedV1 ----------------------------------------
 
-type CreditReportRequestedDataV1 = AsyncRequest<{
+export type CreditReportRequestedDataV1 = AsyncRequest<{
   readonly quoteReference: string;
   readonly quoteRequestDataUrl: string;
 }>;
@@ -203,8 +204,8 @@ export const newCreditReportRequestedV1 = ({
 
 // CreditReportReceivedV1 ----------------------------------------
 
-type CreditReportReceivedDataV1 = AsyncResponse<{
-  readonly creditReportDataUrl?: string;
+export type CreditReportReceivedDataV1 = AsyncResponse<{
+  readonly creditReportDataUrl: string;
 }>;
 
 export type CreditReportReceivedV1 = DomainEvent<CreditReportReceivedDataV1>;
@@ -230,7 +231,7 @@ export const newCreditReportReceivedV1 = ({
 
 // LenderRateRequestedDataV1 ----------------------------------------
 
-type LenderRateRequestedDataV1 = AsyncRequest<{
+export type LenderRateRequestedDataV1 = AsyncRequest<{
   lenderId: string;
   quoteReference: string;
   quoteRequestDataUrl: string;
@@ -260,9 +261,9 @@ export const newLenderRateRequestedV1 = ({
 
 // LenderRateReceivedDataV1 ----------------------------------------
 
-type LenderRateReceivedDataV1 = AsyncResponse<{
+export type LenderRateReceivedDataV1 = AsyncResponse<{
   readonly lenderId: string;
-  readonly lenderRateDataUrl?: string;
+  readonly lenderRateDataUrl: string;
 }>;
 
 export type LenderRateReceivedV1 = DomainEvent<LenderRateReceivedDataV1>;

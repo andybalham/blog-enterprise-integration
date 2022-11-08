@@ -74,7 +74,7 @@ describe('Domain Event Pattern Test Suite', () => {
         data: {
           resultType: 'SUCCEEDED',
           taskToken: 'test-taskToken',
-          response: {
+          payload: {
             creditReportDataUrl: 'test-creditReportDataUrl',
           },
         },
@@ -88,7 +88,7 @@ describe('Domain Event Pattern Test Suite', () => {
         data: {
           resultType: 'SUCCEEDED',
           taskToken: 'test-taskToken',
-          response: {
+          payload: {
             creditReportDataUrl: 'test-creditReportDataUrl',
           },
         },
@@ -102,7 +102,7 @@ describe('Domain Event Pattern Test Suite', () => {
         data: {
           resultType: 'SUCCEEDED',
           taskToken: 'test-taskToken',
-          response: {
+          payload: {
             lenderId: 'test-lenderId',
             lenderRateDataUrl: 'test-lenderRateDataUrl',
           },
@@ -133,7 +133,7 @@ describe('Domain Event Pattern Test Suite', () => {
         data: {
           resultType: 'SUCCEEDED',
           taskToken: 'test-taskToken',
-          response: {
+          payload: {
             lenderId: 'test-lenderId',
             lenderRateDataUrl: 'test-lenderRateDataUrl',
           },

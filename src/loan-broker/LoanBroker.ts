@@ -174,7 +174,7 @@ export default class LoanBroker extends Construct {
         parameters: {
           'state.$': '$',
         },
-        resultPath: '$.creditReportReceived',
+        resultPath: '$.creditReportReceivedData',
         timeout: Duration.seconds(10),
       })
 
@@ -186,23 +186,23 @@ export default class LoanBroker extends Construct {
         // https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-map-state.html
         itemsPath: '$.lenders',
         parameters: {
-          'quoteSubmitted.$': '$.quoteSubmitted',
-          'creditReportReceived.$': '$.creditReportReceived',
           'lender.$': '$$.Map.Item.Value',
+          'quoteSubmitted.$': '$.quoteSubmitted',
+          'creditReportReceivedData.$': '$.creditReportReceivedData',
         },
-        resultPath: '$.lenderRatesReceived',
         iterator: new StateMachineBuilder().lambdaInvokeWaitForTaskToken(
           'RequestRate',
           {
             lambdaFunction: rateRequesterFunction,
             parameters: {
               'quoteSubmitted.$': '$.quoteSubmitted',
-              'creditReportReceived.$': '$.creditReportReceived',
+              'creditReportReceivedData.$': '$.creditReportReceivedData',
               'lender.$': '$.lender',
             },
             timeout: Duration.seconds(10),
           }
         ),
+        resultPath: '$.lenderRatesReceivedData',
       })
 
       .lambdaInvoke('SendResponse', {

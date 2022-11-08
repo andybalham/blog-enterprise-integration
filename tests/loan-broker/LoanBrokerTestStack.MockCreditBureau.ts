@@ -67,7 +67,7 @@ export const handler = async (
     data: {
       resultType: creditReportResultType,
       taskToken: event.detail.data.taskToken,
-      response: {
+      payload: {
         creditReportDataUrl,
       },
     },

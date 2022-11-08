@@ -46,16 +46,13 @@ export const handler = async (
     return;
   }
 
-  let rateDataUrl: string | undefined;
-  if (lenderResponse.resultType === 'SUCCEEDED') {
-    const { quoteReference } = event.detail.data.request;
+  const { quoteReference } = event.detail.data.request;
 
-    rateDataUrl = await getDataUrlAsync({
-      bucketName: dataBucketName,
-      key: `${quoteReference}/${quoteReference}-quote-${lenderId}.json`,
-      data: JSON.stringify(lenderResponse.lenderRate),
-    });
-  }
+  const rateDataUrl = await getDataUrlAsync({
+    bucketName: dataBucketName,
+    key: `${quoteReference}/${quoteReference}-quote-${lenderId}.json`,
+    data: JSON.stringify(lenderResponse.lenderRate),
+  });
 
   const rateReceived = newLenderRateReceivedV1({
     context: {
@@ -69,7 +66,7 @@ export const handler = async (
     data:
       lenderResponse.resultType === 'SUCCEEDED'
         ? {
-          response: {
+          payload: {
             lenderId,
             lenderRateDataUrl: rateDataUrl,
           },

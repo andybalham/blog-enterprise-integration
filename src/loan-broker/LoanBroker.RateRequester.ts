@@ -14,9 +14,7 @@ const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 export const handler = async (event: QuoteRequestState): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  // TODO 06Oct22: Assert creditReportDataUrl is not null?
-
-  if (event.creditReportReceived.data.resultType === 'SUCCEEDED') {
+  if (event.creditReportReceivedData.resultType === 'SUCCEEDED') {
     const lenderRateRequested = newLenderRateRequestedV1({
       context: event.quoteSubmitted.metadata,
       origin: {
@@ -29,8 +27,7 @@ export const handler = async (event: QuoteRequestState): Promise<void> => {
           quoteReference: event.quoteSubmitted.data.quoteReference,
           quoteRequestDataUrl: event.quoteSubmitted.data.quoteRequestDataUrl,
           creditReportDataUrl:
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            event.creditReportReceived.data.response!.creditReportDataUrl!,
+            event.creditReportReceivedData.payload.creditReportDataUrl,
         },
         taskToken: event.taskToken,
       },

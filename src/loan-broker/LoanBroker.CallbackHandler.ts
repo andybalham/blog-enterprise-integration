@@ -16,9 +16,7 @@ export const handler = async (
     const taskSuccessResponse = await stepFunctions
       .sendTaskSuccess({
         taskToken: event.detail.data.taskToken,
-        // TODO 07Nov22: Should this be the whole event detail or just the response?
-        output: JSON.stringify(event.detail),
-        // output: JSON.stringify(event.detail.data.response),
+        output: JSON.stringify(event.detail.data),
       })
       .promise();
 

@@ -89,7 +89,7 @@ async function handleRequestAsync(
     data: {
       resultType: 'SUCCEEDED',
       taskToken: creditReportRequested.data.taskToken,
-      response: { creditReportDataUrl },
+      payload: { creditReportDataUrl },
     },
     context: creditReportRequested.metadata,
   });
@@ -160,7 +160,7 @@ async function handleTestRequestAsync(
       data: {
         resultType: 'SUCCEEDED',
         taskToken: creditReportRequested.data.taskToken,
-        response: { creditReportDataUrl },
+        payload: { creditReportDataUrl },
       },
       context: creditReportRequested.metadata,
     });

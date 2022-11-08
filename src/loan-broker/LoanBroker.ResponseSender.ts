@@ -28,19 +28,14 @@ export const handler = async (
     state.quoteSubmitted.data.quoteRequestDataUrl
   );
 
+  // TODO 08Nov22: Report about failed quotes
+
   const lenderRatePromises =
-    state.lenderRatesReceived
-      ?.filter(
-        (lrr) =>
-          lrr.data.resultType === 'SUCCEEDED' &&
-          lrr.data.response?.lenderRateDataUrl
-      )
-      .map(async (lrr) =>
-        lrr.data.resultType === 'SUCCEEDED'
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          fetchFromUrlAsync<LenderRate>(lrr.data.response!.lenderRateDataUrl!)
-          : undefined
-      ) ?? [];
+    state.lenderRatesReceivedData?.map(async (lrr) =>
+      lrr.resultType === 'SUCCEEDED'
+        ? fetchFromUrlAsync<LenderRate>(lrr.payload.lenderRateDataUrl)
+        : undefined
+    ) ?? [];
 
   const lenderRatePromiseResults = await Promise.allSettled(lenderRatePromises);
 

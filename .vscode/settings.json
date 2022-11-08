@@ -132,6 +132,19 @@
           "stage": "dev"
         }
       ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Loan Broker Test Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "LoanBrokerTestStack",
+          "stage": "dev"
+        }
+      ]
     }
   ]
 }
