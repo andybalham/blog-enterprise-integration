@@ -17,6 +17,7 @@
     "nanoid",
     "outfile",
     "plusplus",
+    "powertools",
     "resourcegroupstaggingapi",
     "Runtimes",
     "stepfunctions",
@@ -142,6 +143,32 @@
         {
           "region": "eu-west-2",
           "stackName": "LoanBrokerTestStack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Observability Test Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "ObservabilityTestStack",
+          "stage": "dev"
+        }
+      ]
+    },
+    {
+      "type": "cloudformation",
+      "title": "Observability Stack",
+      "timeOffsetInMs": 0,
+      "awsProfile": "default",
+      "stacks": [
+        {
+          "region": "eu-west-2",
+          "stackName": "ObservabilityStack",
           "stage": "dev"
         }
       ]

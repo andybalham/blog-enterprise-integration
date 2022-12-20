@@ -69,6 +69,9 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   return {
     statusCode: 201,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quoteReference }),
+    body: JSON.stringify({
+      requestId: quoteSubmitted.metadata.requestId,
+      quoteReference: quoteSubmitted.data.quoteReference,
+    }),
   };
 };

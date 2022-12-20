@@ -1,4 +1,12 @@
-import { EventType } from './domain-events';
+import { EventDomain, EventType } from './domain-events';
+
+export const LOAN_BROKER_DOMAIN_PATTERN = {
+  detail: {
+    metadata: {
+      domain: [EventDomain.LoanBroker],
+    },
+  },
+};
 
 export const QUOTE_SUBMITTED_PATTERN_V1 = {
   detail: {

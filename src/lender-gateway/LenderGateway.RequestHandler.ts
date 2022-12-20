@@ -51,14 +51,16 @@ export const handler = async (
   const { quoteReference } = event.detail.data.request;
 
   const isRateAvailable =
-    (!creditReport.hasBankruptcies || lenderConfig.allowBankruptcies) &&
-    (creditReport.onElectoralRoll || lenderConfig.allowNotOnElectoralRoll) &&
-    (!lenderConfig.maximumAmount ||
-      quoteRequest.loanDetails.amount <= lenderConfig.maximumAmount) &&
-    (!lenderConfig.minimumTermMonths ||
-      quoteRequest.loanDetails.termMonths >= lenderConfig.minimumTermMonths) &&
-    (!lenderConfig.minimumCreditScore ||
-      creditReport.creditScore >= lenderConfig.minimumCreditScore);
+    ((!creditReport.hasBankruptcies || lenderConfig.allowBankruptcies) &&
+      (creditReport.onElectoralRoll || lenderConfig.allowNotOnElectoralRoll) &&
+      (!lenderConfig.maximumAmount ||
+        quoteRequest.loanDetails.amount <= lenderConfig.maximumAmount) &&
+      (!lenderConfig.minimumTermMonths ||
+        quoteRequest.loanDetails.termMonths >=
+          lenderConfig.minimumTermMonths) &&
+      (!lenderConfig.minimumCreditScore ||
+        creditReport.creditScore >= lenderConfig.minimumCreditScore)) ??
+    false;
 
   const lenderRate: LenderRate = {
     lenderId: lenderConfig.lenderId,
@@ -76,13 +78,14 @@ export const handler = async (
     context: event.detail.metadata,
     origin: {
       domain: EventDomain.LoanBroker,
-      service: EventService.CreditBureau,
+      service: EventService.LenderGateway,
     },
     data: {
       resultType: 'SUCCEEDED',
       taskToken: event.detail.data.taskToken,
       payload: {
         lenderId: lenderConfig.lenderId,
+        isRateAvailable,
         lenderRateDataUrl,
       },
     },

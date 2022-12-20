@@ -263,6 +263,7 @@ export const newLenderRateRequestedV1 = ({
 
 export type LenderRateReceivedDataV1 = AsyncResponse<{
   readonly lenderId: string;
+  readonly isRateAvailable: boolean;
   readonly lenderRateDataUrl: string;
 }>;
 

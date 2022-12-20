@@ -14,6 +14,20 @@ https://github.com/awslabs/aws-lambda-powertools-typescript
 
 https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#usage
 
+# Observability checklist
+
+- Domain event pattern
+- Lambda function to log all events, use insights to query
+  - Should we just log the metadata? NO
+  - [Bring your own formatter?](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#custom-log-formatter-bring-your-own-formatter)
+
+```
+fields @timestamp, eventType, data.quoteReference, correlationId, service, domain
+| filter requestId like /62b7a371./
+| sort @timestamp asc
+| limit 20
+```
+
 # Runtime.ImportModuleError
 
 Why are we getting the following? Is this the same issue? https://github.com/aws/aws-cdk/issues/14290
