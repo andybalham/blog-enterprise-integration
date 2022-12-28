@@ -21,6 +21,7 @@ export enum EventType {
   CreditReportFailed = 'CreditReportFailed',
   LenderRateRequested = 'LenderRateRequested',
   LenderRateReceived = 'LenderRateReceived',
+  LenderRateFailed = 'LenderRateFailed',
 }
 
 // https://www.boyney.io/blog/2022-02-11-event-payload-patterns
@@ -237,6 +238,7 @@ export type CreditReportFailedDataV1 = {
   readonly stateMachineId: string;
   readonly executionId: string;
   readonly executionStartTime: string;
+  readonly error: string;
 };
 
 export type CreditReportFailedV1 = DomainEvent<CreditReportFailedDataV1>;
@@ -318,3 +320,35 @@ export const newLenderRateReceivedV1 = ({
     data,
     context,
   });
+
+// LenderRateFailedV1 ----------------------------------------
+
+export type LenderRateFailedDataV1 = {
+  readonly quoteReference: string;
+  readonly stateMachineId: string;
+  readonly executionId: string;
+  readonly executionStartTime: string;
+  readonly error: string;
+};
+
+export type LenderRateFailedV1 = DomainEvent<LenderRateFailedDataV1>;
+
+export const newLenderRateFailedV1 = ({
+  origin,
+  data,
+  context,
+}: {
+  origin: EventOrigin;
+  data: LenderRateFailedDataV1;
+  context?: EventContext;
+}): LenderRateFailedV1 =>
+  newDomainEvent<LenderRateFailedDataV1>({
+    schema: {
+      eventType: EventType.LenderRateFailed,
+      eventVersion: '1.0',
+    },
+    origin,
+    data,
+    context,
+  });
+

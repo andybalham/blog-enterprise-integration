@@ -13,6 +13,7 @@ import {
   QUOTE_PROCESSED_PATTERN_V1,
   LENDER_RATE_REQUESTED_PATTERN_V1,
   CREDIT_REPORT_FAILED_PATTERN_V1,
+  LENDER_RATE_FAILED_PATTERN_V1,
 } from '../../src/domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS as CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS,
@@ -40,6 +41,8 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
 
   static readonly CreditReportFailedObserverId = 'CreditReportFailedObserver';
 
+  static readonly LenderRateFailedObserverId = 'LenderRateFailedObserver';
+
   static readonly RateRequestedObserverId = 'RateRequestedObserver';
 
   static readonly MockCreditBureauId = 'MockCreditBureau';
@@ -59,6 +62,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
         LoanBrokerTestStack.QuoteProcessedObserverId,
         LoanBrokerTestStack.RateRequestedObserverId,
         LoanBrokerTestStack.CreditReportFailedObserverId,
+        LoanBrokerTestStack.LenderRateFailedObserverId,
       ],
     });
 
@@ -189,6 +193,15 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
         CREDIT_REPORT_FAILED_PATTERN_V1
       ),
       LoanBrokerTestStack.CreditReportFailedObserverId
+    );
+
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
+        'LenderRateFailedRule',
+        eventBus,
+        LENDER_RATE_FAILED_PATTERN_V1
+      ),
+      LoanBrokerTestStack.LenderRateFailedObserverId
     );
 
     // SUT

@@ -51,7 +51,7 @@ export const handler = async (
   const rateDataUrl = await getDataUrlAsync({
     bucketName: dataBucketName,
     key: `${quoteReference}/${quoteReference}-quote-${lenderId}.json`,
-    data: JSON.stringify(lenderResponse.lenderRate),
+    data: JSON.stringify(lenderResponse.lenderRate ?? {}),
   });
 
   const rateReceived = newLenderRateReceivedV1({
@@ -75,7 +75,7 @@ export const handler = async (
           taskToken: event.detail.data.taskToken,
         }
         : {
-          error: 'Mock error',
+          error: `Mock error from lender: ${lenderId}`,
           resultType: lenderResponse.resultType,
           taskToken: event.detail.data.taskToken,
         },

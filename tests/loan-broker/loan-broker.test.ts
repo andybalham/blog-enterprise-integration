@@ -5,11 +5,13 @@ import {
   EventBridgeTestClient,
   IntegrationTestClient,
   S3TestClient,
+  TestObservation,
   // StepFunctionsTestClient,
 } from '@andybalham/cdk-cloud-test-kit';
 import {
   CreditReportFailedV1,
   EventType,
+  LenderRateFailedV1,
   QuoteProcessedV1,
 } from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
@@ -212,5 +214,123 @@ describe('LoanBroker Tests', () => {
     expect(creditReportFailed.data.stateMachineId).toBeDefined();
     expect(creditReportFailed.data.executionId).toBeDefined();
     expect(creditReportFailed.data.executionStartTime).toBeDefined();
+    expect(creditReportFailed.data.error).toBeDefined();
+  });
+
+  test(`Quote submitted event succeeds despite failed rate request`, async () => {
+    // Arrange
+
+    const quoteRequest: QuoteRequest = {
+      ...defaultTestQuoteRequest,
+      loanDetails: {
+        amount: 1000,
+        termMonths: 12,
+      },
+    };
+
+    const quoteSubmitted = await getQuoteSubmittedEvent(
+      dataBucket,
+      quoteRequest
+    );
+
+    const creditReport: CreditReport = {
+      reportReference: 'test-report-reference',
+      creditScore: 999,
+      hasBankruptcies: false,
+      onElectoralRoll: true,
+    };
+
+    const lenderResponses: Record<string, MockLenderResponse> = {
+      [LoanBrokerTestStack.LENDER_1_ID]: {
+        resultType: 'SUCCEEDED',
+        lenderRate: {
+          lenderId: LoanBrokerTestStack.LENDER_1_ID,
+          lenderName: 'Lender One',
+          rate: 3,
+        },
+      },
+      [LoanBrokerTestStack.LENDER_2_ID]: {
+        resultType: 'FAILED',
+      },
+    };
+
+    await testClient.initialiseTestAsync({
+      testId: 'quote-processed-event-published',
+      inputs: {
+        creditReportResultType: 'SUCCEEDED',
+        creditReport,
+        lenderResponses,
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent: quoteSubmitted,
+    });
+
+    // Await
+
+    const { observations: quoteProcessedObservations, timedOut } =
+      await testClient.pollTestAsync({
+        filterById: LoanBrokerTestStack.QuoteProcessedObserverId,
+        until: async (o) => o.length > 0,
+        timeoutSeconds: 30,
+      });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+
+    const quoteProcessedObservationData = quoteProcessedObservations[0].data;
+
+    expect(quoteProcessedObservationData['detail-type']).toBe(
+      EventType.QuoteProcessed
+    );
+
+    const quoteProcessed =
+      quoteProcessedObservationData.detail as QuoteProcessedV1;
+
+    expect(quoteProcessed.metadata.correlationId).toBe(
+      quoteSubmitted.metadata.correlationId
+    );
+    expect(quoteProcessed.metadata.requestId).toBe(
+      quoteSubmitted.metadata.requestId
+    );
+    expect(quoteProcessed.data.quoteReference).toBe(
+      quoteSubmitted.data.quoteReference
+    );
+    expect(quoteProcessed.data.loanDetails).toEqual(quoteRequest.loanDetails);
+    expect(quoteProcessed.data.bestLenderRate).toEqual(
+      lenderResponses[LoanBrokerTestStack.LENDER_1_ID].lenderRate
+    );
+
+    const allObservations = await testClient.getTestObservationsAsync();
+
+    const lenderRateFailedObservations = TestObservation.filterById(
+      allObservations,
+      LoanBrokerTestStack.LenderRateFailedObserverId
+    );
+
+    expect(lenderRateFailedObservations.length).toBeGreaterThan(0);
+
+    expect(lenderRateFailedObservations[0].data['detail-type']).toBe(
+      EventType.LenderRateFailed
+    );
+
+    const lenderRateFailed = lenderRateFailedObservations[0].data
+      .detail as LenderRateFailedV1;
+
+    expect(lenderRateFailed.metadata.correlationId).toBe(
+      quoteSubmitted.metadata.correlationId
+    );
+    expect(lenderRateFailed.metadata.requestId).toBe(
+      quoteSubmitted.metadata.requestId
+    );
+    expect(lenderRateFailed.data.quoteReference).toBe(
+      quoteSubmitted.data.quoteReference
+    );
+    expect(lenderRateFailed.data.error).toBeDefined();
   });
 });

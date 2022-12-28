@@ -91,3 +91,12 @@ export const LENDER_RATE_RECEIVED_PATTERN_V1 = {
     },
   },
 };
+
+export const LENDER_RATE_FAILED_PATTERN_V1 = {
+  detail: {
+    metadata: {
+      eventType: [EventType.LenderRateFailed],
+      eventVersion: [{ prefix: '1.' }],
+    },
+  },
+};

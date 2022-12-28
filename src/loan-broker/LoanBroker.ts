@@ -12,7 +12,10 @@ import {
   StateMachine,
   TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
-import { EventBridgePutEvents } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import {
+  EventBridgePutEvents,
+  EventBridgePutEventsEntry,
+} from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import {
   LOAN_BROKER_CALLBACK_PATTERN_V1,
@@ -192,7 +195,7 @@ export default class LoanBroker extends Construct {
             {
               // https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html
               errors: ['States.Timeout', 'States.TaskFailed'],
-              handler: 'HandleCreditReportFailure',
+              handler: 'PutEventCreditReportFailed',
             },
           ],
         })
@@ -222,17 +225,35 @@ export default class LoanBroker extends Construct {
               catches: [
                 {
                   errors: ['States.Timeout', 'States.TaskFailed'],
-                  handler: 'HandleRateFailure',
+                  handler: 'PutEventLenderRateFailed',
                 },
               ],
             })
             .end()
 
-            .pass('HandleRateFailure')
-            // TODO 27Dec22: Publish a rate failure event
+            .perform(
+              new EventBridgePutEvents(this, 'PutEventLenderRateFailed', {
+                entries: [
+                  this.getEventEntry(
+                    loanBrokerEventBus,
+                    EventType.LenderRateFailed,
+                    '1.0',
+                    {
+                      // There is no way to access the lender id
+                      'quoteReference.$':
+                        '$$.Execution.Input.quoteSubmitted.data.quoteReference',
+                      'stateMachineId.$': '$$.StateMachine.Id',
+                      'executionId.$': '$$.Execution.Id',
+                      'executionStartTime.$': '$$.Execution.StartTime',
+                      'error.$': '$.Error',
+                    }
+                  ),
+                ],
+              })
+            )
             .end(),
 
-          resultPath: '$.lenderRatesReceivedData', // TODO 27Dec22: How does this work when we have a failure?
+          resultPath: '$.lenderRatesReceivedData',
         })
 
         .lambdaInvoke('SendResponse', {
@@ -240,36 +261,23 @@ export default class LoanBroker extends Construct {
         })
         .end()
 
-        .pass('HandleCreditReportFailure')
         // https://docs.aws.amazon.com/step-functions/latest/dg/connect-eventbridge.html
         .perform(
           new EventBridgePutEvents(this, 'PutEventCreditReportFailed', {
             entries: [
-              {
-                eventBus: loanBrokerEventBus,
-                detailType: EventType.CreditReportFailed,
-                source: `${EventDomain.LoanBroker}.${EventService.LoanBroker}`,
-                detail: TaskInput.fromObject({
-                  metadata: {
-                    domain: EventDomain.LoanBroker,
-                    service: EventService.LoanBroker,
-                    eventType: EventType.CreditReportFailed,
-                    eventVersion: '1.0',
-                    'correlationId.$':
-                      '$$.Execution.Input.quoteSubmitted.metadata.correlationId',
-                    'requestId.$':
-                      '$$.Execution.Input.quoteSubmitted.metadata.requestId',
-                    'timestamp.$': '$$.State.EnteredTime',
-                  },
-                  data: {
-                    'quoteReference.$':
-                      '$$.Execution.Input.quoteSubmitted.data.quoteReference',
-                    'stateMachineId.$': '$$.StateMachine.Id',
-                    'executionId.$': '$$.Execution.Id',
-                    'executionStartTime.$': '$$.Execution.StartTime',
-                  },
-                }),
-              },
+              this.getEventEntry(
+                loanBrokerEventBus,
+                EventType.CreditReportFailed,
+                '1.0',
+                {
+                  'quoteReference.$':
+                    '$$.Execution.Input.quoteSubmitted.data.quoteReference',
+                  'stateMachineId.$': '$$.StateMachine.Id',
+                  'executionId.$': '$$.Execution.Id',
+                  'executionStartTime.$': '$$.Execution.StartTime',
+                  'error.$': '$.Error',
+                }
+              ),
             ],
           })
         )
@@ -283,5 +291,32 @@ export default class LoanBroker extends Construct {
           },
         })
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getEventEntry(
+    loanBrokerEventBus: IEventBus,
+    eventType: EventType,
+    eventVersion: string,
+    data: Record<string, string>
+  ): EventBridgePutEventsEntry {
+    return {
+      eventBus: loanBrokerEventBus,
+      detailType: eventType,
+      source: `${EventDomain.LoanBroker}.${EventService.LoanBroker}`,
+      detail: TaskInput.fromObject({
+        metadata: {
+          domain: EventDomain.LoanBroker,
+          service: EventService.LoanBroker,
+          eventType,
+          eventVersion,
+          'correlationId.$':
+            '$$.Execution.Input.quoteSubmitted.metadata.correlationId',
+          'requestId.$': '$$.Execution.Input.quoteSubmitted.metadata.requestId',
+          'timestamp.$': '$$.State.EnteredTime',
+        },
+        data,
+      }),
+    };
   }
 }
