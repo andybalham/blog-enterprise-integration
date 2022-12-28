@@ -5,8 +5,13 @@ import {
   EventBridgeTestClient,
   IntegrationTestClient,
   S3TestClient,
+  // StepFunctionsTestClient,
 } from '@andybalham/cdk-cloud-test-kit';
-import { EventType, QuoteProcessedV1 } from '../../src/domain/domain-events';
+import {
+  CreditReportFailedV1,
+  EventType,
+  QuoteProcessedV1,
+} from '../../src/domain/domain-events';
 import { CreditReport, QuoteRequest } from '../../src/domain/domain-models';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import { defaultTestQuoteRequest } from '../lib/model-examples';
@@ -22,11 +27,16 @@ describe('LoanBroker Tests', () => {
     testStackId: LoanBrokerTestStack.Id,
   });
 
+  // let stateMachine: StepFunctionsTestClient;
   let dataBucket: S3TestClient;
   let loanBrokerEventBus: EventBridgeTestClient;
 
   beforeAll(async () => {
     await testClient.initialiseClientAsync();
+
+    // stateMachine = testClient.getStepFunctionsTestClient(
+    //   LoanBrokerTestStack.StateMachineId
+    // );
 
     dataBucket = testClient.getS3TestClient(LoanBrokerTestStack.DataBucketId);
 
@@ -133,5 +143,74 @@ describe('LoanBroker Tests', () => {
     expect(quoteProcessed.data.bestLenderRate).toEqual(
       lenderResponses[LoanBrokerTestStack.LENDER_2_ID].lenderRate
     );
+  });
+
+  test(`Quote submitted event results in credit report failed event`, async () => {
+    // Arrange
+
+    const quoteRequest: QuoteRequest = {
+      ...defaultTestQuoteRequest,
+      loanDetails: {
+        amount: 1000,
+        termMonths: 12,
+      },
+    };
+
+    const quoteSubmitted = await getQuoteSubmittedEvent(
+      dataBucket,
+      quoteRequest
+    );
+
+    const lenderResponses: Record<string, MockLenderResponse> = {};
+
+    await testClient.initialiseTestAsync({
+      testId: 'quote-processed-event-published',
+      inputs: {
+        creditReportResultType: 'FAILED',
+        lenderResponses,
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent: quoteSubmitted,
+    });
+
+    // Await
+
+    const { observations: creditReportFailedObservations, timedOut } =
+      await testClient.pollTestAsync({
+        filterById: LoanBrokerTestStack.CreditReportFailedObserverId,
+        until: async (o) => o.length > 0,
+        timeoutSeconds: 30,
+      });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+
+    // expect(await stateMachine.getStatusAsync()).toBe('FAILED');
+
+    const observationData = creditReportFailedObservations[0].data;
+
+    expect(observationData['detail-type']).toBe(EventType.CreditReportFailed);
+
+    expect(observationData.detail.metadata.correlationId).toBe(
+      quoteSubmitted.metadata.correlationId
+    );
+    expect(observationData.detail.metadata.requestId).toBe(
+      quoteSubmitted.metadata.requestId
+    );
+
+    const creditReportFailed = observationData.detail as CreditReportFailedV1;
+
+    expect(creditReportFailed.data.quoteReference).toBe(
+      quoteSubmitted.data.quoteReference
+    );
+    expect(creditReportFailed.data.stateMachineId).toBeDefined();
+    expect(creditReportFailed.data.executionId).toBeDefined();
+    expect(creditReportFailed.data.executionStartTime).toBeDefined();
   });
 });

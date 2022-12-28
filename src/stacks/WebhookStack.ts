@@ -6,7 +6,10 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import dotenv from 'dotenv';
-import { QUOTE_PROCESSED_PATTERN_V1 } from '../domain/domain-event-patterns';
+import {
+  CREDIT_REPORT_FAILED_PATTERN_V1,
+  QUOTE_PROCESSED_PATTERN_V1,
+} from '../domain/domain-event-patterns';
 
 dotenv.config();
 
@@ -33,6 +36,15 @@ export default class WebhookStack extends Stack {
     });
 
     quoteProcessedCallbackRule.addTarget(
+      new LambdaFunctionTarget(webhookSenderFunction)
+    );
+
+    const creditReportFailedCallbackRule = new Rule(this, id, {
+      eventBus: props.loanBrokerEventBus,
+      eventPattern: CREDIT_REPORT_FAILED_PATTERN_V1,
+    });
+
+    creditReportFailedCallbackRule.addTarget(
       new LambdaFunctionTarget(webhookSenderFunction)
     );
   }

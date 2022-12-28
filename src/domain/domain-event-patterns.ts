@@ -44,6 +44,15 @@ export const CREDIT_REPORT_RECEIVED_PATTERN_V1 = {
   },
 };
 
+export const CREDIT_REPORT_FAILED_PATTERN_V1 = {
+  detail: {
+    metadata: {
+      eventType: [EventType.CreditReportFailed],
+      eventVersion: [{ prefix: '1.' }],
+    },
+  },
+};
+
 export const LOAN_BROKER_CALLBACK_PATTERN_V1 = {
   detail: {
     metadata: {

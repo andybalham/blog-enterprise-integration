@@ -68,6 +68,7 @@ export const handler = async (
         ? {
           payload: {
             lenderId,
+            isRateAvailable: true,
             lenderRateDataUrl: rateDataUrl,
           },
           resultType: lenderResponse.resultType,

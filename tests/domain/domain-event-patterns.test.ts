@@ -116,6 +116,7 @@ describe('Domain Event Pattern Test Suite', () => {
           taskToken: 'test-taskToken',
           payload: {
             lenderId: 'test-lenderId',
+            isRateAvailable: true,
             lenderRateDataUrl: 'test-lenderRateDataUrl',
           },
         },
@@ -147,6 +148,7 @@ describe('Domain Event Pattern Test Suite', () => {
           taskToken: 'test-taskToken',
           payload: {
             lenderId: 'test-lenderId',
+            isRateAvailable: true,
             lenderRateDataUrl: 'test-lenderRateDataUrl',
           },
         },

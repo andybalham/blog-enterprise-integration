@@ -29,5 +29,11 @@ export default class Observer extends Construct {
     });
 
     domainEventRule.addTarget(new LambdaFunctionTarget(measurerFunction));
+
+    // const measurerEMFunction = new NodejsFunction(this, 'MeasurerEM', {
+    //   logRetention: RetentionDays.ONE_WEEK,
+    // });
+
+    // domainEventRule.addTarget(new LambdaFunctionTarget(measurerEMFunction));
   }
 }

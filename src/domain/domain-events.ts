@@ -18,6 +18,7 @@ export enum EventType {
   QuoteProcessed = 'QuoteProcessed',
   CreditReportRequested = 'CreditReportRequested',
   CreditReportReceived = 'CreditReportReceived',
+  CreditReportFailed = 'CreditReportFailed',
   LenderRateRequested = 'LenderRateRequested',
   LenderRateReceived = 'LenderRateReceived',
 }
@@ -68,16 +69,16 @@ export const newDomainEvent = <T extends Record<string, any>>({
   data: T;
   context?: EventContext;
 }): DomainEvent<T> => ({
-  metadata: {
-    ...schema,
-    correlationId: context?.correlationId ?? uuidv4(),
-    requestId: context?.requestId ?? uuidv4(),
-    domain: origin.domain,
-    service: origin.service,
-    timestamp: new Date(),
-  },
-  data,
-});
+    metadata: {
+      ...schema,
+      correlationId: context?.correlationId ?? uuidv4(),
+      requestId: context?.requestId ?? uuidv4(),
+      domain: origin.domain,
+      service: origin.service,
+      timestamp: new Date(),
+    },
+    data,
+  });
 
 export interface AsyncRequestBase {
   readonly taskToken: string;
@@ -222,6 +223,36 @@ export const newCreditReportReceivedV1 = ({
   newDomainEvent<CreditReportReceivedDataV1>({
     schema: {
       eventType: EventType.CreditReportReceived,
+      eventVersion: '1.0',
+    },
+    origin,
+    data,
+    context,
+  });
+
+// CreditReportFailedV1 ----------------------------------------
+
+export type CreditReportFailedDataV1 = {
+  readonly quoteReference: string;
+  readonly stateMachineId: string;
+  readonly executionId: string;
+  readonly executionStartTime: string;
+};
+
+export type CreditReportFailedV1 = DomainEvent<CreditReportFailedDataV1>;
+
+export const newCreditReportFailedV1 = ({
+  origin,
+  data,
+  context,
+}: {
+  origin: EventOrigin;
+  data: CreditReportFailedDataV1;
+  context?: EventContext;
+}): CreditReportFailedV1 =>
+  newDomainEvent<CreditReportFailedDataV1>({
+    schema: {
+      eventType: EventType.CreditReportFailed,
       eventVersion: '1.0',
     },
     origin,

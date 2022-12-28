@@ -12,6 +12,7 @@ import {
   CREDIT_REPORT_REQUESTED_PATTERN_V1,
   QUOTE_PROCESSED_PATTERN_V1,
   LENDER_RATE_REQUESTED_PATTERN_V1,
+  CREDIT_REPORT_FAILED_PATTERN_V1,
 } from '../../src/domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS as CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS,
@@ -31,9 +32,13 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
 
   static readonly DataBucketId = 'DataBucket';
 
+  static readonly StateMachineId = 'StateMachine';
+
   static readonly LoanBrokerEventBusId = 'LoanBrokerEventBus';
 
   static readonly QuoteProcessedObserverId = 'QuoteProcessedObserver';
+
+  static readonly CreditReportFailedObserverId = 'CreditReportFailedObserver';
 
   static readonly RateRequestedObserverId = 'RateRequestedObserver';
 
@@ -53,6 +58,7 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       testFunctionIds: [
         LoanBrokerTestStack.QuoteProcessedObserverId,
         LoanBrokerTestStack.RateRequestedObserverId,
+        LoanBrokerTestStack.CreditReportFailedObserverId,
       ],
     });
 
@@ -176,9 +182,18 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       LoanBrokerTestStack.QuoteProcessedObserverId
     );
 
+    this.addEventBridgeRuleTargetFunction(
+      this.addEventBridgePatternRule(
+        'CreditReportFailedRule',
+        eventBus,
+        CREDIT_REPORT_FAILED_PATTERN_V1
+      ),
+      LoanBrokerTestStack.CreditReportFailedObserverId
+    );
+
     // SUT
 
-    new LoanBroker(this, 'SUT', {
+    const loanBroker = new LoanBroker(this, 'SUT', {
       loanBrokerEventBus: eventBus,
       dataBucket: bucket,
       lendersParameterPathPrefix,
@@ -186,6 +201,10 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
 
     // Tag resources for testing
 
+    this.addTestResourceTag(
+      loanBroker.stateMachine,
+      LoanBrokerTestStack.StateMachineId
+    );
     this.addTestResourceTag(bucket, LoanBrokerTestStack.DataBucketId);
     this.addTestResourceTag(eventBus, LoanBrokerTestStack.LoanBrokerEventBusId);
   }

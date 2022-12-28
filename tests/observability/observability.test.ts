@@ -6,6 +6,8 @@ import {
 import {
   EventDomain,
   EventService,
+  newLenderRateReceivedV1,
+  newLenderRateRequestedV1,
   newQuoteSubmittedV1,
 } from '../../src/domain/domain-events';
 import { putDomainEventAsync } from '../../src/lib/utils';
@@ -33,21 +35,21 @@ describe('Observability tests', () => {
     await testClient.initialiseTestAsync();
   });
 
-  test(`Observe quote submitted event`, async () => {
+  test(`QuoteSubmitted`, async () => {
     // Arrange
 
-    const creditReportRequested = newQuoteSubmittedV1({
+    const domainEvent = newQuoteSubmittedV1({
       context: {
         correlationId: 'test-correlationId',
         requestId: 'test-requestId',
       },
       origin: {
         domain: EventDomain.LoanBroker,
-        service: EventService.LoanBroker,
+        service: EventService.RequestApi,
       },
       data: {
         quoteReference: 'test-quoteReference',
-        quoteRequestDataUrl: 'test-quoteRequestDataUrl'
+        quoteRequestDataUrl: 'test-quoteRequestDataUrl',
       },
     });
 
@@ -55,7 +57,89 @@ describe('Observability tests', () => {
 
     await putDomainEventAsync({
       eventBusName: loanBrokerEventBus.eventBusArn,
-      domainEvent: creditReportRequested,
+      domainEvent,
+    });
+
+    // Await
+
+    const { timedOut } = await testClient.pollTestAsync({
+      until: async () => true,
+    });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+  });
+
+  test(`LenderRateRequested`, async () => {
+    // Arrange
+
+    const domainEvent = newLenderRateRequestedV1({
+      context: {
+        correlationId: 'test-correlationId',
+        requestId: 'test-requestId',
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LenderGateway,
+      },
+      data: {
+        request: {
+          lenderId: 'test-lenderId',
+          quoteReference: 'test-quoteReference',
+          quoteRequestDataUrl: 'test-quoteRequestDataUrl',
+          creditReportDataUrl: 'test-creditReportDataUrl',
+        },
+        taskToken: 'test-taskToken',
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent,
+    });
+
+    // Await
+
+    const { timedOut } = await testClient.pollTestAsync({
+      until: async () => true,
+    });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+  });
+
+  test(`LenderRateReceived`, async () => {
+    // Arrange
+
+    const domainEvent = newLenderRateReceivedV1({
+      context: {
+        correlationId: 'test-correlationId',
+        requestId: 'test-requestId',
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LenderGateway,
+      },
+      data: {
+        resultType: 'SUCCEEDED',
+        payload: {
+          lenderId: 'test-lenderId',
+          isRateAvailable: true,
+          lenderRateDataUrl: 'test-lenderRateDataUrl',
+        },
+        taskToken: 'test-taskToken',
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent,
     });
 
     // Await

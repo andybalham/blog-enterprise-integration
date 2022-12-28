@@ -14,30 +14,30 @@ const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 export const handler = async (event: QuoteRequestState): Promise<void> => {
   console.log(JSON.stringify({ event }, null, 2));
 
-  if (event.creditReportReceivedData.resultType === 'SUCCEEDED') {
-    const lenderRateRequested = newLenderRateRequestedV1({
-      context: event.quoteSubmitted.metadata,
-      origin: {
-        domain: EventDomain.LoanBroker,
-        service: EventService.LoanBroker,
-      },
-      data: {
-        request: {
-          lenderId: event.lender.lenderId,
-          quoteReference: event.quoteSubmitted.data.quoteReference,
-          quoteRequestDataUrl: event.quoteSubmitted.data.quoteRequestDataUrl,
-          creditReportDataUrl:
-            event.creditReportReceivedData.payload.creditReportDataUrl,
-        },
-        taskToken: event.taskToken,
-      },
-    });
-
-    await putDomainEventAsync({
-      eventBusName,
-      domainEvent: lenderRateRequested,
-    });
-  } else {
-    // TODO 07Nov22: Handle the scenario where the credit report failed
+  if (event.creditReportReceivedData.resultType === 'FAILED') {
+    throw new Error('Credit report failed');
   }
+
+  const lenderRateRequested = newLenderRateRequestedV1({
+    context: event.quoteSubmitted.metadata,
+    origin: {
+      domain: EventDomain.LoanBroker,
+      service: EventService.LoanBroker,
+    },
+    data: {
+      request: {
+        lenderId: event.lender.lenderId,
+        quoteReference: event.quoteSubmitted.data.quoteReference,
+        quoteRequestDataUrl: event.quoteSubmitted.data.quoteRequestDataUrl,
+        creditReportDataUrl:
+          event.creditReportReceivedData.payload.creditReportDataUrl,
+      },
+      taskToken: event.taskToken,
+    },
+  });
+
+  await putDomainEventAsync({
+    eventBusName,
+    domainEvent: lenderRateRequested,
+  });
 };
