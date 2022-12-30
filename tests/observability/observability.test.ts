@@ -104,7 +104,7 @@ describe('Observability tests', () => {
     // Await
 
     const { timedOut } = await testClient.pollTestAsync({
-      until: async () => true,
+      until: async (o) => o.length > 0,
     });
 
     // Assert
@@ -145,7 +145,7 @@ describe('Observability tests', () => {
     // Await
 
     const { timedOut } = await testClient.pollTestAsync({
-      until: async () => true,
+      until: async (o) => o.length > 0,
     });
 
     // Assert

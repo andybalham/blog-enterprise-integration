@@ -117,11 +117,12 @@ export const handler = async (
 ): Promise<void> => {
   //
   switch (event.detail.metadata.eventType) {
-    // TODO 20Dec22: What other metrics do we want to log?
+    // TODO 20Dec22: Add failure events and alarms
     case EventType.QuoteSubmitted:
       publishQuoteSubmittedMetric(event.detail as QuoteSubmittedV1);
       break;
     case EventType.QuoteProcessed:
+      // TODO 30Dec22: Add overall time for processing
       publishQuoteProcessedMetric(event.detail as QuoteProcessedV1);
       break;
     case EventType.LenderRateRequested:

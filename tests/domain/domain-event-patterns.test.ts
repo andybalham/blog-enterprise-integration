@@ -7,7 +7,7 @@ import {
   LENDER_RATE_RECEIVED_PATTERN_V1,
   LENDER_RATE_REQUESTED_PATTERN_V1,
   LOAN_BROKER_CALLBACK_PATTERN_V1,
-  LOAN_BROKER_DOMAIN_PATTERN,
+  LOAN_BROKER_METRICS_PATTERN,
   QUOTE_PROCESSED_PATTERN_V1,
   QUOTE_SUBMITTED_PATTERN_V1,
 } from '../../src/domain/domain-event-patterns';
@@ -29,11 +29,11 @@ const TEST_ORIGIN = {
 };
 
 describe('Domain Event Pattern Test Suite', () => {
-  //
   [
     {
       isMatchExpected: true,
-      eventPattern: LOAN_BROKER_DOMAIN_PATTERN,
+      // In practice, we would want multiple tests for this pattern
+      eventPattern: LOAN_BROKER_METRICS_PATTERN,
       domainEvent: newQuoteSubmittedV1({
         origin: TEST_ORIGIN,
         data: {

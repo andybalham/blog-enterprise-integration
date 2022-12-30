@@ -1,9 +1,18 @@
 import { EventDomain, EventType } from './domain-events';
 
-export const LOAN_BROKER_DOMAIN_PATTERN = {
+export const LOAN_BROKER_METRICS_PATTERN = {
   detail: {
     metadata: {
       domain: [EventDomain.LoanBroker],
+      eventType: [
+        EventType.QuoteSubmitted,
+        EventType.QuoteProcessed,
+        EventType.LenderRateRequested,
+        EventType.LenderRateReceived,
+        EventType.CreditReportFailed,
+        EventType.LenderRateFailed,
+      ],
+      eventVersion: [{ prefix: '1.' }],
     },
   },
 };
