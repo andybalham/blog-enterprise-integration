@@ -5,7 +5,6 @@ import { EventBus } from 'aws-cdk-lib/aws-events';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import LoanBroker from '../../src/loan-broker/LoanBroker';
 import {
@@ -24,6 +23,7 @@ import {
   LOAN_BROKER_EVENT_BUS as LENDER_GATEWAY_LOAN_BROKER_EVENT_BUS,
   LENDER_GATEWAY_DATA_BUCKET_NAME,
 } from '../../src/lender-gateway/constants';
+import { getNodejsFunctionProps } from '../../src/lib/utils';
 
 const lendersParameterPathPrefix = 'quote-processor-test-lenders';
 
@@ -90,13 +90,12 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
     const mockCreditBureauFunction = new NodejsFunction(
       this,
       LoanBrokerTestStack.MockCreditBureauId,
-      {
+      getNodejsFunctionProps({
         environment: {
           [CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS]: eventBus.eventBusArn,
           [CREDIT_BUREAU_DATA_BUCKET_NAME]: bucket.bucketName,
         },
-        logRetention: RetentionDays.ONE_DAY,
-      }
+      })
     );
 
     this.addTestFunction(mockCreditBureauFunction);
@@ -118,13 +117,12 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
     const mockLenderFunction = new NodejsFunction(
       this,
       LoanBrokerTestStack.MockLenderId,
-      {
+      getNodejsFunctionProps({
         environment: {
           [LENDER_GATEWAY_LOAN_BROKER_EVENT_BUS]: eventBus.eventBusArn,
           [LENDER_GATEWAY_DATA_BUCKET_NAME]: bucket.bucketName,
         },
-        logRetention: RetentionDays.ONE_DAY,
-      }
+      })
     );
 
     this.addTestFunction(mockLenderFunction);

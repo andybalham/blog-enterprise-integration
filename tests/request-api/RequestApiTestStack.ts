@@ -2,11 +2,11 @@ import { IntegrationTestStack } from '@andybalham/cdk-cloud-test-kit';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { EventBus } from 'aws-cdk-lib/aws-events';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import RequestApi from '../../src/request-api/RequestApi';
 import { EventType } from '../../src/domain/domain-events';
+import { getNodejsFunctionProps } from '../../src/lib/utils';
 
 export default class RequestApiTestStack extends IntegrationTestStack {
   //
@@ -35,9 +35,11 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     const eventBus = new EventBus(this, 'EventBus');
 
     this.addTestFunction(
-      new NodejsFunction(this, RequestApiTestStack.EventObserverId, {
-        logRetention: RetentionDays.ONE_DAY,
-      })
+      new NodejsFunction(
+        this,
+        RequestApiTestStack.EventObserverId,
+        getNodejsFunctionProps()
+      )
     );
 
     this.addEventBridgeRuleTargetFunction(

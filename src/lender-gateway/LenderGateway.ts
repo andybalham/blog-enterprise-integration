@@ -12,6 +12,7 @@ import {
   LENDER_CONFIG,
 } from './constants';
 import { LenderRegisterEntry } from '../domain/domain-models';
+import { getNodejsFunctionProps } from '../lib/utils';
 
 export interface LenderConfig {
   lenderId: string;
@@ -36,13 +37,17 @@ export default class LenderGateway extends Construct {
   constructor(scope: Construct, id: string, props: LenderGatewayProps) {
     super(scope, id);
 
-    const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
-      environment: {
-        [LENDER_CONFIG]: JSON.stringify(props.lenderConfig),
-        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
-        [LENDER_GATEWAY_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
-      },
-    });
+    const requestHandlerFunction = new NodejsFunction(
+      this,
+      'RequestHandler',
+      getNodejsFunctionProps({
+        environment: {
+          [LENDER_CONFIG]: JSON.stringify(props.lenderConfig),
+          [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
+          [LENDER_GATEWAY_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        },
+      })
+    );
 
     const lenderRateRequestedRule = new Rule(
       this,

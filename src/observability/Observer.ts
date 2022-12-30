@@ -4,6 +4,7 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
 import { LOAN_BROKER_DOMAIN_PATTERN } from '../domain/domain-event-patterns';
+import { getNodejsFunctionProps } from '../lib/utils';
 
 export interface ObserverProps {
   loanBrokerEventBus: EventBus;
@@ -18,21 +19,33 @@ export default class Observer extends Construct {
       eventPattern: LOAN_BROKER_DOMAIN_PATTERN,
     });
 
-    const loggerFunction = new NodejsFunction(this, 'Logger', {
-      logRetention: RetentionDays.ONE_WEEK,
-    });
+    const loggerFunction = new NodejsFunction(
+      this,
+      'Logger',
+      getNodejsFunctionProps({
+        logRetention: RetentionDays.ONE_WEEK,
+      })
+    );
 
     domainEventRule.addTarget(new LambdaFunctionTarget(loggerFunction));
 
-    const measurerFunction = new NodejsFunction(this, 'Measurer', {
-      logRetention: RetentionDays.ONE_WEEK,
-    });
+    const measurerFunction = new NodejsFunction(
+      this,
+      'Measurer',
+      getNodejsFunctionProps({
+        logRetention: RetentionDays.ONE_WEEK,
+      })
+    );
 
     domainEventRule.addTarget(new LambdaFunctionTarget(measurerFunction));
 
-    // const measurerEMFunction = new NodejsFunction(this, 'MeasurerEM', {
-    //   logRetention: RetentionDays.ONE_WEEK,
-    // });
+    // const measurerEMFunction = new NodejsFunction(
+    //   this,
+    //   'MeasurerEM',
+    //   getNodejsFunctionProps({
+    //     logRetention: RetentionDays.ONE_WEEK,
+    //   })
+    // );
 
     // domainEventRule.addTarget(new LambdaFunctionTarget(measurerEMFunction));
   }

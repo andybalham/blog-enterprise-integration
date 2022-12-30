@@ -5,7 +5,6 @@ import { EventBus, IEventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
   IChainable,
@@ -17,6 +16,7 @@ import {
   EventBridgePutEventsEntry,
 } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
+import { getNodejsFunctionProps } from '../lib/utils';
 import {
   LOAN_BROKER_CALLBACK_PATTERN_V1,
   QUOTE_SUBMITTED_PATTERN_V1,
@@ -44,13 +44,16 @@ export default class LoanBroker extends Construct {
 
     // Response sender function
 
-    const responseSenderFunction = new NodejsFunction(this, 'ResponseSender', {
-      environment: {
-        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
-        [LOAN_BROKER_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
-      },
-      logRetention: RetentionDays.ONE_DAY,
-    });
+    const responseSenderFunction = new NodejsFunction(
+      this,
+      'ResponseSender',
+      getNodejsFunctionProps({
+        environment: {
+          [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
+          [LOAN_BROKER_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
+        },
+      })
+    );
 
     props.loanBrokerEventBus.grantPutEventsTo(responseSenderFunction);
     props.dataBucket.grantReadWrite(responseSenderFunction);
@@ -60,12 +63,11 @@ export default class LoanBroker extends Construct {
     const creditReportRequesterFunction = new NodejsFunction(
       this,
       'CreditReportRequester',
-      {
+      getNodejsFunctionProps({
         environment: {
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
         },
-        logRetention: RetentionDays.ONE_DAY,
-      }
+      })
     );
 
     props.loanBrokerEventBus.grantPutEventsTo(creditReportRequesterFunction);
@@ -77,12 +79,15 @@ export default class LoanBroker extends Construct {
     // https://bobbyhadz.com/blog/cdk-get-region-accountid
     // https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-access.html
 
-    const lenderLookupFunction = new NodejsFunction(this, 'LenderLookup', {
-      environment: {
-        [LENDERS_PARAMETER_PATH_PREFIX]: props.lendersParameterPathPrefix,
-      },
-      logRetention: RetentionDays.ONE_DAY,
-    });
+    const lenderLookupFunction = new NodejsFunction(
+      this,
+      'LenderLookup',
+      getNodejsFunctionProps({
+        environment: {
+          [LENDERS_PARAMETER_PATH_PREFIX]: props.lendersParameterPathPrefix,
+        },
+      })
+    );
 
     lenderLookupFunction.role?.attachInlinePolicy(
       new Policy(this, 'GetLendersPolicy', {
@@ -101,12 +106,15 @@ export default class LoanBroker extends Construct {
 
     // Rate requester
 
-    const rateRequesterFunction = new NodejsFunction(this, 'RateRequester', {
-      environment: {
-        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
-      },
-      logRetention: RetentionDays.ONE_DAY,
-    });
+    const rateRequesterFunction = new NodejsFunction(
+      this,
+      'RateRequester',
+      getNodejsFunctionProps({
+        environment: {
+          [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
+        },
+      })
+    );
 
     props.loanBrokerEventBus.grantPutEventsTo(rateRequesterFunction);
 
@@ -124,13 +132,16 @@ export default class LoanBroker extends Construct {
 
     // Request handler function
 
-    const requestHandlerFunction = new NodejsFunction(this, 'RequestHandler', {
-      environment: {
-        [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
-        [STATE_MACHINE_ARN]: this.stateMachine.stateMachineArn,
-      },
-      logRetention: RetentionDays.ONE_DAY,
-    });
+    const requestHandlerFunction = new NodejsFunction(
+      this,
+      'RequestHandler',
+      getNodejsFunctionProps({
+        environment: {
+          [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
+          [STATE_MACHINE_ARN]: this.stateMachine.stateMachineArn,
+        },
+      })
+    );
 
     const quoteSubmittedRule = new Rule(this, 'QuoteSubmittedRule', {
       eventBus: props.loanBrokerEventBus,
@@ -148,12 +159,11 @@ export default class LoanBroker extends Construct {
     const callbackHandlerFunction = new NodejsFunction(
       this,
       'CallbackHandler',
-      {
+      getNodejsFunctionProps({
         environment: {
           [STATE_MACHINE_ARN]: this.stateMachine.stateMachineArn,
         },
-        logRetention: RetentionDays.ONE_DAY,
-      }
+      })
     );
 
     const loanBrokerCallbackRule = new Rule(this, id, {

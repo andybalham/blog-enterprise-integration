@@ -7,11 +7,37 @@ import EventBridge, {
   PutEventsRequestEntry,
   PutEventsResponse,
 } from 'aws-sdk/clients/eventbridge';
+import { NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DomainEvent } from '../domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3();
 const eventBridge = new EventBridge();
+
+// https://medium.com/@moritzonken/enable-source-maps-for-typescript-in-aws-lambda-83f4cd91338c
+// https://serverless.pub/aws-lambda-node-sourcemaps/
+export const NODE_DEFAULT_PROPS = {
+  environment: {
+    NODE_OPTIONS: '--enable-source-maps',
+  },
+  logRetention: RetentionDays.ONE_DAY,
+  bundling: {
+    sourceMap: true,
+    minify: true,
+  },
+};
+
+export const getNodejsFunctionProps = (
+  props?: NodejsFunctionProps
+): NodejsFunctionProps => ({
+  ...NODE_DEFAULT_PROPS,
+  ...props,
+  environment: {
+    ...NODE_DEFAULT_PROPS.environment,
+    ...props?.environment,
+  },
+});
 
 export const fetchFromUrlAsync = async <T>(url: string): Promise<T> => {
   const fetchResponse = await fetch(url);
