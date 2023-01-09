@@ -52,7 +52,7 @@ const publishLenderRateReceivedMetric = (
 
     // ----------------------------------------------------------------------
 
-    metrics.putDimensions({
+    metrics.setDimensions({
       lenderId: lenderRateReceived.data.payload.lenderId,
     });
     metrics.putMetric('lenderRateReceivedByLender', 1, Unit.Count);
@@ -82,7 +82,7 @@ const publishLenderRateRequestedMetric = (
 
   // ----------------------------------------------------------------------
 
-  metrics.putDimensions({
+  metrics.setDimensions({
     lenderId: lenderRateRequested.data.request.lenderId,
   });
   metrics.putMetric('lenderRateRequestedByLender', 1, Unit.Count);

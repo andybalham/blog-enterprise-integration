@@ -6,6 +6,7 @@ import {
 import {
   EventDomain,
   EventService,
+  newCreditReportFailedV1,
   newLenderRateReceivedV1,
   newLenderRateRequestedV1,
   newQuoteSubmittedV1,
@@ -132,6 +133,45 @@ describe('Observability tests', () => {
           lenderRateDataUrl: 'test-lenderRateDataUrl',
         },
         taskToken: 'test-taskToken',
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent,
+    });
+
+    // Await
+
+    const { timedOut } = await testClient.pollTestAsync({
+      until: async (o) => o.length > 0,
+    });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+  });
+
+  test(`CreditReportFailed`, async () => {
+    // Arrange
+
+    const domainEvent = newCreditReportFailedV1({
+      context: {
+        correlationId: 'test-correlationId',
+        requestId: 'test-requestId',
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.LoanBroker,
+      },
+      data: {
+        error: 'test-error',
+        executionId: 'test-executionId',
+        executionStartTime: 'test-executionStartTime',
+        quoteReference: 'test-quoteReference',
+        stateMachineId: 'test-stateMachineId',
       },
     });
 

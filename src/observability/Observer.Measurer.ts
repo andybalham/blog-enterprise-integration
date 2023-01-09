@@ -1,18 +1,26 @@
+/* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda/trigger/eventbridge';
 import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
 import {
+  CreditReportFailedV1,
   DomainEventBase,
   EventType,
+  LenderRateFailedV1,
   LenderRateReceivedV1,
   LenderRateRequestedV1,
   QuoteProcessedV1,
   QuoteSubmittedV1,
 } from '../domain/domain-events';
 
+export const METRICS_NAMESPACE = 'LoanBrokerPT';
+export const METRICS_SERVICE_NAME = 'observer';
+
+export const CREDIT_REPORT_FAILED_METRIC = 'creditReportFailed';
+
 const metrics = new Metrics({
-  namespace: 'LoanBrokerPT',
-  serviceName: 'observer',
+  namespace: METRICS_NAMESPACE,
+  serviceName: METRICS_SERVICE_NAME,
 });
 
 const addMetadata = (
@@ -74,6 +82,38 @@ const publishLenderRateReceivedMetric = (
   }
 };
 
+const publishLenderRateFailedMetric = (
+  lenderRateFailed: LenderRateFailedV1
+): void => {
+  metrics.addMetric('lenderRateFailed', MetricUnits.Count, 1);
+
+  addMetadata(lenderRateFailed, {
+    quoteReference: lenderRateFailed.data.quoteReference,
+    error: lenderRateFailed.data.error,
+    executionId: lenderRateFailed.data.executionId,
+    executionStartTime: lenderRateFailed.data.executionStartTime,
+    stateMachineId: lenderRateFailed.data.stateMachineId,
+  });
+
+  metrics.publishStoredMetrics();
+};
+
+const publishCreditReportFailedMetric = (
+  creditReportFailed: CreditReportFailedV1
+): void => {
+  metrics.addMetric(CREDIT_REPORT_FAILED_METRIC, MetricUnits.Count, 1);
+
+  addMetadata(creditReportFailed, {
+    quoteReference: creditReportFailed.data.quoteReference,
+    error: creditReportFailed.data.error,
+    executionId: creditReportFailed.data.executionId,
+    executionStartTime: creditReportFailed.data.executionStartTime,
+    stateMachineId: creditReportFailed.data.stateMachineId,
+  });
+
+  metrics.publishStoredMetrics();
+};
+
 const publishLenderRateRequestedMetric = (
   lenderRateRequested: LenderRateRequestedV1
 ): void => {
@@ -116,6 +156,10 @@ export const handler = async (
   event: EventBridgeEvent<'DomainEventBase', DomainEventBase>
 ): Promise<void> => {
   //
+  console.log(JSON.stringify({ event }, null, 2));
+
+  let isEventHandled = true;
+
   switch (event.detail.metadata.eventType) {
     // TODO 20Dec22: Add failure events and alarms
     case EventType.QuoteSubmitted:
@@ -131,8 +175,17 @@ export const handler = async (
     case EventType.LenderRateReceived:
       publishLenderRateReceivedMetric(event.detail as LenderRateReceivedV1);
       break;
+    case EventType.LenderRateFailed:
+      publishLenderRateFailedMetric(event.detail as LenderRateFailedV1);
+      break;
+    case EventType.CreditReportFailed:
+      publishCreditReportFailedMetric(event.detail as CreditReportFailedV1);
+      break;
     default:
       // Do nothing
+      isEventHandled = false;
       break;
   }
+
+  console.log(JSON.stringify({ isEventHandled }, null, 2));
 };
