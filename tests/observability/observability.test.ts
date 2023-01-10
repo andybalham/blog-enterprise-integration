@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { v4 as uuidv4 } from 'uuid';
 import {
   EventBridgeTestClient,
   IntegrationTestClient,
@@ -9,10 +10,12 @@ import {
   newCreditReportFailedV1,
   newLenderRateReceivedV1,
   newLenderRateRequestedV1,
+  newQuoteProcessedV1,
   newQuoteSubmittedV1,
 } from '../../src/domain/domain-events';
 import { putDomainEventAsync } from '../../src/lib/utils';
 import ObservabilityTestStack from './ObservabilityTestStack';
+import { emptyLoanDetails } from '../lib/model-examples';
 
 jest.setTimeout(2 * 60 * 1000);
 
@@ -41,8 +44,8 @@ describe('Observability tests', () => {
 
     const domainEvent = newQuoteSubmittedV1({
       context: {
-        correlationId: 'test-correlationId',
-        requestId: 'test-requestId',
+        correlationId: uuidv4(),
+        requestId: uuidv4(),
       },
       origin: {
         domain: EventDomain.LoanBroker,
@@ -72,13 +75,74 @@ describe('Observability tests', () => {
     expect(timedOut).toBeFalsy();
   });
 
+  test.only(`QuoteProcessed`, async () => {
+    // Arrange
+
+    const quoteSubmittedEvent = newQuoteSubmittedV1({
+      context: {
+        correlationId: uuidv4(),
+        requestId: uuidv4(),
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.RequestApi,
+      },
+      data: {
+        quoteReference: 'test-quoteReference',
+        quoteRequestDataUrl: 'test-quoteRequestDataUrl',
+      },
+    });
+
+    const quoteProcessedEvent = newQuoteProcessedV1({
+      context: {
+        correlationId: quoteSubmittedEvent.metadata.correlationId,
+        requestId: quoteSubmittedEvent.metadata.requestId,
+      },
+      origin: {
+        domain: EventDomain.LoanBroker,
+        service: EventService.RequestApi,
+      },
+      data: {
+        quoteReference: 'test-quoteReference',
+        loanDetails: emptyLoanDetails,
+        bestLenderRate: {
+          lenderId: 'test-lenderId',
+          lenderName: 'test-lenderName',
+          rate: 6.66,
+        },
+      },
+    });
+
+    // Act
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent: quoteSubmittedEvent,
+    });
+
+    await putDomainEventAsync({
+      eventBusName: loanBrokerEventBus.eventBusArn,
+      domainEvent: quoteProcessedEvent,
+    });
+
+    // Await
+
+    const { timedOut } = await testClient.pollTestAsync({
+      until: async (o) => o.length > 1,
+    });
+
+    // Assert
+
+    expect(timedOut).toBeFalsy();
+  });
+
   test(`LenderRateRequested`, async () => {
     // Arrange
 
     const domainEvent = newLenderRateRequestedV1({
       context: {
-        correlationId: 'test-correlationId',
-        requestId: 'test-requestId',
+        correlationId: uuidv4(),
+        requestId: uuidv4(),
       },
       origin: {
         domain: EventDomain.LoanBroker,
@@ -118,8 +182,8 @@ describe('Observability tests', () => {
 
     const domainEvent = newLenderRateReceivedV1({
       context: {
-        correlationId: 'test-correlationId',
-        requestId: 'test-requestId',
+        correlationId: uuidv4(),
+        requestId: uuidv4(),
       },
       origin: {
         domain: EventDomain.LoanBroker,
@@ -159,8 +223,8 @@ describe('Observability tests', () => {
 
     const domainEvent = newCreditReportFailedV1({
       context: {
-        correlationId: 'test-correlationId',
-        requestId: 'test-requestId',
+        correlationId: uuidv4(),
+        requestId: uuidv4(),
       },
       origin: {
         domain: EventDomain.LoanBroker,

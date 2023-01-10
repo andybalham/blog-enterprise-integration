@@ -8,7 +8,8 @@ import {
   Metric,
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { LOAN_BROKER_METRICS_PATTERN } from '../domain/domain-event-patterns';
 import { getNodejsFunctionProps } from '../lib/utils';
 import {
@@ -16,6 +17,7 @@ import {
   METRICS_NAMESPACE as OBSERVER_NAMESPACE,
   METRICS_SERVICE_NAME as OBSERVER_SERVICE_NAME,
 } from './Observer.Measurer';
+import { ENV_REQUEST_EVENT_TABLE_NAME } from './RequestEventTableClient';
 
 export interface ObserverProps {
   loanBrokerEventBus: EventBus;
@@ -25,9 +27,12 @@ export default class Observer extends Construct {
   constructor(scope: Construct, id: string, props: ObserverProps) {
     super(scope, id);
 
-    const domainEventRule = new Rule(this, id, {
-      eventBus: props.loanBrokerEventBus,
-      eventPattern: LOAN_BROKER_METRICS_PATTERN,
+    const requestEventTable = new Table(this, 'RequestEventTable', {
+      partitionKey: { name: 'requestId', type: AttributeType.STRING },
+      sortKey: { name: 'SK', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      timeToLiveAttribute: 'expiryTime',
     });
 
     const loggerFunction = new NodejsFunction(
@@ -35,19 +40,33 @@ export default class Observer extends Construct {
       'Logger',
       getNodejsFunctionProps({
         logRetention: RetentionDays.ONE_WEEK,
+        environment: {
+          [ENV_REQUEST_EVENT_TABLE_NAME]: requestEventTable.tableName,
+        },
       })
     );
 
-    domainEventRule.addTarget(new LambdaFunctionTarget(loggerFunction));
+    requestEventTable.grantWriteData(loggerFunction);
 
     const measurerFunction = new NodejsFunction(
       this,
       'Measurer',
       getNodejsFunctionProps({
         logRetention: RetentionDays.ONE_WEEK,
+        environment: {
+          [ENV_REQUEST_EVENT_TABLE_NAME]: requestEventTable.tableName,
+        },
       })
     );
 
+    requestEventTable.grantReadData(measurerFunction);
+
+    const domainEventRule = new Rule(this, id, {
+      eventBus: props.loanBrokerEventBus,
+      eventPattern: LOAN_BROKER_METRICS_PATTERN,
+    });
+
+    domainEventRule.addTarget(new LambdaFunctionTarget(loggerFunction));
     domainEventRule.addTarget(new LambdaFunctionTarget(measurerFunction));
 
     // const measurerEMFunction = new NodejsFunction(

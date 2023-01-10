@@ -65,3 +65,14 @@ https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
 # CDK CLI
 
 See 'Specifying the app command': https://docs.aws.amazon.com/cdk/v2/guide/cli.html
+
+# Creating an event table
+
+- Name: RequestEventLog
+- PK: RequestId
+- SK: Time#ShortId
+- eventType
+- metadata
+- data
+- expiryTime
+

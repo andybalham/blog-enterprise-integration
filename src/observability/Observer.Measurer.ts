@@ -12,6 +12,9 @@ import {
   QuoteProcessedV1,
   QuoteSubmittedV1,
 } from '../domain/domain-events';
+import RequestEventTableClient from './RequestEventTableClient';
+
+const requestEventTableClient = new RequestEventTableClient();
 
 export const METRICS_NAMESPACE = 'LoanBrokerPT';
 export const METRICS_SERVICE_NAME = 'observer';
@@ -136,20 +139,27 @@ const publishLenderRateRequestedMetric = (
   metrics.publishStoredMetrics();
 };
 
-const publishQuoteProcessedMetric = (
+const publishQuoteProcessedMetricAsync = async (
   quoteProcessed: QuoteProcessedV1
-): void => {
+): Promise<void> => {
+  //
   metrics.addMetric('quoteProcessed', MetricUnits.Count, 1);
 
   addMetadata(quoteProcessed, {
     quoteReference: quoteProcessed.data.quoteReference,
-    bestLenderRate: quoteProcessed.data.bestLenderRate?.toString(),
-    loanDetailsAmount: quoteProcessed.data.loanDetails.amount?.toString(),
-    loanDetailsTermMonths:
-      quoteProcessed.data.loanDetails.termMonths?.toString(),
   });
 
   metrics.publishStoredMetrics();
+
+  //---------------------------------------------------
+
+  const [quoteSubmittedEvent] = await requestEventTableClient.getEventsByType(
+    quoteProcessed.metadata.requestId,
+    EventType.QuoteSubmitted
+  );
+
+  console.log('quoteSubmittedEvent:');
+  console.log(JSON.stringify({ quoteSubmittedEvent }, null, 2));
 };
 
 export const handler = async (
@@ -167,7 +177,7 @@ export const handler = async (
       break;
     case EventType.QuoteProcessed:
       // TODO 30Dec22: Add overall time for processing
-      publishQuoteProcessedMetric(event.detail as QuoteProcessedV1);
+      await publishQuoteProcessedMetricAsync(event.detail as QuoteProcessedV1);
       break;
     case EventType.LenderRateRequested:
       publishLenderRateRequestedMetric(event.detail as LenderRateRequestedV1);
