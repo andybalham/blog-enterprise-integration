@@ -63,7 +63,7 @@ export default class RequestEventTableClient {
 
     // In production, we would need to worry about continuation tokens
     const queryOutput = await documentClient.query(queryParams).promise();
-
+    
     if (!queryOutput.Items) {
       return [];
     }

@@ -2,6 +2,7 @@
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda/trigger/eventbridge';
 import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
+import { DateTime } from 'luxon';
 import {
   CreditReportFailedV1,
   DomainEventBase,
@@ -42,7 +43,7 @@ const addMetadata = (
   }
 };
 
-const publishQuoteSubmittedMetric = (
+const publishQuoteSubmittedMetrics = (
   quoteSubmitted: QuoteSubmittedV1
 ): void => {
   metrics.addMetric('quoteSubmitted', MetricUnits.Count, 1);
@@ -54,7 +55,7 @@ const publishQuoteSubmittedMetric = (
   metrics.publishStoredMetrics();
 };
 
-const publishLenderRateReceivedMetric = (
+const publishLenderRateReceivedMetrics = (
   lenderRateReceived: LenderRateReceivedV1
 ): void => {
   if (
@@ -85,7 +86,7 @@ const publishLenderRateReceivedMetric = (
   }
 };
 
-const publishLenderRateFailedMetric = (
+const publishLenderRateFailedMetrics = (
   lenderRateFailed: LenderRateFailedV1
 ): void => {
   metrics.addMetric('lenderRateFailed', MetricUnits.Count, 1);
@@ -101,7 +102,7 @@ const publishLenderRateFailedMetric = (
   metrics.publishStoredMetrics();
 };
 
-const publishCreditReportFailedMetric = (
+const publishCreditReportFailedMetrics = (
   creditReportFailed: CreditReportFailedV1
 ): void => {
   metrics.addMetric(CREDIT_REPORT_FAILED_METRIC, MetricUnits.Count, 1);
@@ -139,7 +140,7 @@ const publishLenderRateRequestedMetric = (
   metrics.publishStoredMetrics();
 };
 
-const publishQuoteProcessedMetricAsync = async (
+const publishQuoteProcessedMetricsAsync = async (
   quoteProcessed: QuoteProcessedV1
 ): Promise<void> => {
   //
@@ -153,13 +154,35 @@ const publishQuoteProcessedMetricAsync = async (
 
   //---------------------------------------------------
 
-  const [quoteSubmittedEvent] = await requestEventTableClient.getEventsByType(
+  const [quoteSubmitted] = await requestEventTableClient.getEventsByType(
     quoteProcessed.metadata.requestId,
     EventType.QuoteSubmitted
   );
 
-  console.log('quoteSubmittedEvent:');
-  console.log(JSON.stringify({ quoteSubmittedEvent }, null, 2));
+  if (!quoteSubmitted) {
+    return;
+  }
+
+  const quoteSubmittedMillis = DateTime.fromISO(
+    quoteSubmitted.metadata.timestamp
+  ).toMillis();
+  const quoteProcessedMillis = DateTime.fromISO(
+    quoteProcessed.metadata.timestamp
+  ).toMillis();
+
+  const durationMillis = quoteProcessedMillis - quoteSubmittedMillis;
+
+  metrics.addMetric(
+    'quoteProcessedDuration',
+    MetricUnits.Milliseconds,
+    durationMillis
+  );
+
+  addMetadata(quoteProcessed, {
+    quoteReference: quoteProcessed.data.quoteReference,
+  });
+
+  metrics.publishStoredMetrics();
 };
 
 export const handler = async (
@@ -173,23 +196,23 @@ export const handler = async (
   switch (event.detail.metadata.eventType) {
     // TODO 20Dec22: Add failure events and alarms
     case EventType.QuoteSubmitted:
-      publishQuoteSubmittedMetric(event.detail as QuoteSubmittedV1);
+      publishQuoteSubmittedMetrics(event.detail as QuoteSubmittedV1);
       break;
     case EventType.QuoteProcessed:
       // TODO 30Dec22: Add overall time for processing
-      await publishQuoteProcessedMetricAsync(event.detail as QuoteProcessedV1);
+      await publishQuoteProcessedMetricsAsync(event.detail as QuoteProcessedV1);
       break;
     case EventType.LenderRateRequested:
       publishLenderRateRequestedMetric(event.detail as LenderRateRequestedV1);
       break;
     case EventType.LenderRateReceived:
-      publishLenderRateReceivedMetric(event.detail as LenderRateReceivedV1);
+      publishLenderRateReceivedMetrics(event.detail as LenderRateReceivedV1);
       break;
     case EventType.LenderRateFailed:
-      publishLenderRateFailedMetric(event.detail as LenderRateFailedV1);
+      publishLenderRateFailedMetrics(event.detail as LenderRateFailedV1);
       break;
     case EventType.CreditReportFailed:
-      publishCreditReportFailedMetric(event.detail as CreditReportFailedV1);
+      publishCreditReportFailedMetrics(event.detail as CreditReportFailedV1);
       break;
     default:
       // Do nothing

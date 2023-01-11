@@ -75,7 +75,7 @@ describe('Observability tests', () => {
     expect(timedOut).toBeFalsy();
   });
 
-  test.only(`QuoteProcessed`, async () => {
+  test(`QuoteProcessed`, async () => {
     // Arrange
 
     const quoteSubmittedEvent = newQuoteSubmittedV1({
@@ -92,6 +92,8 @@ describe('Observability tests', () => {
         quoteRequestDataUrl: 'test-quoteRequestDataUrl',
       },
     });
+
+    await IntegrationTestClient.sleepAsync(1);
 
     const quoteProcessedEvent = newQuoteProcessedV1({
       context: {
@@ -119,6 +121,8 @@ describe('Observability tests', () => {
       eventBusName: loanBrokerEventBus.eventBusArn,
       domainEvent: quoteSubmittedEvent,
     });
+
+    await IntegrationTestClient.sleepAsync(1);
 
     await putDomainEventAsync({
       eventBusName: loanBrokerEventBus.eventBusArn,

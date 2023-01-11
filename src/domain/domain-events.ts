@@ -45,7 +45,7 @@ export interface DomainEventMetadata
   extends EventSchema,
     EventOrigin,
     EventContext {
-  readonly timestamp: Date;
+  readonly timestamp: string;
 }
 
 export interface DomainEventBase {
@@ -76,7 +76,7 @@ export const newDomainEvent = <T extends Record<string, any>>({
       requestId: context?.requestId ?? uuidv4(),
       domain: origin.domain,
       service: origin.service,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     },
     data,
   });
