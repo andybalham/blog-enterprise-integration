@@ -16,6 +16,7 @@ import {
   CREDIT_REPORT_FAILED_METRIC,
   METRICS_NAMESPACE as OBSERVER_NAMESPACE,
   METRICS_SERVICE_NAME as OBSERVER_SERVICE_NAME,
+  QUOTE_PROCESSED_DURATION_METRIC,
 } from './Observer.Measurer';
 import { ENV_REQUEST_EVENT_TABLE_NAME } from './RequestEventTableClient';
 
@@ -96,6 +97,24 @@ export default class Observer extends Construct {
       evaluationPeriods: 1,
       comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
       threshold: 0,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
+    const quoteProcessedDuration = new Metric({
+      namespace: OBSERVER_NAMESPACE,
+      metricName: QUOTE_PROCESSED_DURATION_METRIC,
+      dimensionsMap: {
+        service: OBSERVER_SERVICE_NAME,
+      },
+    }).with({
+      statistic: 'sum',
+      period: Duration.minutes(5),
+    });
+
+    quoteProcessedDuration.createAlarm(this, 'QuoteProcessedDurationAlarm', {
+      evaluationPeriods: 1,      
+      comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+      threshold: 2000,
       treatMissingData: TreatMissingData.NOT_BREACHING,
     });
 

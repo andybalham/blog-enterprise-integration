@@ -21,6 +21,7 @@ export const METRICS_NAMESPACE = 'LoanBrokerPT';
 export const METRICS_SERVICE_NAME = 'observer';
 
 export const CREDIT_REPORT_FAILED_METRIC = 'creditReportFailed';
+export const QUOTE_PROCESSED_DURATION_METRIC = 'quoteProcessedDuration';
 
 const metrics = new Metrics({
   namespace: METRICS_NAMESPACE,
@@ -173,7 +174,7 @@ const publishQuoteProcessedMetricsAsync = async (
   const durationMillis = quoteProcessedMillis - quoteSubmittedMillis;
 
   metrics.addMetric(
-    'quoteProcessedDuration',
+    QUOTE_PROCESSED_DURATION_METRIC,
     MetricUnits.Milliseconds,
     durationMillis
   );
@@ -199,7 +200,6 @@ export const handler = async (
       publishQuoteSubmittedMetrics(event.detail as QuoteSubmittedV1);
       break;
     case EventType.QuoteProcessed:
-      // TODO 30Dec22: Add overall time for processing
       await publishQuoteProcessedMetricsAsync(event.detail as QuoteProcessedV1);
       break;
     case EventType.LenderRateRequested:

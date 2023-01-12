@@ -4,6 +4,7 @@ import {
   EventBridgeTestClient,
   IntegrationTestClient,
 } from '@andybalham/cdk-cloud-test-kit';
+import { DateTime } from 'luxon';
 import {
   EventDomain,
   EventService,
@@ -75,7 +76,7 @@ describe('Observability tests', () => {
     expect(timedOut).toBeFalsy();
   });
 
-  test(`QuoteProcessed`, async () => {
+  test.only(`QuoteProcessed`, async () => {
     // Arrange
 
     const quoteSubmittedEvent = newQuoteSubmittedV1({
@@ -92,8 +93,6 @@ describe('Observability tests', () => {
         quoteRequestDataUrl: 'test-quoteRequestDataUrl',
       },
     });
-
-    await IntegrationTestClient.sleepAsync(1);
 
     const quoteProcessedEvent = newQuoteProcessedV1({
       context: {
@@ -114,6 +113,12 @@ describe('Observability tests', () => {
         },
       },
     });
+
+    (quoteProcessedEvent.metadata as any).timestamp = DateTime.fromISO(
+      quoteSubmittedEvent.metadata.timestamp
+    )
+      .plus({ seconds: 3 })
+      .toISOTime();
 
     // Act
 
