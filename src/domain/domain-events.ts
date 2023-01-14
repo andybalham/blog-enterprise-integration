@@ -39,6 +39,7 @@ export interface EventOrigin {
 export interface EventContext {
   readonly correlationId: string;
   readonly requestId: string;
+  readonly eventId: string;
 }
 
 export interface DomainEventMetadata
@@ -68,12 +69,13 @@ export const newDomainEvent = <T extends Record<string, any>>({
   schema: EventSchema;
   origin: EventOrigin;
   data: T;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): DomainEvent<T> => ({
     metadata: {
       ...schema,
       correlationId: context?.correlationId ?? uuidv4(),
       requestId: context?.requestId ?? uuidv4(),
+      eventId: uuidv4(),
       domain: origin.domain,
       service: origin.service,
       timestamp: new Date().toISOString(),
@@ -135,7 +137,7 @@ export const newQuoteSubmittedV1 = ({
 }: {
   origin: EventOrigin;
   data: QuoteSubmittedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): QuoteSubmittedV1 =>
   newDomainEvent<QuoteSubmittedDataV1>({
     schema: {
@@ -164,7 +166,7 @@ export const newQuoteProcessedV1 = ({
 }: {
   origin: EventOrigin;
   data: QuoteProcessedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): QuoteProcessedV1 =>
   newDomainEvent<QuoteProcessedDataV1>({
     schema: {
@@ -192,7 +194,7 @@ export const newCreditReportRequestedV1 = ({
 }: {
   origin: EventOrigin;
   data: CreditReportRequestedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): CreditReportRequestedV1 =>
   newDomainEvent<CreditReportRequestedDataV1>({
     schema: {
@@ -219,7 +221,7 @@ export const newCreditReportReceivedV1 = ({
 }: {
   origin: EventOrigin;
   data: CreditReportReceivedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): CreditReportReceivedV1 =>
   newDomainEvent<CreditReportReceivedDataV1>({
     schema: {
@@ -250,7 +252,7 @@ export const newCreditReportFailedV1 = ({
 }: {
   origin: EventOrigin;
   data: CreditReportFailedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): CreditReportFailedV1 =>
   newDomainEvent<CreditReportFailedDataV1>({
     schema: {
@@ -280,7 +282,7 @@ export const newLenderRateRequestedV1 = ({
 }: {
   origin: EventOrigin;
   data: LenderRateRequestedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): LenderRateRequestedV1 =>
   newDomainEvent<LenderRateRequestedDataV1>({
     schema: {
@@ -309,7 +311,7 @@ export const newLenderRateReceivedV1 = ({
 }: {
   origin: EventOrigin;
   data: LenderRateReceivedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): LenderRateReceivedV1 =>
   newDomainEvent<LenderRateReceivedDataV1>({
     schema: {
@@ -340,7 +342,7 @@ export const newLenderRateFailedV1 = ({
 }: {
   origin: EventOrigin;
   data: LenderRateFailedDataV1;
-  context?: EventContext;
+  context?: Omit<EventContext, 'eventId'>;
 }): LenderRateFailedV1 =>
   newDomainEvent<LenderRateFailedDataV1>({
     schema: {
@@ -351,4 +353,3 @@ export const newLenderRateFailedV1 = ({
     data,
     context,
   });
-

@@ -34,7 +34,9 @@ export const handler = async (
       }
     );
 
-    console.log(JSON.stringify({ response }, null, 2));
+    console.log(
+      JSON.stringify({ response: { status: response.status } }, null, 2)
+    );
     //
   } else {
     //

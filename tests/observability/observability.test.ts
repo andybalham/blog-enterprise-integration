@@ -76,7 +76,7 @@ describe('Observability tests', () => {
     expect(timedOut).toBeFalsy();
   });
 
-  test.only(`QuoteProcessed`, async () => {
+  test(`QuoteProcessed`, async () => {
     // Arrange
 
     const quoteSubmittedEvent = newQuoteSubmittedV1({

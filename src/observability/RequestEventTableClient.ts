@@ -1,9 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import {
-  DocumentClient,
-  PutItemInput,
-} from 'aws-sdk/clients/dynamodb';
-import { nanoid } from 'nanoid';
+import { DocumentClient, PutItemInput } from 'aws-sdk/clients/dynamodb';
 import {
   DomainEventBase,
   DomainEventMetadata,
@@ -17,7 +13,10 @@ const documentClient = new DocumentClient();
 interface RequestEventItem extends Record<string, any> {
   requestId: string;
   SK: string;
+  receivedTime: string;
   eventType: EventType;
+  eventId: string;
+  correlationId: string;
   metadata: DomainEventMetadata;
   data: Record<string, any>;
   expiryTime: number;
@@ -26,16 +25,20 @@ interface RequestEventItem extends Record<string, any> {
 export default class RequestEventTableClient {
   async putEventAsync(event: DomainEventBase): Promise<void> {
     //
-    const nowUnixSeconds = Math.floor(Date.now() / 1000);
+    const receivedTimeMillis = Date.now();
+    const receivedTimeSeconds = Math.floor(receivedTimeMillis / 1000);
     const oneDaySeconds = 60 * 24;
 
     const requestEventItem: RequestEventItem = {
       requestId: event.metadata.requestId,
-      SK: `${event.metadata.timestamp}#${nanoid(6)}`,
+      SK: `${receivedTimeMillis}#${event.metadata.eventId}`,
+      receivedTime: new Date(receivedTimeMillis).toISOString(),
       eventType: event.metadata.eventType,
+      eventId: event.metadata.eventId,
+      correlationId: event.metadata.correlationId,
       metadata: event.metadata,
       data: event.data,
-      expiryTime: nowUnixSeconds + oneDaySeconds,
+      expiryTime: receivedTimeSeconds + oneDaySeconds,
     };
 
     const putItem: PutItemInput = {
@@ -63,7 +66,7 @@ export default class RequestEventTableClient {
 
     // In production, we would need to worry about continuation tokens
     const queryOutput = await documentClient.query(queryParams).promise();
-    
+
     if (!queryOutput.Items) {
       return [];
     }
