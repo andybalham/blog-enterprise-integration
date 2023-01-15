@@ -23,6 +23,7 @@ export const handler = async (
     const response = await axios.post(
       process.env.WEBHOOK_URL ?? '<undefined>',
       {
+        requestId: event.detail.metadata.requestId,
         result: 'SUCCESS',
         quoteReference: event.detail.data.quoteReference,
         loanDetails: event.detail.data.loanDetails,
@@ -43,6 +44,7 @@ export const handler = async (
     const response = await axios.post(
       process.env.WEBHOOK_URL ?? '<undefined>',
       {
+        requestId: event.detail.metadata.requestId,
         result: 'FAILED',
         quoteReference: event.detail.data.quoteReference,
       },
@@ -51,6 +53,8 @@ export const handler = async (
       }
     );
 
-    console.log(JSON.stringify({ response }, null, 2));
+    console.log(
+      JSON.stringify({ response: { status: response.status } }, null, 2)
+    );
   }
 };
