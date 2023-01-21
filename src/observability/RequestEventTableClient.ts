@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
-import { DocumentClient, PutItemInput } from 'aws-sdk/clients/dynamodb';
+import {
+  DynamoDBTableClientFactory,
+  QueryInput,
+} from '../../@andybalham/aws-client-wrappers/DynamoDBTableClient';
 import {
   DomainEventBase,
   DomainEventMetadata,
@@ -7,8 +10,10 @@ import {
 } from '../domain/domain-events';
 
 export const ENV_REQUEST_EVENT_TABLE_NAME = 'REQUEST_EVENT_TABLE_NAME';
-const tableName = process.env[ENV_REQUEST_EVENT_TABLE_NAME] ?? 'undefined';
-const documentClient = new DocumentClient();
+const requestEventTableClient = new DynamoDBTableClientFactory({
+  partitionKeyName: 'requestId',
+  sortKeyName: 'SK',
+}).build(process.env[ENV_REQUEST_EVENT_TABLE_NAME]);
 
 interface RequestEventItem extends Record<string, any> {
   requestId: string;
@@ -41,37 +46,26 @@ export default class RequestEventTableClient {
       expiryTime: receivedTimeSeconds + oneDaySeconds,
     };
 
-    const putItem: PutItemInput = {
-      TableName: tableName,
-      Item: requestEventItem,
-    };
-
-    await documentClient.put(putItem).promise();
+    await requestEventTableClient.putAsync(requestEventItem);
   }
 
   async getEventsByType(
     requestId: string,
     eventType: EventType
   ): Promise<DomainEventBase[]> {
-    // If we use QueryInput, then we get a 'Condition parameter type does not match schema type'
-    const queryParams /*: QueryInput */ = {
-      TableName: tableName,
-      KeyConditionExpression: `requestId = :requestId`,
+    //
+    const queryParams: QueryInput = {
+      partitionKeyValue: requestId,
       FilterExpression: `eventType = :eventType`,
       ExpressionAttributeValues: {
-        ':requestId': requestId,
-        ':eventType': eventType.toString(),
+        ':eventType': eventType,
       },
     };
 
-    // In production, we would need to worry about continuation tokens
-    const queryOutput = await documentClient.query(queryParams).promise();
+    const queryOutput =
+      await requestEventTableClient.queryAsync<RequestEventItem>(queryParams);
 
-    if (!queryOutput.Items) {
-      return [];
-    }
-
-    return queryOutput.Items.map((i) => {
+    return queryOutput.map((i) => {
       const event: DomainEventBase = {
         metadata: i.metadata as DomainEventMetadata,
         data: i.data as Record<string, any>,

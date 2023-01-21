@@ -58,5 +58,5 @@
     // "baseUrl": ".",                       /* Base directory to resolve non-absolute module names. */
     "paths": {}
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tests/**/*", "@andybalham/**/*"]
 }
