@@ -10,7 +10,7 @@ import {
 } from '../domain/domain-events';
 
 export const ENV_REQUEST_EVENT_TABLE_NAME = 'REQUEST_EVENT_TABLE_NAME';
-const requestEventTableClient = new DynamoDBTableClientFactory({
+const requestEventTable = new DynamoDBTableClientFactory({
   partitionKeyName: 'requestId',
   sortKeyName: 'SK',
 }).build(process.env[ENV_REQUEST_EVENT_TABLE_NAME]);
@@ -46,7 +46,7 @@ export default class RequestEventTableClient {
       expiryTime: receivedTimeSeconds + oneDaySeconds,
     };
 
-    await requestEventTableClient.putAsync(requestEventItem);
+    await requestEventTable.putAsync(requestEventItem);
   }
 
   async getEventsByType(
@@ -62,8 +62,9 @@ export default class RequestEventTableClient {
       },
     };
 
-    const queryOutput =
-      await requestEventTableClient.queryAsync<RequestEventItem>(queryParams);
+    const queryOutput = await requestEventTable.queryAllAsync<RequestEventItem>(
+      queryParams
+    );
 
     return queryOutput.map((i) => {
       const event: DomainEventBase = {

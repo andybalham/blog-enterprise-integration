@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import {
   DocumentClient,
+  Key,
   PutItemInput,
   QueryInput as AwsQueryInput,
 } from 'aws-sdk/clients/dynamodb';
@@ -32,8 +33,9 @@ export interface QueryInput
     'TableName' | 'KeyConditionExpression' | 'ExpressionAttributeValues'
   > {
   partitionKeyValue: string | number;
-  sortKeyValue?: string | number;
-  allItems?: boolean;
+  // sortKeyOperation?: SortKeyOperation;
+  // sortKeyValue?: string | number;
+  // sortKeyRange?: {from: string, to: string} | {from: number, to: number} ;
   ExpressionAttributeValues?: Record<string, any>;
 }
 
@@ -63,7 +65,7 @@ export class DynamoDBTableClient {
     await this.documentClient.put(putItem).promise();
   }
 
-  async queryAsync<T>(queryInput: QueryInput): Promise<T[]> {
+  async queryAllAsync<T>(queryInput: QueryInput): Promise<T[]> {
     const queryParams /*: AwsQueryInput */ = {
       ...queryInput,
       TableName: this.tableName,
@@ -82,14 +84,15 @@ export class DynamoDBTableClient {
     */
 
     let concatenatedItems: T[] = [];
-    let continuationToken: string | undefined;
-    const isAllItemsQuery = queryInput.allItems ?? true;
+    let lastEvaluatedKey: Key | undefined;
 
     do {
       queryParams.ExpressionAttributeValues = {
         ...queryParams.ExpressionAttributeValues,
         ':partitionKey': queryInput.partitionKeyValue,
       };
+
+      queryParams.ExclusiveStartKey = lastEvaluatedKey;
 
       // eslint-disable-next-line no-await-in-loop
       const queryOutput = await this.documentClient
@@ -99,8 +102,10 @@ export class DynamoDBTableClient {
       const queryItems = queryOutput.Items?.map((i) => i as T) ?? [];
 
       concatenatedItems = concatenatedItems.concat(queryItems);
+
+      lastEvaluatedKey = queryOutput.LastEvaluatedKey;
       //
-    } while (isAllItemsQuery && continuationToken !== undefined);
+    } while (lastEvaluatedKey !== undefined);
 
     return concatenatedItems;
   }
