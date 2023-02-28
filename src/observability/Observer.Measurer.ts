@@ -49,6 +49,10 @@ const publishQuoteSubmittedMetrics = (
 ): void => {
   metrics.addMetric('quoteSubmitted', MetricUnits.Count, 1);
 
+  // metrics.addMetadata('requestId', quoteSubmitted.metadata.requestId);
+  // metrics.addMetadata('correlationId', quoteSubmitted.metadata.correlationId);
+  // metrics.addMetadata('quoteReference', quoteSubmitted.data.quoteReference);
+
   addMetadata(quoteSubmitted, {
     quoteReference: quoteSubmitted.data.quoteReference,
   });

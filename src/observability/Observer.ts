@@ -2,7 +2,7 @@ import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
-import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import {
   ComparisonOperator,
   Metric,
@@ -67,8 +67,8 @@ export default class Observer extends Construct {
       eventPattern: LOAN_BROKER_METRICS_PATTERN,
     });
 
-    domainEventRule.addTarget(new LambdaFunctionTarget(loggerFunction));
-    domainEventRule.addTarget(new LambdaFunctionTarget(measurerFunction));
+    domainEventRule.addTarget(new LambdaFunction(loggerFunction));
+    domainEventRule.addTarget(new LambdaFunction(measurerFunction));
 
     // const measurerEMFunction = new NodejsFunction(
     //   this,
