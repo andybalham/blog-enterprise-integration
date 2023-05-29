@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import { getTestPropsAsync } from '@andybalham/cdk-cloud-test-kit/testFunctionLib';
 import { EventBridgeEvent } from 'aws-lambda';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import {
   LOAN_BROKER_EVENT_BUS,
   CREDIT_BUREAU_DATA_BUCKET_NAME,
@@ -23,7 +24,7 @@ import {
 const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 const dataBucketName = process.env[CREDIT_BUREAU_DATA_BUCKET_NAME];
 
-const documentClient = new DocumentClient();
+const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (
   event: EventBridgeEvent<'CreditReportRequested', CreditReportRequestedV1>

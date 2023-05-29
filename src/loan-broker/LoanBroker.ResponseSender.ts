@@ -1,6 +1,6 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
-import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import AWS_S3, { S3 } from '@aws-sdk/client-s3';
 import {
   EventDomain,
   EventService,
@@ -17,8 +17,9 @@ import { LoanBrokerState } from './LoanBrokerState';
 const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 const bucketName = process.env[LOAN_BROKER_DATA_BUCKET_NAME];
 
-const s3 = new S3();
+const s3 = new S3({});
 
+// eslint-disable-next-line import/prefer-default-export
 export const handler = async (
   state: LoanBrokerState
 ): Promise<LoanBrokerState> => {
@@ -55,13 +56,11 @@ export const handler = async (
   // eslint-disable-next-line no-param-reassign
   state.bestLenderRate = bestLenderRate;
 
-  await s3
-    .putObject({
-      Bucket: bucketName,
-      Key: `${state.quoteSubmitted.data.quoteReference}-best-rate.json`,
-      Body: JSON.stringify({ bestLenderRate }),
-    } as PutObjectRequest)
-    .promise();
+  await s3.putObject({
+    Bucket: bucketName,
+    Key: `${state.quoteSubmitted.data.quoteReference}-best-rate.json`,
+    Body: JSON.stringify({ bestLenderRate }),
+  } as AWS_S3.PutObjectCommandInput);
 
   const quoteProcessed = newQuoteProcessedV1({
     context: state.quoteSubmitted.metadata,

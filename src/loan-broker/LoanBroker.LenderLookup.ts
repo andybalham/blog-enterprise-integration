@@ -1,15 +1,15 @@
 /* eslint-disable no-console */
-/* eslint-disable no-param-reassign */
-/* eslint-disable import/prefer-default-export */
-import SSM from 'aws-sdk/clients/ssm';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { SSM } from '@aws-sdk/client-ssm';
 import { LenderRegisterEntry } from '../domain/domain-models';
 import { LENDERS_PARAMETER_PATH_PREFIX } from './constants';
 import { LoanBrokerState } from './LoanBrokerState';
 
-const ssm = new SSM();
+const ssm = new SSM({});
 
 const lendersParameterPathPrefix = process.env[LENDERS_PARAMETER_PATH_PREFIX];
 
+// eslint-disable-next-line import/prefer-default-export
 export const handler = async (
   state: LoanBrokerState
 ): Promise<LoanBrokerState> => {
@@ -18,11 +18,9 @@ export const handler = async (
   if (lendersParameterPathPrefix === undefined)
     throw new Error('lendersParameterPathPrefix === undefined');
 
-  const lenderParams = await ssm
-    .getParametersByPath({
-      Path: `/${lendersParameterPathPrefix}`,
-    })
-    .promise();
+  const lenderParams = await ssm.getParametersByPath({
+    Path: `/${lendersParameterPathPrefix}`,
+  });
 
   console.log(
     JSON.stringify({ lenderParams: lenderParams.Parameters }, null, 2)
@@ -33,6 +31,7 @@ export const handler = async (
     (p) => JSON.parse(p.Value!) as LenderRegisterEntry
   );
 
+  // eslint-disable-next-line no-param-reassign
   state.lenders = lenders?.filter((l) => l.isEnabled) ?? [];
 
   return state;

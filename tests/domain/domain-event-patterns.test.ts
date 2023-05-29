@@ -1,5 +1,5 @@
 import { IntegrationTestClient } from '@andybalham/cdk-cloud-test-kit';
-import { PutEventsRequestEntry } from 'aws-sdk/clients/eventbridge';
+import { PutEventsRequestEntry } from '@aws-sdk/client-eventbridge';
 import {
   CREDIT_REPORT_RECEIVED_PATTERN_V1,
   CREDIT_REPORT_REQUESTED_PATTERN_V1,

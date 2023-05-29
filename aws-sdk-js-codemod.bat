@@ -1,0 +1,11 @@
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\@andybalham\aws-client-wrappers\DynamoDBTableClient.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\src\lib\utils.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\src\loan-broker\LoanBroker.CallbackHandler.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\src\loan-broker\LoanBroker.LenderLookup.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\src\loan-broker\LoanBroker.RequestHandler.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\src\loan-broker\LoanBroker.ResponseSender.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\tests\domain\domain-event-patterns.test.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\tests\lender-gateway\lender-gateway.test.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\tests\loan-broker\LoanBrokerTestStack.MockCreditBureau.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\tests\loan-broker\LoanBrokerTestStack.MockLender.ts
+npx aws-sdk-js-codemod -t v2-to-v3 D:\Users\andyb\Documents\github\blog-enterprise-integration\tests\request-api\RequestApiTestStack.EventObserver.ts
