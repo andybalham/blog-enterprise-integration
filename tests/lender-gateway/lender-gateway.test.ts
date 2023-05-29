@@ -5,7 +5,7 @@ import {
   S3TestClient,
 } from '@andybalham/cdk-cloud-test-kit';
 import { EventBridgeEvent } from 'aws-lambda';
-import SSM from 'aws-sdk/clients/ssm';
+import { SSM } from '@aws-sdk/client-ssm';
 import {
   LenderRateReceivedV1,
   EventType,
@@ -37,7 +37,7 @@ describe('LenderGateway tests', () => {
     testStackId: LenderGatewayTestStack.Id,
   });
 
-  const ssm = new SSM();
+  const ssm = new SSM({});
 
   let dataBucket: S3TestClient;
   let loanBrokerEventBus: EventBridgeTestClient;
@@ -60,11 +60,9 @@ describe('LenderGateway tests', () => {
   });
 
   test(`SSM parameter is registered`, async () => {
-    const lenderParams = await ssm
-      .getParametersByPath({
-        Path: `/${LENDERS_PARAMETER_PATH_PREFIX}`,
-      })
-      .promise();
+    const lenderParams = await ssm.getParametersByPath({
+      Path: `/${LENDERS_PARAMETER_PATH_PREFIX}`,
+    });
 
     const lenders = lenderParams.Parameters?.filter((p) => p.Value).map(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

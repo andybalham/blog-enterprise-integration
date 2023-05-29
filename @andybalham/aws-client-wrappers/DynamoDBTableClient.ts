@@ -1,21 +1,28 @@
 /* eslint-disable max-classes-per-file */
+// eslint-disable-next-line import/no-extraneous-dependencies
 import {
-  DocumentClient,
-  Key,
+  DynamoDBClient,
   PutItemInput,
   QueryInput as AwsQueryInput,
-} from 'aws-sdk/clients/dynamodb';
+  QueryCommand,
+} from '@aws-sdk/client-dynamodb';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { Agent } from 'https';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 
 const agent = new Agent({
   keepAlive: true,
 });
 
-const documentClient = new DocumentClient({
-  httpOptions: {
-    agent,
-  },
-});
+const documentClient = DynamoDBDocumentClient.from(
+  new DynamoDBClient({
+    requestHandler: new NodeHttpHandler({
+      httpAgent: agent,
+    }),
+  })
+);
 
 export interface DynamoDBTableProps {
   partitionKeyName: string;
@@ -24,7 +31,7 @@ export interface DynamoDBTableProps {
 
 export interface DynamoDBTableClientProps extends DynamoDBTableProps {
   tableName?: string;
-  documentClientOverride?: DocumentClient;
+  documentClientOverride?: DynamoDBDocumentClient;
 }
 
 export interface QueryInput
@@ -43,7 +50,7 @@ export interface QueryInput
  * Provides a wrapper around `DocumentClient` for a specific table.
  */
 export class DynamoDBTableClient {
-  documentClient: DocumentClient;
+  documentClient: DynamoDBDocumentClient;
 
   constructor(public readonly props: DynamoDBTableClientProps) {
     this.documentClient = props.documentClientOverride ?? documentClient;
@@ -62,7 +69,7 @@ export class DynamoDBTableClient {
       Item: item,
     };
 
-    await this.documentClient.put(putItem).promise();
+    await this.documentClient.send(new PutCommand(putItem));
   }
 
   async queryAllAsync<T>(queryInput: QueryInput): Promise<T[]> {
@@ -84,7 +91,7 @@ export class DynamoDBTableClient {
     */
 
     let concatenatedItems: T[] = [];
-    let lastEvaluatedKey: Key | undefined;
+    let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
       queryParams.ExpressionAttributeValues = {
@@ -95,11 +102,11 @@ export class DynamoDBTableClient {
       queryParams.ExclusiveStartKey = lastEvaluatedKey;
 
       // eslint-disable-next-line no-await-in-loop
-      const queryOutput = await this.documentClient
-        .query(queryParams)
-        .promise();
+      const queryOutput = await this.documentClient.send(
+        new QueryCommand(queryParams)
+      );
 
-      const queryItems = queryOutput.Items?.map((i) => i as T) ?? [];
+      const queryItems = queryOutput.Items?.map((i) => i as unknown as T) ?? [];
 
       concatenatedItems = concatenatedItems.concat(queryItems);
 
@@ -125,7 +132,7 @@ export class DynamoDBTableClientFactory {
    */
   build(
     tableName?: string,
-    documentClientOverride?: DocumentClient
+    documentClientOverride?: DynamoDBDocumentClient
   ): DynamoDBTableClient {
     return new DynamoDBTableClient({
       ...this.props,
