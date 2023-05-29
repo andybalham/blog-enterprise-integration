@@ -10,6 +10,7 @@ import {
   IChainable,
   StateMachine,
   TaskInput,
+  Timeout,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import {
   EventBridgePutEvents,
@@ -200,7 +201,7 @@ export default class LoanBroker extends Construct {
             'state.$': '$',
           },
           resultPath: '$.creditReportReceivedData',
-          timeout: Duration.seconds(10),
+          taskTimeout: Timeout.duration(Duration.seconds(10)),
           catches: [
             {
               // https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html
@@ -231,7 +232,7 @@ export default class LoanBroker extends Construct {
                 'creditReportReceivedData.$': '$.creditReportReceivedData',
                 'lender.$': '$.lender',
               },
-              timeout: Duration.seconds(10),
+              taskTimeout: Timeout.duration(Duration.seconds(10)),
               catches: [
                 {
                   errors: ['States.Timeout', 'States.TaskFailed'],
