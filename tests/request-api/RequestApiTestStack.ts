@@ -52,6 +52,7 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     // SUT
 
     const sut = new RequestApi(this, 'SUT', {
+      testSuffix: ' - Test Stack',
       loanBrokerEventBus: eventBus,
       dataBucket: bucket,
     });

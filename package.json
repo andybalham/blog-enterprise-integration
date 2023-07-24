@@ -95,7 +95,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@andybalham/cdk-cloud-test-kit": "^2.0.0",
+    "@andybalham/cdk-cloud-test-kit": "^2.0.1",
     "@andybalham/state-machine-builder-v2": "^2.0.4",
     "@aws-lambda-powertools/metrics": "^1.5.0",
     "@middy/core": "^4.0.9",

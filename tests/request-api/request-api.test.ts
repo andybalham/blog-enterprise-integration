@@ -55,7 +55,10 @@ describe('RequestApi Tests', () => {
     // Act
 
     const response = await axios.post(requestApiUrl, quoteRequest, {
-      headers: { 'x-correlation-id': correlationId },
+      headers: {
+        'x-correlation-id': correlationId,
+        'x-api-key': process.env.REQUEST_API_TEST_API_KEY ?? '<undefined>',
+      },
     });
 
     expect(response.status).toBe(201);
