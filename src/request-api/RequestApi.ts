@@ -21,7 +21,7 @@ import {
 } from './RequestApi.EventPublisher';
 
 export interface RequestApiProps {
-  testSuffix?: string;
+  isTest?: boolean;
   loanBrokerEventBus: EventBus;
   dataBucket: Bucket;
 }
@@ -54,9 +54,8 @@ export default class RequestApi extends Construct {
 
     this.api = new RestApi(this, 'RequestApi', {
       apiKeySourceType: ApiKeySourceType.HEADER,
+      restApiName: `Request API${props.isTest ? ' - Test' : ''}`,
       deployOptions: {
-        // TODO 24Jul23: Should this have a stage name passed in from the props?
-        // stageName: 'dev',
         tracingEnabled: true,
         loggingLevel: MethodLoggingLevel.INFO,
         accessLogDestination: new LogGroupLogDestination(apiLogGroup),
@@ -82,7 +81,7 @@ export default class RequestApi extends Construct {
     const apiKey = new ApiKey(this, 'ApiKey');
 
     const usagePlan = new UsagePlan(this, 'UsagePlan', {
-      name: `Request API Usage Plan${props.testSuffix ?? ''}`,
+      name: `Request API Usage Plan${props.isTest ? ' - Test' : ''}`,
       apiStages: [
         {
           api: this.api,
