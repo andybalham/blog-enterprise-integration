@@ -101,6 +101,7 @@
     "@middy/core": "^4.0.9",
     "aws-cdk-lib": "^2.81.0",
     "aws-embedded-metrics": "^4.0.0",
+    "aws-xray-sdk": "^3.5.1",
     "axios": "^0.27.2",
     "constructs": "^10.1.106",
     "dotenv": "^16.0.3",

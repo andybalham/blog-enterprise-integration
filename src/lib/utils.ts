@@ -9,11 +9,12 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as AWSXRay from 'aws-xray-sdk';
 import { DomainEvent } from '../domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3({});
-const eventBridge = new EventBridge({});
+const eventBridge = AWSXRay.captureAWSv3Client(new EventBridge({}));
 
 // https://medium.com/@moritzonken/enable-source-maps-for-typescript-in-aws-lambda-83f4cd91338c
 // https://serverless.pub/aws-lambda-node-sourcemaps/

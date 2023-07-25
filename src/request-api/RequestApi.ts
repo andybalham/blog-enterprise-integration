@@ -14,6 +14,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { RemovalPolicy } from 'aws-cdk-lib/core';
+import { Tracing } from 'aws-cdk-lib/aws-lambda';
 import { getNodejsFunctionProps } from '../lib/utils';
 import {
   REQUEST_API_DATA_BUCKET_NAME,
@@ -37,6 +38,7 @@ export default class RequestApi extends Construct {
       this,
       'EventPublisher',
       getNodejsFunctionProps({
+        tracing: Tracing.ACTIVE,
         environment: {
           [REQUEST_API_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
