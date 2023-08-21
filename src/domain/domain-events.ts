@@ -209,7 +209,7 @@ export const newCreditReportRequestedV1 = ({
 // CreditReportReceivedV1 ----------------------------------------
 
 export type CreditReportReceivedDataV1 = AsyncResponse<{
-  readonly creditReportDataUrl: string;
+  readonly creditReportDataUrl: string | undefined;
 }>;
 
 export type CreditReportReceivedV1 = DomainEvent<CreditReportReceivedDataV1>;

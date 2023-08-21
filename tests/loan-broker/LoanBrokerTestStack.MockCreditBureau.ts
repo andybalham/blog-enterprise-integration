@@ -44,7 +44,10 @@ export const handler = async (
   const creditReportResultType = testProps.inputs?.creditReportResultType;
   const creditReport = testProps.inputs?.creditReport as CreditReport;
 
-  if (creditReport === undefined) throw new Error('creditReport === undefined');
+  if (creditReportResultType === 'FAILED') {
+    // Don't return anything, let the task timeout
+    return;
+  }
 
   console.log(JSON.stringify({ creditReport }, null, 2));
 

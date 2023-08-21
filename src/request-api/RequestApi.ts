@@ -38,7 +38,7 @@ export default class RequestApi extends Construct {
       this,
       'EventPublisher',
       getNodejsFunctionProps({
-        tracing: Tracing.ACTIVE,
+        tracing: Tracing.PASS_THROUGH,
         environment: {
           [REQUEST_API_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
