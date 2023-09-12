@@ -11,6 +11,8 @@ import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { Agent } from 'https';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { marshall } from '@aws-sdk/util-dynamodb';
 
 const agent = new Agent({
   keepAlive: true,
@@ -94,17 +96,18 @@ export class DynamoDBTableClient {
     let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
-      queryParams.ExpressionAttributeValues = {
+      // https://www.readysetcloud.io/blog/allen.helton/lessons-learned-from-switching-to-aws-sdk-v3/
+      queryParams.ExpressionAttributeValues = marshall({
         ...queryParams.ExpressionAttributeValues,
         ':partitionKey': queryInput.partitionKeyValue,
-      };
+      });
 
       queryParams.ExclusiveStartKey = lastEvaluatedKey;
 
+      const queryCommand = new QueryCommand(queryParams);
+
       // eslint-disable-next-line no-await-in-loop
-      const queryOutput = await this.documentClient.send(
-        new QueryCommand(queryParams)
-      );
+      const queryOutput = await this.documentClient.send(queryCommand);
 
       const queryItems = queryOutput.Items?.map((i) => i as unknown as T) ?? [];
 

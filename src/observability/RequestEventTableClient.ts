@@ -68,8 +68,8 @@ export default class RequestEventTableClient {
 
     return queryOutput.map((i) => {
       const event: DomainEventBase = {
-        metadata: i.metadata as DomainEventMetadata,
-        data: i.data as Record<string, any>,
+        metadata: i.metadata,
+        data: i.data,
       };
 
       return event;
