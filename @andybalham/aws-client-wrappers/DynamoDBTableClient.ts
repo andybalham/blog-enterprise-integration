@@ -18,12 +18,23 @@ const agent = new Agent({
   keepAlive: true,
 });
 
+// https://stackoverflow.com/questions/68358472/aws-dynamodb-document-client-updatecommand
+const marshallOptions = {
+  // Whether to automatically convert empty strings, blobs, and sets to `null`.
+  convertEmptyValues: false, // false, by default.
+  // Whether to remove undefined values while marshalling.
+  removeUndefinedValues: true, // false, by default.
+  // Whether to convert typeof object to map attribute.
+  convertClassInstanceToMap: true, // false, by default.
+};
+
 const documentClient = DynamoDBDocumentClient.from(
   new DynamoDBClient({
     requestHandler: new NodeHttpHandler({
       httpAgent: agent,
     }),
-  })
+  }),
+  { marshallOptions }
 );
 
 export interface DynamoDBTableProps {
