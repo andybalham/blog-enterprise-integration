@@ -38,7 +38,9 @@ const simulateExternalCallAsync = async (
   const throwError = randomPercentage <= errorPercentage;
 
   if (throwError) {
-    throw new Error(`Simulated error (${randomPercentage} <= ${errorPercentage})`);
+    throw new Error(
+      `Simulated error (${randomPercentage} <= ${errorPercentage})`
+    );
   }
 
   const delayMillis = lenderConfig.minDelayMillis ?? 1000 + randomInt(3000);
@@ -92,15 +94,18 @@ export const handler = async (
   });
 
   const segment = AWSXRay.getSegment();
-  const subsegment = segment?.addNewSubsegment('external-lender-call');
+  const subsegment = segment?.addNewSubsegment('External Call');
 
   try {
-    subsegment?.addAnnotation('lenderId', lenderConfig.lenderId); // Simple values that are indexed for filter expressions
+    // Simple values that are indexed for filter expressions
+    subsegment?.addAnnotation('callType', 'Lender');
+    subsegment?.addAnnotation('lenderId', lenderConfig.lenderId);
+    // Related data for debugging purposes
     subsegment?.addMetadata('lenderDetails', {
       lenderId: lenderConfig.lenderId,
       lenderName: lenderConfig.lenderName,
       lenderUrl: `https://${lenderConfig.lenderId}.com`,
-    }); // Arbitrary data for drilling in
+    });
 
     await simulateExternalCallAsync(lenderConfig);
   } catch (error) {

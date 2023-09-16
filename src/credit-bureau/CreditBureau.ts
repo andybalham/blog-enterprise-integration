@@ -4,6 +4,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-targets';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { Duration } from 'aws-cdk-lib';
 import { CREDIT_REPORT_REQUESTED_PATTERN_V1 } from '../domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS,
@@ -25,6 +26,7 @@ export default class CreditBureau extends Construct {
       this,
       'RequestHandler',
       getNodejsFunctionProps({
+        timeout: Duration.seconds(12),
         environment: {
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
           [CREDIT_BUREAU_DATA_BUCKET_NAME]: props.dataBucket.bucketName,

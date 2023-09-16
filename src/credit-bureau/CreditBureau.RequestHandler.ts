@@ -2,8 +2,9 @@
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 import { EventBridgeEvent } from 'aws-lambda';
-import crypto from 'crypto';
+import crypto, { randomInt } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import * as AWSXRay from 'aws-xray-sdk';
 import {
   CreditReportReceivedV1,
   CreditReportRequestedV1,
@@ -27,12 +28,17 @@ import {
   TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
   TEST_LOW_CREDIT_SCORE,
   TEST_MEDIUM_CREDIT_SCORE,
-  TEST_NI_NUMBER_HAS_BANKRUPTCIES,
-  TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+  TEST_LAST_NAME_HAS_BANKRUPTCIES,
+  TEST_LAST_NAME_NOT_ON_ELECTORAL_ROLL,
 } from './constants';
 
 const eventBusName = process.env[LOAN_BROKER_EVENT_BUS];
 const dataBucketName = process.env[CREDIT_BUREAU_DATA_BUCKET_NAME];
+
+const simulateExternalCallAsync = async (): Promise<void> => {
+  const delayMillis = 1000 + randomInt(2000);
+  await new Promise((resolve) => setTimeout(resolve, delayMillis));
+};
 
 export const handler = async (
   event: EventBridgeEvent<'CreditReportRequested', CreditReportRequestedV1>
@@ -77,6 +83,14 @@ async function handleRequestAsync(
     onElectoralRoll: getHashScore(personalDetailsHash, 20, 30, 100) > 10,
   };
 
+  console.log(
+    JSON.stringify(
+      { personalDetails: quoteRequest.personalDetails, creditReport },
+      null,
+      2
+    )
+  );
+
   const { quoteReference } = creditReportRequested.data.request;
 
   const creditReportDataUrl = await getCreditReportDataUrl(
@@ -93,6 +107,26 @@ async function handleRequestAsync(
     },
     context: creditReportRequested.metadata,
   });
+
+  const segment = AWSXRay.getSegment();
+  const subsegment = segment?.addNewSubsegment('External Call');
+
+  try {
+    // Simple values that are indexed for filter expressions
+    subsegment?.addAnnotation('callType', 'CreditBureau');
+    // Related data for debugging purposes
+    subsegment?.addMetadata('creditBureauDetails', {
+      url: `https://credit-bureau.com`,
+    });
+
+    await simulateExternalCallAsync();
+  } catch (error) {
+    if (error instanceof Error) {
+      subsegment?.addError(error);
+    }
+  } finally {
+    subsegment?.close();
+  }
 
   await putDomainEventAsync({
     eventBusName,
@@ -123,29 +157,28 @@ async function handleTestRequestAsync(
     //
     let creditScore = TEST_HIGH_CREDIT_SCORE;
     if (
-      quoteRequest.personalDetails.lastName === TEST_LAST_NAME_LOW_CREDIT_SCORE
-    )
+      quoteRequest.personalDetails.lastName.includes(
+        TEST_LAST_NAME_LOW_CREDIT_SCORE
+      )
+    ) {
       creditScore = TEST_LOW_CREDIT_SCORE;
-    if (
-      quoteRequest.personalDetails.lastName ===
-      TEST_LAST_NAME_MEDIUM_CREDIT_SCORE
-    )
+    } else if (
+      quoteRequest.personalDetails.lastName.includes(
+        TEST_LAST_NAME_MEDIUM_CREDIT_SCORE
+      )
+    ) {
       creditScore = TEST_MEDIUM_CREDIT_SCORE;
-
-    if (
-      quoteRequest.personalDetails.lastName === TEST_LAST_NAME_LOW_CREDIT_SCORE
-    )
-      creditScore = TEST_LOW_CREDIT_SCORE;
+    }
 
     const creditReport: CreditReport = {
       reportReference: uuidv4(),
       creditScore,
-      hasBankruptcies:
-        quoteRequest.personalDetails.niNumber ===
-        TEST_NI_NUMBER_HAS_BANKRUPTCIES,
-      onElectoralRoll:
-        quoteRequest.personalDetails.address.postcode !==
-        TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+      hasBankruptcies: quoteRequest.personalDetails.lastName.includes(
+        TEST_LAST_NAME_HAS_BANKRUPTCIES
+      ),
+      onElectoralRoll: quoteRequest.personalDetails.lastName.includes(
+        TEST_LAST_NAME_NOT_ON_ELECTORAL_ROLL
+      ),
     };
 
     const { quoteReference } = creditReportRequested.data.request;

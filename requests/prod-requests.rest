@@ -50,3 +50,28 @@ x-api-key: {{apiKey}}
     "termMonths": 48
   }
 }
+
+### --------------------------------------------------------------------
+
+# Terrible credit
+POST {{requestsUrl}} HTTP/1.1
+content-type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "personalDetails": {
+    "firstName": "#TEST#",
+    "lastName": "#LOW_CREDIT_SCORE# #HAS_BANKRUPTCIES# #NOT_ON_ELECTORAL_ROLL#",
+    "niNumber": "RD843356B",
+    "address": {
+      "lines": [
+        "999 Letsby Avenue"
+      ],
+      "postcode": "RE4 8SD"
+    }
+  },
+  "loanDetails": {
+    "amount": 100,
+    "termMonths": 12
+  }
+}
