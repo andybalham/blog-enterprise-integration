@@ -10,6 +10,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Tracing } from 'aws-cdk-lib/aws-lambda';
 import { LOAN_BROKER_METRICS_PATTERN } from '../domain/domain-event-patterns';
 import { getNodejsFunctionProps } from '../lib/utils';
 import {
@@ -22,6 +23,7 @@ import { ENV_REQUEST_EVENT_TABLE_NAME } from './RequestEventTableClient';
 
 export interface ObserverProps {
   loanBrokerEventBus: EventBus;
+  isTestMode?: boolean;
 }
 
 export default class Observer extends Construct {
@@ -40,6 +42,7 @@ export default class Observer extends Construct {
       this,
       'Logger',
       getNodejsFunctionProps({
+        tracing: props.isTestMode ? Tracing.ACTIVE : Tracing.DISABLED,
         logRetention: RetentionDays.ONE_WEEK,
         environment: {
           [ENV_REQUEST_EVENT_TABLE_NAME]: requestEventTable.tableName,
@@ -53,6 +56,7 @@ export default class Observer extends Construct {
       this,
       'Measurer',
       getNodejsFunctionProps({
+        tracing: props.isTestMode ? Tracing.ACTIVE : Tracing.DISABLED,
         logRetention: RetentionDays.ONE_WEEK,
         environment: {
           [ENV_REQUEST_EVENT_TABLE_NAME]: requestEventTable.tableName,
@@ -112,7 +116,7 @@ export default class Observer extends Construct {
     });
 
     quoteProcessedDuration.createAlarm(this, 'QuoteProcessedDurationAlarm', {
-      evaluationPeriods: 1,      
+      evaluationPeriods: 1,
       comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
       threshold: 2000,
       treatMissingData: TreatMissingData.NOT_BREACHING,

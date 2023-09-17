@@ -37,14 +37,14 @@ const simulateExternalCallAsync = async (
   const errorPercentage = lenderConfig.errorPercentage ?? 0;
   const throwError = randomPercentage <= errorPercentage;
 
-  if (throwError) {
-    throw new Error(
-      `Simulated error (${randomPercentage} <= ${errorPercentage})`
-    );
-  }
-
-  const delayMillis = lenderConfig.minDelayMillis ?? 1000 + randomInt(3000);
+  const delayMillis = lenderConfig.minDelayMillis ?? 1000 + randomInt(1000);
   await new Promise((resolve) => setTimeout(resolve, delayMillis));
+
+  if (throwError) {
+    const errorMessage = `Simulated error (${randomPercentage} <= ${errorPercentage})`;
+    console.log(`About to simulate an error: ${errorMessage}`);
+    throw new Error(errorMessage);
+  }
 };
 
 export const handler = async (
@@ -112,6 +112,7 @@ export const handler = async (
     if (error instanceof Error) {
       subsegment?.addError(error);
     }
+    throw error;
   } finally {
     subsegment?.close();
   }

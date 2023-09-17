@@ -53,7 +53,7 @@ x-api-key: {{apiKey}}
 
 ### --------------------------------------------------------------------
 
-# Terrible credit
+# Terrible credit & £100 for 12 months
 POST {{requestsUrl}} HTTP/1.1
 content-type: application/json
 x-api-key: {{apiKey}}

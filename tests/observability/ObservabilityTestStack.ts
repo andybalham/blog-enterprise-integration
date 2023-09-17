@@ -37,6 +37,7 @@ export default class ObservabilityTestStack extends IntegrationTestStack {
 
     new Observer(this, 'SUT', {
       loanBrokerEventBus: eventBus,
+      isTestMode: true,
     });
 
     // Tag resources for testing

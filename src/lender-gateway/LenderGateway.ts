@@ -45,6 +45,8 @@ export default class LenderGateway extends Construct {
       'RequestHandler',
       getNodejsFunctionProps({
         timeout: Duration.seconds(12),
+        memorySize: 256,
+        retryAttempts: 0,
         environment: {
           [LENDER_CONFIG]: JSON.stringify(props.lenderConfig),
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,
