@@ -44,7 +44,7 @@ new LenderGatewayStack(app, 'Lender666Stack', {
     minimumCreditScore: 0,
     minimumTermMonths: 0,
     maximumAmount: 1000000,
-    // errorPercentage: 100,
+    errorPercentage: 40,
   },
 });
 
@@ -60,6 +60,7 @@ new LenderGatewayStack(app, 'LenderSmallBundlesStack', {
     minimumCreditScore: 250,
     minimumTermMonths: 3,
     maximumAmount: 2000,
+    errorPercentage: 20,
   },
 });
 
@@ -75,6 +76,7 @@ new LenderGatewayStack(app, 'LenderSteadyStack', {
     minimumCreditScore: 500,
     minimumTermMonths: 24,
     maximumAmount: 10000,
+    errorPercentage: 10,
   },
 });
 
