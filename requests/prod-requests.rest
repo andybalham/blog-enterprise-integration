@@ -1,0 +1,77 @@
+@apiKey = {{$dotenv PROD_API_KEY}}
+@requestsUrl = {{$dotenv PROD_END_POINT}}requests
+
+### --------------------------------------------------------------------
+
+# £1000 over 24 months
+POST {{requestsUrl}} HTTP/1.1
+content-type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "personalDetails": {
+    "firstName": "Alex",
+    "lastName": "Pritchard",
+    "niNumber": "RD843356B",
+    "address": {
+      "lines": [
+        "999 Letsby Avenue"
+      ],
+      "postcode": "RE4 8SD"
+    }
+  },
+  "loanDetails": {
+    "amount": 1000,
+    "termMonths": 24
+  }
+}
+
+### --------------------------------------------------------------------
+
+# £10000 over 48 months
+POST {{requestsUrl}} HTTP/1.1
+content-type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "personalDetails": {
+    "firstName": "Alex",
+    "lastName": "Pritchard",
+    "niNumber": "RD843356B",
+    "address": {
+      "lines": [
+        "999 Letsby Avenue"
+      ],
+      "postcode": "RE4 8SD"
+    }
+  },
+  "loanDetails": {
+    "amount": 10000,
+    "termMonths": 48
+  }
+}
+
+### --------------------------------------------------------------------
+
+# Terrible credit & £100 for 12 months
+POST {{requestsUrl}} HTTP/1.1
+content-type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "personalDetails": {
+    "firstName": "#TEST#",
+    "lastName": "#LOW_CREDIT_SCORE# #HAS_BANKRUPTCIES# #NOT_ON_ELECTORAL_ROLL#",
+    "niNumber": "RD843356B",
+    "address": {
+      "lines": [
+        "999 Letsby Avenue"
+      ],
+      "postcode": "RE4 8SD"
+    }
+  },
+  "loanDetails": {
+    "amount": 100,
+    "termMonths": 12
+  }
+}

@@ -29,6 +29,45 @@ describe('RequestApi Tests', () => {
     await testClient.initialiseTestAsync();
   });
 
+  test.skip(`send several requests`, async () => {
+    // Arrange
+
+    const requestApiUrl = `${requestApiBaseUrl}/prod/requests`;
+
+    const quoteRequest: QuoteRequest = {
+      personalDetails: {
+        firstName: 'Alex',
+        lastName: 'Pritchard',
+        niNumber: 'AB123456C',
+        address: {
+          lines: ['999 The Avenue', 'Townsville'],
+          postcode: 'AB1 2CD',
+        },
+      },
+      loanDetails: {
+        amount: 10000,
+        termMonths: 24,
+      },
+    };
+
+    const correlationId = 'request-event-published-as-expected';
+
+    // Act
+
+    // eslint-disable-next-line no-plusplus
+    for (let index = 0; index < 20; index++) {
+      // eslint-disable-next-line no-await-in-loop
+      const response = await axios.post(requestApiUrl, quoteRequest, {
+        headers: {
+          'x-correlation-id': correlationId,
+          'x-api-key': process.env.REQUEST_API_TEST_API_KEY ?? '<undefined>',
+        },
+      });
+
+      expect(response.status).toBe(201);
+    }
+  });
+
   test(`request event published as expected`, async () => {
     // Arrange
 
@@ -55,7 +94,10 @@ describe('RequestApi Tests', () => {
     // Act
 
     const response = await axios.post(requestApiUrl, quoteRequest, {
-      headers: { 'x-correlation-id': correlationId },
+      headers: {
+        'x-correlation-id': correlationId,
+        'x-api-key': process.env.REQUEST_API_TEST_API_KEY ?? '<undefined>',
+      },
     });
 
     expect(response.status).toBe(201);

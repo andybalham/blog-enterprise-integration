@@ -4,6 +4,7 @@ import { EventBus } from 'aws-cdk-lib/aws-events';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { Tracing } from 'aws-cdk-lib/aws-lambda';
 import RequestApi from '../../src/request-api/RequestApi';
 import { EventType } from '../../src/domain/domain-events';
 import { getNodejsFunctionProps } from '../../src/lib/utils';
@@ -38,7 +39,9 @@ export default class RequestApiTestStack extends IntegrationTestStack {
       new NodejsFunction(
         this,
         RequestApiTestStack.EventObserverId,
-        getNodejsFunctionProps()
+        getNodejsFunctionProps({
+          tracing: Tracing.ACTIVE,
+        })
       )
     );
 
@@ -52,6 +55,7 @@ export default class RequestApiTestStack extends IntegrationTestStack {
     // SUT
 
     const sut = new RequestApi(this, 'SUT', {
+      isTest: true,
       loanBrokerEventBus: eventBus,
       dataBucket: bucket,
     });

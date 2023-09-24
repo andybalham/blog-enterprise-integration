@@ -36,6 +36,8 @@ export interface LoanBrokerProps {
   lendersParameterPathPrefix: string;
 }
 
+const TASK_TIMEOUT = Timeout.duration(Duration.seconds(12));
+
 export default class LoanBroker extends Construct {
   //
   readonly stateMachine: StateMachine;
@@ -49,6 +51,8 @@ export default class LoanBroker extends Construct {
       this,
       'ResponseSender',
       getNodejsFunctionProps({
+        timeout: Duration.seconds(6),
+        memorySize: 256,
         environment: {
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
           [LOAN_BROKER_DATA_BUCKET_NAME]: props.dataBucket.bucketName,
@@ -111,6 +115,8 @@ export default class LoanBroker extends Construct {
       this,
       'RateRequester',
       getNodejsFunctionProps({
+        timeout: Duration.seconds(6),
+        memorySize: 256,
         environment: {
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusName,
         },
@@ -122,6 +128,7 @@ export default class LoanBroker extends Construct {
     // State machine
 
     this.stateMachine = new StateMachine(this, 'StateMachine', {
+      tracingEnabled: true,
       definition: this.getStateMachine({
         loanBrokerEventBus: props.loanBrokerEventBus,
         creditReportRequesterFunction,
@@ -201,7 +208,7 @@ export default class LoanBroker extends Construct {
             'state.$': '$',
           },
           resultPath: '$.creditReportReceivedData',
-          taskTimeout: Timeout.duration(Duration.seconds(10)),
+          taskTimeout: TASK_TIMEOUT,
           catches: [
             {
               // https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html
@@ -232,7 +239,7 @@ export default class LoanBroker extends Construct {
                 'creditReportReceivedData.$': '$.creditReportReceivedData',
                 'lender.$': '$.lender',
               },
-              taskTimeout: Timeout.duration(Duration.seconds(10)),
+              taskTimeout: TASK_TIMEOUT,
               catches: [
                 {
                   errors: ['States.Timeout', 'States.TaskFailed'],

@@ -91,6 +91,8 @@ export default class LoanBrokerTestStack extends IntegrationTestStack {
       this,
       LoanBrokerTestStack.MockCreditBureauId,
       getNodejsFunctionProps({
+        timeout: Duration.seconds(6),
+        memorySize: 256,
         environment: {
           [CREDIT_BUREAU_LOAN_BROKER_EVENT_BUS]: eventBus.eventBusArn,
           [CREDIT_BUREAU_DATA_BUCKET_NAME]: bucket.bucketName,

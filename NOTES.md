@@ -1,36 +1,38 @@
-# Questions
+# Notes
+
+## Questions
 
 - Should we have a separate CDK test app for each component?
   - Would this speed up test deployments?
 
-# Stacks and Nested Stacks
+## Stacks and Nested Stacks
 
-https://docs.aws.amazon.com/cdk/v2/guide/stacks.html
-https://bobbyhadz.com/blog/aws-cdk-nested-stack
+<https://docs.aws.amazon.com/cdk/v2/guide/stacks.html>
+<https://bobbyhadz.com/blog/aws-cdk-nested-stack>
 
-# Power tools for Lambda
+## Power tools for Lambda
 
-https://github.com/awslabs/aws-lambda-powertools-typescript
+<https://github.com/awslabs/aws-lambda-powertools-typescript>
 
-https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#usage
+<https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#usage>
 
-# Observability checklist
+## Observability checklist
 
 - Domain event pattern
 - Lambda function to log all events, use insights to query
   - Should we just log the metadata? NO
   - [Bring your own formatter?](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/core/logger/#custom-log-formatter-bring-your-own-formatter)
 
-```
+```text
 fields @timestamp, eventType, data.quoteReference, correlationId, service, domain
 | filter requestId like /62b7a371./
 | sort @timestamp asc
 | limit 20
 ```
 
-# Runtime.ImportModuleError
+## Runtime.ImportModuleError
 
-Why are we getting the following? Is this the same issue? https://github.com/aws/aws-cdk/issues/14290
+Why are we getting the following? Is this the same issue? <https://github.com/aws/aws-cdk/issues/14290>
 
 ```json
 {
@@ -58,15 +60,15 @@ Why are we getting the following? Is this the same issue? https://github.com/aws
 
 We solved the above by exposing the underlying functions, rather that the class.
 
-# HTTP Headers
+## HTTP Headers
 
-https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+<https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>
 
-# CDK CLI
+## CDK CLI
 
-See 'Specifying the app command': https://docs.aws.amazon.com/cdk/v2/guide/cli.html
+See 'Specifying the app command': <https://docs.aws.amazon.com/cdk/v2/guide/cli.html>
 
-# Creating an event table
+## Creating an event table
 
 - Name: RequestEventLog
 - PK: RequestId
@@ -76,3 +78,8 @@ See 'Specifying the app command': https://docs.aws.amazon.com/cdk/v2/guide/cli.h
 - data
 - expiryTime
 
+## REST Client
+
+[REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+[Using the REST Client in Visual Studio Code](https://dev.to/mattnield/using-the-rest-client-in-visual-studio-code-344l)
+[VS Code’s REST Client Plugin is All You Need to Make API Calls](https://blog.bitsrc.io/vs-codes-rest-client-plugin-is-all-you-need-to-make-api-calls-e9e95fcfd85a)

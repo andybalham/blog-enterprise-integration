@@ -6,19 +6,23 @@ import AWS_S3, { GetObjectCommand, S3 } from '@aws-sdk/client-s3';
 import AWS_EventBridge, { EventBridge } from '@aws-sdk/client-eventbridge';
 import { NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as AWSXRay from 'aws-xray-sdk';
+// import { Duration } from 'aws-cdk-lib';
 import { DomainEvent } from '../domain/domain-events';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 16);
 const s3 = new S3({});
-const eventBridge = new EventBridge({});
+const eventBridge = AWSXRay.captureAWSv3Client(new EventBridge({}));
 
 // https://medium.com/@moritzonken/enable-source-maps-for-typescript-in-aws-lambda-83f4cd91338c
 // https://serverless.pub/aws-lambda-node-sourcemaps/
 export const NODE_DEFAULT_PROPS = {
   runtime: Runtime.NODEJS_18_X,
+  // timeout: Duration.seconds(6),
+  // memorySize: 256,
   environment: {
     NODE_OPTIONS: '--enable-source-maps',
   },
@@ -27,6 +31,7 @@ export const NODE_DEFAULT_PROPS = {
     sourceMap: true,
     minify: true,
   },
+  tracing: Tracing.ACTIVE,
 };
 
 export const getNodejsFunctionProps = (

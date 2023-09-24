@@ -3,8 +3,8 @@ import {
   TEST_LAST_NAME_FAILED,
   TEST_LAST_NAME_LOW_CREDIT_SCORE,
   TEST_LAST_NAME_MEDIUM_CREDIT_SCORE,
-  TEST_NI_NUMBER_HAS_BANKRUPTCIES,
-  TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
+  TEST_LAST_NAME_HAS_BANKRUPTCIES,
+  TEST_LAST_NAME_NOT_ON_ELECTORAL_ROLL,
 } from '../../src/credit-bureau/constants';
 import { QuoteRequest } from '../../src/domain/domain-models';
 
@@ -41,10 +41,7 @@ export const notOnElectoralRollQuoteRequest: QuoteRequest = {
   personalDetails: {
     ...emptyQuoteRequest.personalDetails,
     firstName: TEST_FIRST_NAME,
-    address: {
-      ...emptyQuoteRequest.personalDetails.address,
-      postcode: TEST_POSTCODE_NOT_ON_ELECTORAL_ROLL,
-    },
+    lastName: TEST_LAST_NAME_NOT_ON_ELECTORAL_ROLL,
   },
 };
 
@@ -53,7 +50,7 @@ export const hasBankruptciesQuoteRequest: QuoteRequest = {
   personalDetails: {
     ...emptyQuoteRequest.personalDetails,
     firstName: TEST_FIRST_NAME,
-    niNumber: TEST_NI_NUMBER_HAS_BANKRUPTCIES,
+    lastName: TEST_LAST_NAME_HAS_BANKRUPTCIES,
   },
 };
 

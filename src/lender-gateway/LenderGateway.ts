@@ -5,6 +5,7 @@ import { LambdaFunction as LambdaFunctionTarget } from 'aws-cdk-lib/aws-events-t
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { Duration } from 'aws-cdk-lib';
 import { getLenderRateRequestedV1Pattern } from '../domain/domain-event-patterns';
 import {
   LOAN_BROKER_EVENT_BUS,
@@ -23,6 +24,8 @@ export interface LenderConfig {
   minimumCreditScore?: number;
   minimumTermMonths?: number;
   maximumAmount?: number;
+  minDelayMillis?: number;
+  errorPercentage?: number;
 }
 
 export interface LenderGatewayProps {
@@ -41,6 +44,9 @@ export default class LenderGateway extends Construct {
       this,
       'RequestHandler',
       getNodejsFunctionProps({
+        timeout: Duration.seconds(12),
+        memorySize: 256,
+        retryAttempts: 0,
         environment: {
           [LENDER_CONFIG]: JSON.stringify(props.lenderConfig),
           [LOAN_BROKER_EVENT_BUS]: props.loanBrokerEventBus.eventBusArn,

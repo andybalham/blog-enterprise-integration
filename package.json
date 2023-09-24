@@ -71,6 +71,7 @@
     "@aws-sdk/lib-dynamodb": "^3.341.0",
     "@aws-sdk/node-http-handler": "^3.341.0",
     "@aws-sdk/s3-request-presigner": "^3.341.0",
+    "@aws-sdk/util-dynamodb": "^3.405.0",
     "@types/aws-lambda": "^8.10.81",
     "@types/jest": "^27.4.1",
     "@types/luxon": "^3.2.0",
@@ -95,12 +96,13 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@andybalham/cdk-cloud-test-kit": "^2.0.0",
+    "@andybalham/cdk-cloud-test-kit": "^2.0.2",
     "@andybalham/state-machine-builder-v2": "^2.0.4",
     "@aws-lambda-powertools/metrics": "^1.5.0",
     "@middy/core": "^4.0.9",
     "aws-cdk-lib": "^2.81.0",
     "aws-embedded-metrics": "^4.0.0",
+    "aws-xray-sdk": "^3.5.1",
     "axios": "^0.27.2",
     "constructs": "^10.1.106",
     "dotenv": "^16.0.3",
